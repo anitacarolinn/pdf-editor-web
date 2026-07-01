@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import Toolbar from './components/Toolbar'
 import ThumbnailRail from './components/ThumbnailRail'
@@ -17,6 +17,8 @@ export default function App() {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
+  const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
+  const [anchor, setAnchor] = useState(0)
 
   useEffect(() => {
     if (!bytes) {
@@ -30,7 +32,15 @@ export default function App() {
       if (!active) return
       setDoc(rdoc)
       setPageCount(count)
-      setSelected((s) => Math.min(s, count) || 1)
+      setSelected((s) => {
+        const clamped = Math.min(s, count) || 1
+        setSelectedPages((prev) => {
+          const next = new Set(Array.from(prev).filter((p) => p < count))
+          if (next.size === 0) next.add(clamped - 1)
+          return next
+        })
+        return clamped
+      })
     })()
     return () => {
       active = false
@@ -42,6 +52,24 @@ export default function App() {
     const merged = all.length === 1 ? all[0] : await mergePdfs(all)
     load(merged, files.length === 1 ? files[0].name : 'combined.pdf')
     setSelected(1)
+    setSelectedPages(new Set([0]))
+    setAnchor(0)
+  }
+
+  function handleThumbClick(i: number, e: React.MouseEvent) {
+    setSelected(i + 1)
+    if (e.shiftKey) {
+      const [lo, hi] = [Math.min(anchor, i), Math.max(anchor, i)]
+      setSelectedPages(new Set(Array.from({ length: hi - lo + 1 }, (_, k) => lo + k)))
+    } else if (e.ctrlKey || e.metaKey) {
+      const next = new Set(selectedPages)
+      next.has(i) ? next.delete(i) : next.add(i)
+      setSelectedPages(next)
+      setAnchor(i)
+    } else {
+      setSelectedPages(new Set([i]))
+      setAnchor(i)
+    }
   }
 
   const onRotate = () => runOp(apply((b) => rotatePage(b, selected - 1, 90)))
@@ -73,20 +101,25 @@ export default function App() {
         canRedo={canRedo()}
         hasDoc={!!bytes}
       />
+      {bytes && (
+        <span data-testid="selection-count" className="sr-only">
+          selected: {selectedPages.size}
+        </span>
+      )}
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>
           {doc &&
             Array.from({ length: pageCount }, (_, i) => (
-              <PageCanvas
-                key={i}
-                doc={doc}
-                pageNumber={i + 1}
-                scale={0.5}
-                className={`mb-2 max-w-full cursor-pointer border-2 ${
-                  selected === i + 1 ? 'border-blue-500' : 'border-transparent'
-                }`}
-                onClick={() => setSelected(i + 1)}
-              />
+              <div key={i} data-testid="thumb" onClick={(e) => handleThumbClick(i, e)}>
+                <PageCanvas
+                  doc={doc}
+                  pageNumber={i + 1}
+                  scale={0.5}
+                  className={`mb-2 max-w-full cursor-pointer border-2 ${
+                    selectedPages.has(i) ? 'border-blue-500' : 'border-transparent'
+                  }`}
+                />
+              </div>
             ))}
         </ThumbnailRail>
         <Viewer>

@@ -153,3 +153,27 @@ export async function addPageNumbers(
   })
   return doc.save()
 }
+
+export async function addWatermark(
+  bytes: Uint8Array,
+  text: string,
+  opts: { fontSize?: number; opacity?: number } = {},
+): Promise<Uint8Array> {
+  const { fontSize = 48, opacity = 0.25 } = opts
+  const doc = await PDFDocument.load(bytes)
+  const font = await doc.embedFont(StandardFonts.Helvetica)
+  for (const page of doc.getPages()) {
+    const { width, height } = page.getSize()
+    const textWidth = font.widthOfTextAtSize(text, fontSize)
+    page.drawText(text, {
+      x: width / 2 - textWidth / 2,
+      y: height / 2,
+      size: fontSize,
+      font,
+      color: rgb(0.5, 0.5, 0.5),
+      opacity,
+      rotate: pdfDegrees(45),
+    })
+  }
+  return doc.save()
+}

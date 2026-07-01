@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage, addPageNumbers } from './page-ops'
+import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage, addPageNumbers, addWatermark } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -142,6 +142,22 @@ describe('addPageNumbers', () => {
     const bytes = await makeSamplePdf(2)
     const copy = bytes.slice()
     await addPageNumbers(bytes)
+    expect(bytes).toEqual(copy)
+  })
+})
+
+describe('addWatermark', () => {
+  it('stamps text on every page, preserving count', async () => {
+    const bytes = await makeSamplePdf(2)
+    const out = await addWatermark(bytes, 'DRAFT')
+    expect(await getPageCount(out)).toBe(2)
+    expect(out.length).not.toBe(bytes.length)
+  })
+
+  it('does not mutate the input', async () => {
+    const bytes = await makeSamplePdf(1)
+    const copy = bytes.slice()
+    await addWatermark(bytes, 'X')
     expect(bytes).toEqual(copy)
   })
 })

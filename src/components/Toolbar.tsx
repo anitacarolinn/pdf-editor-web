@@ -20,6 +20,7 @@ export interface ToolbarProps {
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
+  busy: boolean
   selectionCount: number
   canReplace: boolean
   exportFormat: 'pdf' | 'png' | 'jpeg'
@@ -32,42 +33,42 @@ export default function Toolbar(p: ToolbarProps) {
   const replaceRef = useRef<HTMLInputElement>(null)
   const btn = 'rounded px-3 py-1 text-sm disabled:opacity-40'
   return (
-    <header className="flex items-center gap-2 border-b bg-white px-4 py-2 shadow-sm">
+    <header aria-busy={p.busy} className="flex items-center gap-2 border-b bg-white px-4 py-2 shadow-sm">
       <span className="font-semibold text-slate-800">PDF Editor</span>
       <button className={`${btn} bg-blue-600 text-white`} onClick={() => openRef.current?.click()}>
         Open PDF
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onRotateL}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onRotateL}>
         Rotate L
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onRotateR}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onRotateR}>
         Rotate R
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onDuplicate}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate}>
         Duplicate
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onDelete}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onDelete}>
         Delete Page
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onExtract}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onExtract}>
         Extract
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onSplit}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onSplit}>
         Split
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || !p.canReplace} onClick={() => replaceRef.current?.click()}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || !p.canReplace || p.busy} onClick={() => replaceRef.current?.click()}>
         Replace
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onInsert}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onInsert}>
         Insert Blank
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={() => mergeRef.current?.click()}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()}>
         Merge PDF
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.canUndo} onClick={p.onUndo}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.canUndo || p.busy} onClick={p.onUndo}>
         Undo
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.canRedo} onClick={p.onRedo}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.canRedo || p.busy} onClick={p.onRedo}>
         Redo
       </button>
       <select
@@ -80,16 +81,16 @@ export default function Toolbar(p: ToolbarProps) {
         <option value="png">PNG</option>
         <option value="jpeg">JPG</option>
       </select>
-      <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc} onClick={p.onDownload}>
+      <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
         Download
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onInfo}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onInfo}>
         Info
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onPageNumbers}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers}>
         Page #
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onWatermark}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onWatermark}>
         Watermark
       </button>
       {p.hasDoc && (

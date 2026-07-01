@@ -30,8 +30,6 @@ import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
 
-const runOp = (p: Promise<void>) => p.catch((e) => console.error('operation failed', e))
-
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
@@ -42,6 +40,18 @@ export default function App() {
   const [anchor, setAnchor] = useState(0)
   const [info, setInfo] = useState<PdfInfo | null>(null)
   const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
+  const [busy, setBusy] = useState(false)
+
+  const run = async (p: Promise<void>) => {
+    setBusy(true)
+    try {
+      await p
+    } catch (e) {
+      console.error('operation failed', e)
+    } finally {
+      setBusy(false)
+    }
+  }
   const dragFrom = useRef<number | null>(null)
 
   useEffect(() => {
@@ -99,48 +109,56 @@ export default function App() {
 
   const sel = () => (selectedPages.size ? [...selectedPages].sort((a, b) => a - b) : [selected - 1])
 
-  const onRotateL = () => runOp(apply((b) => rotatePages(b, sel(), -90)))
-  const onRotateR = () => runOp(apply((b) => rotatePages(b, sel(), 90)))
-  const onDuplicate = () => runOp(apply((b) => duplicatePages(b, sel())))
-  const onDelete = () => runOp(apply((b) => deletePages(b, sel())))
-  const onExtract = async () => {
-    if (!bytes) return
-    const out = await extractPages(bytes, sel())
-    downloadBytes(out, 'extracted.pdf')
-  }
-  const onSplit = async () => {
-    if (!bytes) return
-    const pages = sel()
-    const parts = await splitPdf(bytes, pages.map((p) => [p]))
-    await downloadZip(parts.map((b, k) => ({ name: `page-${pages[k] + 1}.pdf`, bytes: b })), 'split.pdf.zip')
-  }
-  const onReplace = (file: File) => runOp(
+  const onRotateL = () => run(apply((b) => rotatePages(b, sel(), -90)))
+  const onRotateR = () => run(apply((b) => rotatePages(b, sel(), 90)))
+  const onDuplicate = () => run(apply((b) => duplicatePages(b, sel())))
+  const onDelete = () => run(apply((b) => deletePages(b, sel())))
+  const onExtract = () => run(
+    (async () => {
+      if (!bytes) return
+      const out = await extractPages(bytes, sel())
+      downloadBytes(out, 'extracted.pdf')
+    })(),
+  )
+  const onSplit = () => run(
+    (async () => {
+      if (!bytes) return
+      const pages = sel()
+      const parts = await splitPdf(bytes, pages.map((p) => [p]))
+      await downloadZip(parts.map((b, k) => ({ name: `page-${pages[k] + 1}.pdf`, bytes: b })), 'split.pdf.zip')
+    })(),
+  )
+  const onReplace = (file: File) => run(
     (async () => {
       const other = await readFileAsBytes(file)
       await apply((b) => replacePage(b, sel()[0], other, 0))
     })(),
   )
-  const onInsert = () => runOp(apply((b) => {
+  const onInsert = () => run(apply((b) => {
     // selected is 1-based; passing it as 0-based atIndex inserts AFTER the current page
     return insertBlankPage(b, selected)
   }))
-  const onMerge = async (file: File) => {
-    const other = await readFileAsBytes(file)
-    await runOp(apply((b) => mergePdfs([b, other])))
-  }
-  const onDownload = async () => {
-    if (!bytes) return
-    if (exportFormat === 'pdf') { downloadBytes(bytes, fileName ?? 'edited.pdf'); return }
-    if (!doc) return
-    const pages = sel().map((i) => i + 1) // 1-based for pdf.js
-    const files = await exportPagesAsImages(doc, pages, exportFormat, 2)
-    await downloadZip(files, 'images.zip')
-  }
+  const onMerge = (file: File) => run(
+    (async () => {
+      const other = await readFileAsBytes(file)
+      await apply((b) => mergePdfs([b, other]))
+    })(),
+  )
+  const onDownload = () => run(
+    (async () => {
+      if (!bytes) return
+      if (exportFormat === 'pdf') { downloadBytes(bytes, fileName ?? 'edited.pdf'); return }
+      if (!doc) return
+      const pages = sel().map((i) => i + 1) // 1-based for pdf.js
+      const files = await exportPagesAsImages(doc, pages, exportFormat, 2)
+      await downloadZip(files, 'images.zip')
+    })(),
+  )
   const onInfo = async () => {
     if (bytes) setInfo(await readInfo(bytes))
   }
-  const onPageNumbers = () => runOp(apply((b) => addPageNumbers(b, { format: 'n/total' })))
-  const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) runOp(apply((b) => addWatermark(b, t))) }
+  const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
+  const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
 
   return (
     <div className="flex h-screen flex-col">
@@ -162,6 +180,7 @@ export default function App() {
         canUndo={canUndo()}
         canRedo={canRedo()}
         hasDoc={!!bytes}
+        busy={busy}
         selectionCount={selectedPages.size}
         canReplace={selectedPages.size === 1}
         onInfo={onInfo}
@@ -183,7 +202,7 @@ export default function App() {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => {
                   if (dragFrom.current !== null && dragFrom.current !== i)
-                    runOp(apply((b) => reorderPages(b, moveIndex(pageCount, dragFrom.current!, i))))
+                    run(apply((b) => reorderPages(b, moveIndex(pageCount, dragFrom.current!, i))))
                   dragFrom.current = null
                 }}
               >

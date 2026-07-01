@@ -12,6 +12,8 @@ import {
   IconWatermark,
   IconShrink,
   IconInfo,
+  IconLock,
+  IconUnlock,
   IconUndo,
   IconRedo,
   IconDownload,
@@ -35,6 +37,8 @@ export interface ToolbarProps {
   onPageNumbers: () => void
   onWatermark: () => void
   onShrink: () => void
+  onLock: () => void
+  onUnlock: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
@@ -121,6 +125,18 @@ export default function Toolbar(p: ToolbarProps) {
           </button>
           <button className="tbtn" disabled={!p.hasDoc} onClick={p.onInfo} title="View document metadata">
             <IconInfo /><span>Info</span>
+          </button>
+        </div>
+
+        <span className="tb-sep" aria-hidden />
+
+        {/* Security — Lock / Unlock */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onLock} title="Password-protect (encrypt) this document and download it">
+            <IconLock /><span>Lock</span>
+          </button>
+          <button className="tbtn" disabled={p.busy} onClick={p.onUnlock} title="Open a password-protected PDF and decrypt it">
+            <IconUnlock /><span>Unlock</span>
           </button>
         </div>
 

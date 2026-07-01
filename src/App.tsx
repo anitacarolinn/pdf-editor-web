@@ -33,6 +33,8 @@ import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
 import ShrinkModal from './components/ShrinkModal'
 import SignatureModal from './components/SignatureModal'
+import LockModal from './components/LockModal'
+import UnlockModal from './components/UnlockModal'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -47,6 +49,8 @@ export default function App() {
   const [previewPage, setPreviewPage] = useState<number | null>(null)
   const [modalZoom, setModalZoom] = useState(1)
   const [shrinkOpen, setShrinkOpen] = useState(false)
+  const [lockOpen, setLockOpen] = useState(false)
+  const [unlockOpen, setUnlockOpen] = useState(false)
   const [signOpen, setSignOpen] = useState(false)
   const [lastSignatureBytes, setLastSignatureBytes] = useState<Uint8Array | null>(null)
   const [signedThisSession, setSignedThisSession] = useState(false)
@@ -191,6 +195,8 @@ export default function App() {
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
   const onShrink = () => setShrinkOpen(true)
+  const onLock = () => setLockOpen(true)
+  const onUnlock = () => setUnlockOpen(true)
 
   // Handle a completed signature drawing: convert transparent-PNG bytes to an
   // overlay image at ~30% page width, preserving aspect ratio.
@@ -347,6 +353,32 @@ export default function App() {
           onClose={() => setShrinkOpen(false)}
         />
       )}
+      {lockOpen && bytes && (
+        <LockModal
+          bytes={bytes}
+          onLocked={(locked) => {
+            // Download the encrypted copy — do NOT replace the working document,
+            // since an encrypted PDF can't be re-rendered by the pdf.js viewer.
+            downloadBytes(locked, 'locked.pdf')
+            setLockOpen(false)
+          }}
+          onClose={() => setLockOpen(false)}
+        />
+      )}
+      {unlockOpen && (
+        <UnlockModal
+          onUnlocked={(decrypted, name) => {
+            // Load decrypted bytes as the working document (same path as onOpen).
+            load(decrypted, name)
+            useOverlayStore.getState().clear()
+            setSelected(1)
+            setSelectedPages(new Set([0]))
+            setAnchor(0)
+            setUnlockOpen(false)
+          }}
+          onClose={() => setUnlockOpen(false)}
+        />
+      )}
       {signOpen && (
         <SignatureModal
           onAdd={handleSignatureAdd}
@@ -453,6 +485,8 @@ export default function App() {
           onPageNumbers={onPageNumbers}
           onWatermark={onWatermark}
           onShrink={onShrink}
+          onLock={onLock}
+          onUnlock={onUnlock}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
         />

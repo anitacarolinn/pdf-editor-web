@@ -17,6 +17,7 @@ import {
   IconUndo,
   IconRedo,
   IconDownload,
+  IconSign,
 } from './icons'
 
 export interface ToolbarProps {
@@ -37,6 +38,7 @@ export interface ToolbarProps {
   onPageNumbers: () => void
   onWatermark: () => void
   onShrink: () => void
+  onSign: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
@@ -118,6 +120,15 @@ export default function Toolbar(p: ToolbarProps) {
           </button>
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onSplit} title="Split selected pages into separate PDFs">
             <IconSplit /><span>Split</span>
+          </button>
+        </div>
+
+        <span className="tb-sep" aria-hidden />
+
+        {/* Sign */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onSign} title="Draw and place an e-signature on the current page">
+            <IconSign /><span>Sign</span>
           </button>
         </div>
 

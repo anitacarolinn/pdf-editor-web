@@ -32,6 +32,7 @@ import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
 import ShrinkModal from './components/ShrinkModal'
+import SignatureModal from './components/SignatureModal'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -46,6 +47,7 @@ export default function App() {
   const [previewPage, setPreviewPage] = useState<number | null>(null)
   const [modalZoom, setModalZoom] = useState(1)
   const [shrinkOpen, setShrinkOpen] = useState(false)
+  const [signOpen, setSignOpen] = useState(false)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -179,6 +181,28 @@ export default function App() {
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
   const onShrink = () => setShrinkOpen(true)
+  const onSign = () => setSignOpen(true)
+
+  // Handle a completed signature drawing: convert transparent-PNG bytes to an
+  // overlay image at ~30% page width, preserving aspect ratio.
+  const handleSignatureAdd = (sigBytes: Uint8Array) => {
+    const targetPage = previewPage !== null ? previewPage : selected - 1
+    // Decode the PNG to measure its natural dimensions for accurate aspect ratio
+    const blob = new Blob([new Uint8Array(sigBytes)], { type: 'image/png' })
+    const url = URL.createObjectURL(blob)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const pageW = 600
+      const pageH = 800
+      const wPct = 0.3
+      const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
+      useOverlayStore.getState().addImage(targetPage, sigBytes, 'png', wPct, hPct)
+    }
+    img.onerror = () => URL.revokeObjectURL(url)
+    img.src = url
+    setSignOpen(false)
+  }
 
   // Modal-scoped page operations — operate on the currently previewed page
   const onModalDeletePage = () => {
@@ -304,6 +328,12 @@ export default function App() {
           onClose={() => setShrinkOpen(false)}
         />
       )}
+      {signOpen && (
+        <SignatureModal
+          onAdd={handleSignatureAdd}
+          onClose={() => setSignOpen(false)}
+        />
+      )}
       {/* The menu bar only appears once a document is open. The landing state is
           just the drop zone — no toolbar. */}
       {bytes && (
@@ -331,6 +361,7 @@ export default function App() {
           onPageNumbers={onPageNumbers}
           onWatermark={onWatermark}
           onShrink={onShrink}
+          onSign={onSign}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
         />

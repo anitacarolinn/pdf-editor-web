@@ -281,3 +281,16 @@ export function IconAddPicture() {
     </svg>
   )
 }
+
+export function IconSign() {
+  return (
+    <svg {...BASE}>
+      {/* pen nib stroke — a flowing signature-like path */}
+      <path d="M2.5 11.5 C4 9 6 6 8.5 4.5 L11 3 L10 5.5 C8.5 8 6 10.5 3.5 12.5 Z" />
+      {/* underline baseline */}
+      <path d="M2 13.5 h12" />
+      {/* pen handle */}
+      <path d="M10 5.5 L12.5 3 L13.5 4 L11 6.5" />
+    </svg>
+  )
+}

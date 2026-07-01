@@ -23,6 +23,9 @@ import {
 import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
 import { downloadZip } from './services/zip-export'
+import { readInfo } from './services/metadata'
+import type { PdfInfo } from './services/metadata'
+import InfoModal from './components/InfoModal'
 
 const runOp = (p: Promise<void>) => p.catch((e) => console.error('operation failed', e))
 
@@ -34,6 +37,7 @@ export default function App() {
   const [zoom, setZoom] = useState(1.5)
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
+  const [info, setInfo] = useState<PdfInfo | null>(null)
   const dragFrom = useRef<number | null>(null)
 
   useEffect(() => {
@@ -123,9 +127,13 @@ export default function App() {
   const onDownload = () => {
     if (bytes) downloadBytes(bytes, fileName ?? 'edited.pdf')
   }
+  const onInfo = async () => {
+    if (bytes) setInfo(await readInfo(bytes))
+  }
 
   return (
     <div className="flex h-screen flex-col">
+      {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
       <Toolbar
         onOpen={onOpen}
         onRotateL={onRotateL}
@@ -145,6 +153,7 @@ export default function App() {
         hasDoc={!!bytes}
         selectionCount={selectedPages.size}
         canReplace={selectedPages.size === 1}
+        onInfo={onInfo}
       />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>

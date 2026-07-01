@@ -25,6 +25,7 @@ import {
 import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
 import { downloadZip } from './services/zip-export'
+import { exportPagesAsImages } from './services/image-export'
 import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
@@ -40,6 +41,7 @@ export default function App() {
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
   const [info, setInfo] = useState<PdfInfo | null>(null)
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const dragFrom = useRef<number | null>(null)
 
   useEffect(() => {
@@ -126,8 +128,13 @@ export default function App() {
     const other = await readFileAsBytes(file)
     await runOp(apply((b) => mergePdfs([b, other])))
   }
-  const onDownload = () => {
-    if (bytes) downloadBytes(bytes, fileName ?? 'edited.pdf')
+  const onDownload = async () => {
+    if (!bytes) return
+    if (exportFormat === 'pdf') { downloadBytes(bytes, fileName ?? 'edited.pdf'); return }
+    if (!doc) return
+    const pages = sel().map((i) => i + 1) // 1-based for pdf.js
+    const files = await exportPagesAsImages(doc, pages, exportFormat, 2)
+    await downloadZip(files, 'images.zip')
   }
   const onInfo = async () => {
     if (bytes) setInfo(await readInfo(bytes))
@@ -160,6 +167,8 @@ export default function App() {
         onInfo={onInfo}
         onPageNumbers={onPageNumbers}
         onWatermark={onWatermark}
+        exportFormat={exportFormat}
+        onExportFormatChange={setExportFormat}
       />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>

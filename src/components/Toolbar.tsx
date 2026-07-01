@@ -22,6 +22,8 @@ export interface ToolbarProps {
   hasDoc: boolean
   selectionCount: number
   canReplace: boolean
+  exportFormat: 'pdf' | 'png' | 'jpeg'
+  onExportFormatChange: (format: 'pdf' | 'png' | 'jpeg') => void
 }
 
 export default function Toolbar(p: ToolbarProps) {
@@ -68,6 +70,16 @@ export default function Toolbar(p: ToolbarProps) {
       <button className={`${btn} bg-slate-100`} disabled={!p.canRedo} onClick={p.onRedo}>
         Redo
       </button>
+      <select
+        data-testid="export-format"
+        value={p.exportFormat}
+        onChange={(e) => p.onExportFormatChange(e.target.value as 'pdf' | 'png' | 'jpeg')}
+        className="rounded border border-slate-300 px-2 py-1 text-sm"
+      >
+        <option value="pdf">PDF</option>
+        <option value="png">PNG</option>
+        <option value="jpeg">JPG</option>
+      </select>
       <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc} onClick={p.onDownload}>
         Download
       </button>

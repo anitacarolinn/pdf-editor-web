@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import Toolbar from './components/Toolbar'
 import ThumbnailRail from './components/ThumbnailRail'
@@ -17,7 +17,9 @@ import {
   extractPages,
   replacePage,
   splitPdf,
+  reorderPages,
 } from './services/page-ops'
+import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
 import { downloadZip } from './services/zip-export'
 
@@ -30,6 +32,7 @@ export default function App() {
   const [selected, setSelected] = useState(1)
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
+  const dragFrom = useRef<number | null>(null)
 
   useEffect(() => {
     if (!bytes) {
@@ -143,7 +146,19 @@ export default function App() {
         <ThumbnailRail>
           {doc &&
             Array.from({ length: pageCount }, (_, i) => (
-              <div key={i} data-testid="thumb" onClick={(e) => handleThumbClick(i, e)}>
+              <div
+                key={i}
+                data-testid="thumb"
+                draggable
+                onClick={(e) => handleThumbClick(i, e)}
+                onDragStart={() => (dragFrom.current = i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragFrom.current !== null && dragFrom.current !== i)
+                    runOp(apply((b) => reorderPages(b, moveIndex(pageCount, dragFrom.current!, i))))
+                  dragFrom.current = null
+                }}
+              >
                 <PageCanvas
                   doc={doc}
                   pageNumber={i + 1}

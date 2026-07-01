@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, deletePages } from './page-ops'
+import { getPageCount, rotatePage, deletePages, reorderPages } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -32,5 +32,18 @@ describe('deletePages', () => {
     const bytes = await makeSamplePdf(4) // widths 100,200,300,400
     const out = await deletePages(bytes, [1, 3])
     expect(await getPageWidths(out)).toEqual([100, 300])
+  })
+})
+
+describe('reorderPages', () => {
+  it('reorders pages per the permutation', async () => {
+    const bytes = await makeSamplePdf(3) // widths 100,200,300
+    const out = await reorderPages(bytes, [2, 0, 1])
+    expect(await getPageWidths(out)).toEqual([300, 100, 200])
+  })
+
+  it('throws if newOrder is not a permutation of all pages', async () => {
+    const bytes = await makeSamplePdf(3)
+    await expect(reorderPages(bytes, [0, 1])).rejects.toThrow()
   })
 })

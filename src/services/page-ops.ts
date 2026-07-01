@@ -28,3 +28,21 @@ export async function deletePages(
   for (const i of sorted) doc.removePage(i)
   return doc.save()
 }
+
+export async function reorderPages(
+  bytes: Uint8Array,
+  newOrder: number[],
+): Promise<Uint8Array> {
+  const src = await PDFDocument.load(bytes)
+  const count = src.getPageCount()
+  const valid =
+    newOrder.length === count &&
+    new Set(newOrder).size === count &&
+    newOrder.every((i) => i >= 0 && i < count)
+  if (!valid) throw new Error('newOrder must be a permutation of all page indices')
+
+  const out = await PDFDocument.create()
+  const copied = await out.copyPages(src, newOrder)
+  copied.forEach((p) => out.addPage(p))
+  return out.save()
+}

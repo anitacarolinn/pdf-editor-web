@@ -17,8 +17,6 @@ export interface PageEditModalProps {
   onAddText: () => void
   onAddPicture: () => void
   onApply: () => void
-  /** Optional initial tool to highlight on open */
-  initialTool?: 'preview' | 'text' | 'picture'
 }
 
 export default function PageEditModal({

@@ -80,7 +80,7 @@ export default function Landing({ onFiles }: LandingProps) {
         <input
           ref={inputRef}
           type="file"
-          accept="application/pdf"
+          accept="application/pdf,.pdf"
           multiple
           aria-label="Choose PDF file"
           style={{ display: 'none' }}

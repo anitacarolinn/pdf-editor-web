@@ -10,6 +10,9 @@ export interface PageGridProps {
   selectedPages: Set<number>
   onCardClick: (i: number, e: React.MouseEvent) => void
   onCardOpen: (i: number, tool: CardOpenTool) => void
+  /** Called when the "Add picture" hover button is clicked; triggers the file
+   *  picker synchronously so the user-gesture chain is preserved. */
+  onCardPicture: (i: number) => void
   onHoverRotate: (i: number) => void
   onHoverDelete: (i: number) => void
   dragFrom: React.MutableRefObject<number | null>
@@ -22,6 +25,7 @@ export default function PageGrid({
   selectedPages,
   onCardClick,
   onCardOpen,
+  onCardPicture,
   onHoverRotate,
   onHoverDelete,
   dragFrom,
@@ -91,7 +95,7 @@ export default function PageGrid({
                   className="card-hover-btn"
                   aria-label="Add picture to page"
                   title="Add picture to page"
-                  onClick={(e) => { e.stopPropagation(); onCardOpen(i, 'picture') }}
+                  onClick={(e) => { e.stopPropagation(); onCardPicture(i) }}
                 >
                   🖼
                 </button>

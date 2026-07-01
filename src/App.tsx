@@ -44,7 +44,6 @@ export default function App() {
   const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const [busy, setBusy] = useState(false)
   const [previewPage, setPreviewPage] = useState<number | null>(null)
-  const [modalInitialTool, setModalInitialTool] = useState<CardOpenTool>('preview')
   const [modalZoom, setModalZoom] = useState(1)
 
   const run = async (p: Promise<void>) => {
@@ -151,7 +150,7 @@ export default function App() {
     })(),
   )
 
-  // Apply flattens overlay objects for the modal's page (or the selected page)
+  // Apply flattens ALL overlay objects across every page into the PDF bytes
   const onApply = () => run(
     (async () => {
       await apply((b) => flattenObjects(b, useOverlayStore.getState().objects))
@@ -190,7 +189,11 @@ export default function App() {
 
   // Modal-scoped Add picture: opens a file picker, then adds to the previewed page
   const addImageInputRef = useRef<HTMLInputElement>(null)
+  // Tracks the target page for the next image-file pick (set synchronously before
+  // calling .click() so it is available when the onChange handler fires).
+  const addImageTargetPageRef = useRef<number | null>(null)
   const onModalAddPicture = () => {
+    addImageTargetPageRef.current = previewPage
     addImageInputRef.current?.click()
   }
 
@@ -204,15 +207,21 @@ export default function App() {
       const img = new Image()
       img.onload = () => {
         URL.revokeObjectURL(img.src)
-        const targetPage = previewPage !== null ? previewPage : selected - 1
+        // Use the ref-captured target page (set before the picker opened) so
+        // that both the modal button and the grid-card button land on the right page.
+        const targetPage = addImageTargetPageRef.current !== null
+          ? addImageTargetPageRef.current
+          : previewPage !== null ? previewPage : selected - 1
         const pageW = 600
         const pageH = 800
         const wPct = 0.3
         const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
         useOverlayStore.getState().addImage(targetPage, imgBytes, mimeType, wPct, hPct)
+        addImageTargetPageRef.current = null
       }
       img.onerror = () => {
         URL.revokeObjectURL(img.src)
+        addImageTargetPageRef.current = null
       }
       img.src = URL.createObjectURL(file)
     }
@@ -222,11 +231,19 @@ export default function App() {
   // Handle opening the modal from a page card
   const handleCardOpen = (i: number, tool: CardOpenTool) => {
     setPreviewPage(i)
-    setModalInitialTool(tool)
     // If the card tool is 'text', immediately add a text object after opening
     if (tool === 'text') {
       useOverlayStore.getState().addText(i)
     }
+  }
+
+  // Handle 'picture' hover button on a grid card: set the target page in the
+  // ref synchronously (preserving the user-gesture chain), trigger the file
+  // picker, and open the modal so the added image is visible.
+  const handleCardPicture = (i: number) => {
+    setPreviewPage(i)
+    addImageTargetPageRef.current = i
+    addImageInputRef.current?.click()
   }
 
   // Handle modal zoom — support 'fit' as a no-op sentinel (fit-to-width logic
@@ -290,6 +307,7 @@ export default function App() {
             selectedPages={selectedPages}
             onCardClick={handleThumbClick}
             onCardOpen={handleCardOpen}
+            onCardPicture={handleCardPicture}
             onHoverRotate={(i) => run(apply((b) => rotatePages(b, [i], 90)))}
             onHoverDelete={(i) => run(apply((b) => deletePages(b, [i])))}
             dragFrom={dragFrom}
@@ -311,7 +329,6 @@ export default function App() {
           onAddText={onModalAddText}
           onAddPicture={onModalAddPicture}
           onApply={onApply}
-          initialTool={modalInitialTool}
         />
       )}
 

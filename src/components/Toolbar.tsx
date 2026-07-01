@@ -16,6 +16,7 @@ export interface ToolbarProps {
   onDownload: () => void
   onInfo: () => void
   onPageNumbers: () => void
+  onWatermark: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
@@ -75,6 +76,9 @@ export default function Toolbar(p: ToolbarProps) {
       </button>
       <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onPageNumbers}>
         Page #
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onWatermark}>
+        Watermark
       </button>
       {p.hasDoc && (
         <span data-testid="selection-count" className="ml-2 text-xs text-slate-500">

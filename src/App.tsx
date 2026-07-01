@@ -20,6 +20,7 @@ import {
   splitPdf,
   reorderPages,
   addPageNumbers,
+  addWatermark,
 } from './services/page-ops'
 import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
@@ -132,6 +133,7 @@ export default function App() {
     if (bytes) setInfo(await readInfo(bytes))
   }
   const onPageNumbers = () => runOp(apply((b) => addPageNumbers(b, { format: 'n/total' })))
+  const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) runOp(apply((b) => addWatermark(b, t))) }
 
   return (
     <div className="flex h-screen flex-col">
@@ -157,6 +159,7 @@ export default function App() {
         canReplace={selectedPages.size === 1}
         onInfo={onInfo}
         onPageNumbers={onPageNumbers}
+        onWatermark={onWatermark}
       />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>

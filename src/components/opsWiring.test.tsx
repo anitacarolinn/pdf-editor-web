@@ -38,3 +38,16 @@ it('Page # adds numbers without changing page count', async () => {
     expect(await getPageCount(after)).toBe(beforeCount)
   })
 })
+
+it('Watermark stamps text (page count preserved)', async () => {
+  vi.spyOn(window, 'prompt').mockReturnValue('DRAFT')
+  render(<App />)
+  const before = useDocumentStore.getState().bytes!
+  const beforeCount = await getPageCount(before)
+  await userEvent.click(await screen.findByRole('button', { name: 'Watermark' }))
+  await waitFor(async () => {
+    const after = useDocumentStore.getState().bytes!
+    expect(after).not.toBe(before)
+    expect(await getPageCount(after)).toBe(beforeCount)
+  })
+})

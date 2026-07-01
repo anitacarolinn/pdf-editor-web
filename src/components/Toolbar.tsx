@@ -17,6 +17,8 @@ export interface ToolbarProps {
   onInfo: () => void
   onPageNumbers: () => void
   onWatermark: () => void
+  onAddText: () => void
+  onAddImage: (file: File) => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
@@ -31,6 +33,7 @@ export default function Toolbar(p: ToolbarProps) {
   const openRef = useRef<HTMLInputElement>(null)
   const mergeRef = useRef<HTMLInputElement>(null)
   const replaceRef = useRef<HTMLInputElement>(null)
+  const addImageRef = useRef<HTMLInputElement>(null)
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
@@ -161,6 +164,26 @@ export default function Toolbar(p: ToolbarProps) {
         </button>
       </div>
 
+      {/* Text & Image group */}
+      <div className="btn-group">
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={p.onAddText}
+          title="Add a text box to the current page"
+        >
+          Add Text
+        </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={() => addImageRef.current?.click()}
+          title="Add an image to the current page"
+        >
+          Add Picture
+        </button>
+      </div>
+
       {/* History group */}
       <div className="btn-group">
         <button
@@ -242,6 +265,17 @@ export default function Toolbar(p: ToolbarProps) {
         onChange={(e) => {
           const f = e.target.files?.[0]
           if (f) p.onReplace(f)
+          e.target.value = ''
+        }}
+      />
+      <input
+        ref={addImageRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) p.onAddImage(f)
           e.target.value = ''
         }}
       />

@@ -5,7 +5,9 @@ import ThumbnailRail from './components/ThumbnailRail'
 import Viewer from './components/Viewer'
 import PageCanvas from './components/PageCanvas'
 import PreviewControls from './components/PreviewControls'
+import OverlayLayer from './components/OverlayLayer'
 import { useDocumentStore } from './services/document-store'
+import { useOverlayStore } from './services/overlay-store'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
 import {
@@ -41,6 +43,22 @@ export default function App() {
   const [info, setInfo] = useState<PdfInfo | null>(null)
   const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const [busy, setBusy] = useState(false)
+
+  // Measured canvas size for overlay alignment
+  const canvasWrapRef = useRef<HTMLDivElement>(null)
+  const [canvasSizePx, setCanvasSizePx] = useState({ w: 0, h: 0 })
+
+  useEffect(() => {
+    const wrap = canvasWrapRef.current
+    if (!wrap) return
+    const canvas = wrap.querySelector('canvas')
+    if (!canvas) return
+    const ro = new ResizeObserver(() => {
+      setCanvasSizePx({ w: canvas.offsetWidth, h: canvas.offsetHeight })
+    })
+    ro.observe(canvas)
+    return () => ro.disconnect()
+  }, [doc, selected])
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -161,6 +179,30 @@ export default function App() {
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
 
+  const onAddText = () => {
+    useOverlayStore.getState().addText(selected - 1)
+  }
+
+  const onAddImage = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const arrayBuffer = e.target?.result
+      if (!(arrayBuffer instanceof ArrayBuffer)) return
+      const bytes = new Uint8Array(arrayBuffer)
+      const mimeType = file.type === 'image/jpeg' ? 'jpeg' : 'png'
+      const img = new Image()
+      img.onload = () => {
+        const pageW = canvasSizePx.w || 600
+        const pageH = canvasSizePx.h || 800
+        const wPct = 0.3
+        const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
+        useOverlayStore.getState().addImage(selected - 1, bytes, mimeType, wPct, hPct)
+      }
+      img.src = URL.createObjectURL(file)
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
   return (
     <div className="app-shell">
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
@@ -187,6 +229,8 @@ export default function App() {
         onInfo={onInfo}
         onPageNumbers={onPageNumbers}
         onWatermark={onWatermark}
+        onAddText={onAddText}
+        onAddImage={onAddImage}
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
       />
@@ -237,7 +281,19 @@ export default function App() {
                 onGo={(p) => setSelected(p)}
                 onZoom={(z) => setZoom(z === 'fit' ? 1.5 : z)}
               />
-              <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="page-canvas-viewer mx-auto" />
+              <div
+                ref={canvasWrapRef}
+                style={{ position: 'relative', display: 'inline-block', margin: '0 auto' }}
+              >
+                <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="page-canvas-viewer" />
+                {canvasSizePx.w > 0 && canvasSizePx.h > 0 && (
+                  <OverlayLayer
+                    page={selected - 1}
+                    pageWidthPx={canvasSizePx.w}
+                    pageHeightPx={canvasSizePx.h}
+                  />
+                )}
+              </div>
             </>
           )}
         </Viewer>

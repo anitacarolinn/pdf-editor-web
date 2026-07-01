@@ -113,19 +113,27 @@ body {
   z-index: 10;
 }
 
-/* Action clusters: flat chips grouped by whitespace (reference style) */
+/* Action clusters: borderless buttons grouped by thin dividers */
 .toolbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
-  row-gap: 8px;
+  row-gap: 6px;
 }
 
 .tb-group {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 1px;
+}
+
+/* Thin separator between clusters */
+.tb-sep {
+  width: 1px;
+  height: 22px;
+  background: var(--color-chrome-hairline);
+  flex-shrink: 0;
 }
 
 /* Right-side controls pinned to the far end */
@@ -145,27 +153,26 @@ body {
   white-space: nowrap;
 }
 
-/* Flat chip button */
+/* Borderless toolbar button — hover reveals a subtle fill (Linear/Notion feel) */
 .tbtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 11px;
+  padding: 6px 9px;
   font-family: var(--font-sans);
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--color-chrome-secondary);
-  background: var(--color-surface-card);
-  border: 1px solid var(--color-chrome-hairline);
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
   cursor: pointer;
   white-space: nowrap;
   transition:
     background var(--duration-fast) var(--ease-out-quart),
     color var(--duration-fast) var(--ease-out-quart),
-    border-color var(--duration-fast) var(--ease-out-quart),
     transform var(--duration-fast) var(--ease-spring);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -174,24 +181,24 @@ body {
 .tbtn > svg {
   flex-shrink: 0;
   color: var(--color-chrome-muted);
+  transition: color var(--duration-fast) var(--ease-out-quart);
 }
 
 .tbtn:hover:not(:disabled) {
   background: var(--color-surface-base);
   color: var(--color-chrome);
-  border-color: rgba(24, 24, 27, 0.18);
 }
 
 .tbtn:hover:not(:disabled) > svg {
-  color: var(--color-chrome-secondary);
+  color: var(--color-accent);
 }
 
 .tbtn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .tbtn:disabled {
-  opacity: 0.4;
+  opacity: 0.38;
   cursor: not-allowed;
 }
 

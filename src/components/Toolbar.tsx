@@ -73,12 +73,16 @@ export default function Toolbar(p: ToolbarProps) {
           </button>
         </div>
 
+        <span className="tb-sep" aria-hidden />
+
         {/* Add / Merge */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()} title="Add / merge another PDF into this document">
             <IconMerge /><span>Add / Merge</span>
           </button>
         </div>
+
+        <span className="tb-sep" aria-hidden />
 
         {/* Delete / Duplicate */}
         <div className="tb-group">
@@ -90,6 +94,8 @@ export default function Toolbar(p: ToolbarProps) {
           </button>
         </div>
 
+        <span className="tb-sep" aria-hidden />
+
         {/* Rotate */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onRotateL} title="Rotate pages left 90°">
@@ -99,6 +105,8 @@ export default function Toolbar(p: ToolbarProps) {
             <IconRotateRight /><span>Rotate R</span>
           </button>
         </div>
+
+        <span className="tb-sep" aria-hidden />
 
         {/* Extract / Replace / Split */}
         <div className="tb-group">
@@ -112,6 +120,8 @@ export default function Toolbar(p: ToolbarProps) {
             <IconSplit /><span>Split</span>
           </button>
         </div>
+
+        <span className="tb-sep" aria-hidden />
 
         {/* Page # / Watermark / Shrink / Info */}
         <div className="tb-group">
@@ -128,6 +138,8 @@ export default function Toolbar(p: ToolbarProps) {
             <IconInfo /><span>Info</span>
           </button>
         </div>
+
+        <span className="tb-sep" aria-hidden />
 
         {/* History */}
         <div className="tb-group">

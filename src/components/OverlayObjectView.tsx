@@ -111,6 +111,38 @@ export default function OverlayObjectView({
         </button>
       )}
 
+      {/* Font-color swatch — shown only when a text object is selected */}
+      {selected && obj.type === 'text' && (
+        <label
+          aria-label="Text color"
+          title="Text color"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            top: '-12px',
+            left: '-12px',
+            width: '22px',
+            height: '22px',
+            borderRadius: '50%',
+            border: '2px solid #fff',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+            background: obj.color ?? '#000000',
+            cursor: 'pointer',
+            zIndex: 10,
+            display: 'block',
+            overflow: 'hidden',
+          }}
+        >
+          <input
+            type="color"
+            value={obj.color ?? '#000000'}
+            onChange={(e) => onChange({ color: e.target.value })}
+            style={{ opacity: 0, width: '100%', height: '100%', cursor: 'pointer', border: 'none', padding: 0 }}
+          />
+        </label>
+      )}
+
       {obj.type === 'text' && (
         <div
           ref={textRef}

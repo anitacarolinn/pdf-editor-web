@@ -251,6 +251,8 @@ export default function PageEditModal({
 
   // The preview opens at 100% (default zoom = 1). Fit-to-width is available on
   // demand via the "Fit" button, but is no longer forced on open.
+  // fitActive = the current zoom equals fit-width (so the button offers "Original").
+  const fitActive = !!(pageDims && scrollRef.current) && Math.abs(zoom - computeFitWidth()) < 0.02
 
   // Prevent backdrop click from triggering when clicking on content
   const handleBackdropClick = useCallback(
@@ -373,17 +375,23 @@ export default function PageEditModal({
 
             <button
               aria-label="Fit width"
-              onClick={() => onZoom(computeFitWidth())}
+              onClick={() => {
+                // Toggle: if already at fit-width, snap back to original 100%.
+                const fw = computeFitWidth()
+                onZoom(Math.abs(zoom - fw) < 0.02 ? 1 : fw)
+              }}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                gap: '4px', padding: '8px 10px 6px', background: 'transparent', border: 'none',
-                borderRadius: '6px', cursor: 'pointer', color: '#374151', minWidth: '40px',
+                gap: '4px', padding: '8px 10px 6px', border: 'none',
+                borderRadius: '6px', cursor: 'pointer', minWidth: '40px',
+                background: fitActive ? '#fef3c7' : 'transparent',
+                color: fitActive ? '#b45309' : '#374151',
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb' }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+              onMouseEnter={(e) => { if (!fitActive) (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = fitActive ? '#fef3c7' : 'transparent' }}
             >
               <span style={{ fontSize: '14px', fontWeight: 700, height: 20, display: 'flex', alignItems: 'center' }}>⊟</span>
-              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Fit</span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>{fitActive ? 'Original' : 'Fit'}</span>
             </button>
           </div>
           <Divider />

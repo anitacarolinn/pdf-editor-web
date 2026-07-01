@@ -54,192 +54,116 @@ export default function Toolbar(p: ToolbarProps) {
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
-      {/* Brand header */}
+      {/* Brand */}
       <div className="toolbar-brand-group">
         <img className="toolbar-logo" src="/favicon.svg" alt="PDF Page Editor logo" />
         <span className="toolbar-brand">PDF Page Editor</span>
         <span className="toolbar-offline-badge">offline</span>
       </div>
 
-      <div className="toolbar-divider" />
+      {/* Actions — flat chips grouped by whitespace, like the reference */}
+      <div className="toolbar-actions">
+        {/* New / Open */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onInsert} title="Insert a blank page after the selected page">
+            <IconInsertBlank /><span>New Page</span>
+          </button>
+          <button className="tbtn" onClick={() => openRef.current?.click()} title="Open a PDF">
+            <IconOpen /><span>Open PDF</span>
+          </button>
+        </div>
 
-      {/* Group 1: Open / Insert / Merge */}
-      <div className="btn-group toolbar-group">
-        <button
-          className="btn-primary"
-          onClick={() => openRef.current?.click()}
-        >
-          <IconOpen /><span>Open PDF</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onInsert}
-          title="Insert a blank page after the selected page"
-        >
-          <IconInsertBlank /><span>Insert Blank</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={() => mergeRef.current?.click()}
-          title="Merge another PDF into this document"
-        >
-          <IconMerge /><span>Merge PDF</span>
-        </button>
+        {/* Add / Merge */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()} title="Add / merge another PDF into this document">
+            <IconMerge /><span>Add / Merge</span>
+          </button>
+        </div>
+
+        {/* Delete / Duplicate */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDelete} title="Delete selected pages">
+            <IconDelete /><span>Delete page</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate} title="Duplicate selected pages">
+            <IconDuplicate /><span>Duplicate</span>
+          </button>
+        </div>
+
+        {/* Rotate */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onRotateL} title="Rotate pages left 90°">
+            <IconRotateLeft /><span>Rotate L</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onRotateR} title="Rotate pages right 90°">
+            <IconRotateRight /><span>Rotate R</span>
+          </button>
+        </div>
+
+        {/* Extract / Replace / Split */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onExtract} title="Extract selected pages to a new PDF">
+            <IconExtract /><span>Extract page</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || !p.canReplace || p.busy} onClick={() => replaceRef.current?.click()} title="Replace the selected page with another PDF">
+            <IconReplace /><span>Replace page</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onSplit} title="Split selected pages into separate PDFs">
+            <IconSplit /><span>Split</span>
+          </button>
+        </div>
+
+        {/* Page # / Watermark / Shrink / Info */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers} title="Add page numbers">
+            <IconPageNumber /><span>Page #</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onWatermark} title="Add a watermark">
+            <IconWatermark /><span>Watermark</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onShrink} title="Shrink file size by re-encoding pages as JPEG images">
+            <IconShrink /><span>Shrink file size</span>
+          </button>
+          <button className="tbtn" disabled={!p.hasDoc} onClick={p.onInfo} title="View document metadata">
+            <IconInfo /><span>Info</span>
+          </button>
+        </div>
+
+        {/* History */}
+        <div className="tb-group">
+          <button className="tbtn" disabled={!p.canUndo || p.busy} onClick={p.onUndo} title="Undo last action">
+            <IconUndo /><span>Undo</span>
+          </button>
+          <button className="tbtn" disabled={!p.canRedo || p.busy} onClick={p.onRedo} title="Redo last undone action">
+            <IconRedo /><span>Redo</span>
+          </button>
+        </div>
       </div>
 
-      <div className="toolbar-divider" />
+      {/* Right-side controls */}
+      <div className="toolbar-right">
+        {p.hasDoc && (
+          <span data-testid="selection-count" className="tb-selected">
+            selected: {p.selectionCount}
+          </span>
+        )}
 
-      {/* Group 2: Page manipulation */}
-      <div className="btn-group toolbar-group">
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onDelete}
-          title="Delete selected pages"
+        <select
+          data-testid="export-format"
+          value={p.exportFormat}
+          onChange={(e) => p.onExportFormatChange(e.target.value as 'pdf' | 'png' | 'jpeg')}
+          className="export-select"
+          aria-label="Export format"
         >
-          <IconDelete /><span>Delete Page</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onDuplicate}
-          title="Duplicate selected pages"
-        >
-          <IconDuplicate /><span>Duplicate</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onRotateL}
-          title="Rotate pages left 90°"
-        >
-          <IconRotateLeft /><span>Rotate L</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onRotateR}
-          title="Rotate pages right 90°"
-        >
-          <IconRotateRight /><span>Rotate R</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onExtract}
-          title="Extract selected pages to new PDF"
-        >
-          <IconExtract /><span>Extract</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || !p.canReplace || p.busy}
-          onClick={() => replaceRef.current?.click()}
-          title="Replace the selected page with another PDF"
-        >
-          <IconReplace /><span>Replace</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onSplit}
-          title="Split selected pages into separate PDFs"
-        >
-          <IconSplit /><span>Split</span>
+          <option value="pdf">PDF</option>
+          <option value="png">PNG</option>
+          <option value="jpeg">JPG</option>
+        </select>
+
+        <button className="tbtn-export" disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
+          <IconDownload /><span>Export</span>
         </button>
       </div>
-
-      <div className="toolbar-divider" />
-
-      {/* Group 3: Annotations / metadata */}
-      <div className="btn-group toolbar-group">
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onPageNumbers}
-          title="Add page numbers"
-        >
-          <IconPageNumber /><span>Page #</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onWatermark}
-          title="Add a watermark"
-        >
-          <IconWatermark /><span>Watermark</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onShrink}
-          title="Shrink file size by re-encoding pages as JPEG images"
-        >
-          <IconShrink /><span>Shrink file size</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc}
-          onClick={p.onInfo}
-          title="View document metadata"
-        >
-          <IconInfo /><span>Info</span>
-        </button>
-      </div>
-
-      <div className="toolbar-divider" />
-
-      {/* History */}
-      <div className="btn-group toolbar-group">
-        <button
-          className="btn-tool"
-          disabled={!p.canUndo || p.busy}
-          onClick={p.onUndo}
-          title="Undo last action"
-        >
-          <IconUndo /><span>Undo</span>
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.canRedo || p.busy}
-          onClick={p.onRedo}
-          title="Redo last undone action"
-        >
-          <IconRedo /><span>Redo</span>
-        </button>
-      </div>
-
-      {/* Push the right-side controls to the far right */}
-      <span className="toolbar-spacer" />
-
-      {/* Selection badge */}
-      {p.hasDoc && (
-        <span data-testid="selection-count" className="selection-badge">
-          {p.selectionCount} selected
-        </span>
-      )}
-
-      {/* Export format + Download */}
-      <select
-        data-testid="export-format"
-        value={p.exportFormat}
-        onChange={(e) => p.onExportFormatChange(e.target.value as 'pdf' | 'png' | 'jpeg')}
-        className="export-select"
-      >
-        <option value="pdf">PDF</option>
-        <option value="png">PNG</option>
-        <option value="jpeg">JPG</option>
-      </select>
-
-      <button
-        className="btn-download"
-        disabled={!p.hasDoc || p.busy}
-        onClick={p.onDownload}
-      >
-        <IconDownload /><span>Download</span>
-      </button>
 
       {/* Hidden file inputs */}
       <input

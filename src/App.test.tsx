@@ -31,7 +31,7 @@ it('Download triggers export of the working bytes', async () => {
   const bytes = await makeSamplePdf(1)
   useDocumentStore.setState({ bytes, fileName: 'a.pdf', past: [], future: [] })
   render(<App />)
-  await userEvent.click(await screen.findByRole('button', { name: 'Download' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Export' }))
   expect(spy).toHaveBeenCalledOnce()
   spy.mockRestore()
 })

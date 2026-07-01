@@ -23,7 +23,7 @@ it('exposes an export format selector defaulting to PDF; PDF download works', as
   render(<App />)
   const sel = screen.getByTestId('export-format') as HTMLSelectElement
   expect(sel.value).toBe('pdf')
-  await userEvent.click(screen.getByRole('button', { name: 'Download' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Export' }))
   expect(spy).toHaveBeenCalled()
   spy.mockRestore()
 })

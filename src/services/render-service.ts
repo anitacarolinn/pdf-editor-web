@@ -26,6 +26,7 @@ export function renderPageToCanvas(
   pageNumber: number,
   canvas: HTMLCanvasElement,
   scale: number,
+  opts?: { fluid?: boolean },
 ): { cancel(): void; done: Promise<void> } {
   let renderTask: RenderTask | null = null
   let cancelled = false
@@ -43,8 +44,16 @@ export function renderPageToCanvas(
     if (!ctx) throw new Error('2d context unavailable')
     canvas.width = viewport.width
     canvas.height = viewport.height
-    canvas.style.width = `${viewport.width / dpr}px`
-    canvas.style.height = `${viewport.height / dpr}px`
+    if (opts?.fluid) {
+      // Grid thumbnails: let CSS size the canvas (width:100%, height:auto) so it
+      // always fits the card. Setting inline px here would overflow the fixed-
+      // width card and get clipped by overflow:hidden.
+      canvas.style.removeProperty('width')
+      canvas.style.removeProperty('height')
+    } else {
+      canvas.style.width = `${viewport.width / dpr}px`
+      canvas.style.height = `${viewport.height / dpr}px`
+    }
     renderTask = page.render({ canvasContext: ctx, viewport, canvas })
     try {
       await renderTask.promise

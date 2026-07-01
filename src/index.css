@@ -103,14 +103,135 @@ body {
 .toolbar-chrome {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: 14px;
+  padding: 9px 16px;
   background: var(--color-surface-card);
   border-bottom: 1px solid var(--color-chrome-hairline);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 1px 0 rgba(24, 24, 27, 0.04);
   flex-wrap: wrap;
   position: relative;
   z-index: 10;
+}
+
+/* Action clusters: flat chips grouped by whitespace (reference style) */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.tb-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Right-side controls pinned to the far end */
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.tb-selected {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-chrome-muted);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+/* Flat chip button */
+.tbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-chrome-secondary);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-chrome-hairline);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast) var(--ease-out-quart),
+    color var(--duration-fast) var(--ease-out-quart),
+    border-color var(--duration-fast) var(--ease-out-quart),
+    transform var(--duration-fast) var(--ease-spring);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tbtn > svg {
+  flex-shrink: 0;
+  color: var(--color-chrome-muted);
+}
+
+.tbtn:hover:not(:disabled) {
+  background: var(--color-surface-base);
+  color: var(--color-chrome);
+  border-color: rgba(24, 24, 27, 0.18);
+}
+
+.tbtn:hover:not(:disabled) > svg {
+  color: var(--color-chrome-secondary);
+}
+
+.tbtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.tbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Export — green primary commit action (reference) */
+.tbtn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background: var(--color-success);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.3), 0 0 0 1px rgba(22, 163, 74, 0.15);
+  transition:
+    background var(--duration-fast) var(--ease-out-quart),
+    box-shadow var(--duration-fast) var(--ease-out-quart),
+    transform var(--duration-fast) var(--ease-spring);
+  flex-shrink: 0;
+}
+
+.tbtn-export:hover:not(:disabled) {
+  background: #15803d;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35), 0 0 0 1px rgba(22, 163, 74, 0.25);
+}
+
+.tbtn-export:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.tbtn-export:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .toolbar-brand {

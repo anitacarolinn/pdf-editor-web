@@ -70,8 +70,9 @@ export default function PageGrid({
               <PageCanvas
                 doc={doc}
                 pageNumber={i + 1}
-                scale={0.35}
+                scale={0.6}
                 className="page-card__canvas"
+                fluid
               />
               {/* Per-card hover toolbar */}
               <div className="card-hover-toolbar" role="toolbar" aria-label={`Page ${i + 1} actions`}>

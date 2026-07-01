@@ -19,7 +19,7 @@ beforeEach(async () => {
 describe('page operations', () => {
   it('Delete reduces the page count of the working document', async () => {
     render(<App />)
-    await userEvent.click(await screen.findByRole('button', { name: 'Delete Page' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete page' }))
     await waitFor(async () => {
       const bytes = useDocumentStore.getState().bytes!
       expect(await getPageCount(bytes)).toBe(2)
@@ -28,7 +28,7 @@ describe('page operations', () => {
 
   it('Undo restores the page count', async () => {
     render(<App />)
-    await userEvent.click(await screen.findByRole('button', { name: 'Delete Page' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete page' }))
     await userEvent.click(await screen.findByRole('button', { name: 'Undo' }))
     await waitFor(async () => {
       const bytes = useDocumentStore.getState().bytes!

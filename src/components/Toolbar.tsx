@@ -29,7 +29,7 @@ export interface ToolbarProps {
   onSplit: () => void
   onReplace: (file: File) => void
   onInsert: () => void
-  onMerge: (file: File) => void
+  onMerge: (files: File[]) => void
   onUndo: () => void
   onRedo: () => void
   onDownload: () => void
@@ -182,10 +182,11 @@ export default function Toolbar(p: ToolbarProps) {
         ref={mergeRef}
         type="file"
         accept="application/pdf"
+        multiple
         className="hidden"
         onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) p.onMerge(f)
+          const fs = e.target.files
+          if (fs && fs.length) p.onMerge(Array.from(fs))
           e.target.value = ''
         }}
       />

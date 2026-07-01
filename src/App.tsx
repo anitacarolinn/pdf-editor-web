@@ -143,10 +143,10 @@ export default function App() {
     // selected is 1-based; passing it as 0-based atIndex inserts AFTER the current page
     return insertBlankPage(b, selected)
   }))
-  const onMerge = (file: File) => run(
+  const onMerge = (files: File[]) => run(
     (async () => {
-      const other = await readFileAsBytes(file)
-      await apply((b) => mergePdfs([b, other]))
+      const others = await Promise.all(files.map(readFileAsBytes))
+      await apply((b) => mergePdfs([b, ...others]))
     })(),
   )
 

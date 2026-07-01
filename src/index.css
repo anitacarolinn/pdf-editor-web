@@ -645,8 +645,10 @@ body {
 .page-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 18px;
   align-content: flex-start;
+  /* Cap at 6 columns: 6×200 + 5×18 = 1290px. Wider viewports stop at 6/row. */
+  max-width: 1290px;
 }
 
 /* ── Page card ───────────────────────────────────────────────── */
@@ -654,8 +656,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  width: 156px;
+  gap: 8px;
+  width: 200px;
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;

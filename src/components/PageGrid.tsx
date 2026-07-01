@@ -1,6 +1,7 @@
 import React from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import PageCanvas from './PageCanvas'
+import CardOverlayPreview from './CardOverlayPreview'
 
 export type CardOpenTool = 'preview' | 'text' | 'picture'
 
@@ -74,6 +75,9 @@ export default function PageGrid({
                 className="page-card__canvas"
                 fluid
               />
+              {/* Read-only preview of overlay text/images so edits made in the
+                  modal are visible on the home grid too. */}
+              <CardOverlayPreview page={i} />
               {/* Per-card hover toolbar */}
               <div className="card-hover-toolbar" role="toolbar" aria-label={`Page ${i + 1} actions`}>
                 <button

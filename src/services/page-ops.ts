@@ -1,4 +1,4 @@
-import { PDFDocument, degrees as pdfDegrees } from 'pdf-lib'
+import { PDFDocument, degrees as pdfDegrees, StandardFonts, rgb } from 'pdf-lib'
 
 export async function getPageCount(bytes: Uint8Array): Promise<number> {
   const doc = await PDFDocument.load(bytes)
@@ -128,5 +128,28 @@ export async function replacePage(
   const [copy] = await doc.copyPages(src, [otherIndex])
   doc.insertPage(index, copy) // now the replacement sits BEFORE the old page
   doc.removePage(index + 1) // remove the old page (shifted by +1)
+  return doc.save()
+}
+
+export async function addPageNumbers(
+  bytes: Uint8Array,
+  opts: { startAt?: number; format?: 'n' | 'n/total'; fontSize?: number } = {},
+): Promise<Uint8Array> {
+  const { startAt = 1, format = 'n', fontSize = 10 } = opts
+  const doc = await PDFDocument.load(bytes)
+  const font = await doc.embedFont(StandardFonts.Helvetica)
+  const pages = doc.getPages()
+  pages.forEach((page, i) => {
+    const label = format === 'n/total' ? `${startAt + i} / ${pages.length}` : `${startAt + i}`
+    const width = font.widthOfTextAtSize(label, fontSize)
+    const { width: pw } = page.getSize()
+    page.drawText(label, {
+      x: pw / 2 - width / 2,
+      y: 24,
+      size: fontSize,
+      font,
+      color: rgb(0.3, 0.3, 0.3),
+    })
+  })
   return doc.save()
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage } from './page-ops'
+import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage, addPageNumbers } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -127,5 +127,21 @@ describe('replacePage', () => {
     const other = await makeSamplePdf(5) // 100,200,300,400,500
     const out = await replacePage(base, 1, other, 3) // put other's page3 (width 400) at index 1
     expect(await getPageWidths(out)).toEqual([100, 400, 300])
+  })
+})
+
+describe('addPageNumbers', () => {
+  it('returns a valid pdf with the same page count and changed bytes', async () => {
+    const bytes = await makeSamplePdf(3)
+    const out = await addPageNumbers(bytes, { format: 'n/total' })
+    expect(await getPageCount(out)).toBe(3)
+    expect(out.length).not.toBe(bytes.length) // content was added
+  })
+
+  it('does not mutate the input', async () => {
+    const bytes = await makeSamplePdf(2)
+    const copy = bytes.slice()
+    await addPageNumbers(bytes)
+    expect(bytes).toEqual(copy)
   })
 })

@@ -19,6 +19,7 @@ import {
   replacePage,
   splitPdf,
   reorderPages,
+  addPageNumbers,
 } from './services/page-ops'
 import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
@@ -130,6 +131,7 @@ export default function App() {
   const onInfo = async () => {
     if (bytes) setInfo(await readInfo(bytes))
   }
+  const onPageNumbers = () => runOp(apply((b) => addPageNumbers(b, { format: 'n/total' })))
 
   return (
     <div className="flex h-screen flex-col">
@@ -154,6 +156,7 @@ export default function App() {
         selectionCount={selectedPages.size}
         canReplace={selectedPages.size === 1}
         onInfo={onInfo}
+        onPageNumbers={onPageNumbers}
       />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>

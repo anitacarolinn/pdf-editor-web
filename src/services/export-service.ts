@@ -7,5 +7,7 @@ export function downloadBytes(bytes: Uint8Array, fileName: string): void {
   document.body.appendChild(a)
   a.click()
   a.remove()
-  URL.revokeObjectURL(url)
+  // Revoke after a tick — revoking immediately can cancel the download in some
+  // browsers before it starts.
+  setTimeout(() => URL.revokeObjectURL(url), 1500)
 }

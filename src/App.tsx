@@ -151,12 +151,10 @@ export default function App() {
   )
 
   // Apply flattens ALL overlay objects across every page into the PDF bytes
-  const onApply = () => run(
-    (async () => {
-      await apply((b) => flattenObjects(b, useOverlayStore.getState().objects))
-      useOverlayStore.getState().clear()
-    })(),
-  )
+  // Non-destructive: "Apply" just closes the modal and KEEPS the objects as an
+  // editable layer (re-openable to move/resize/edit/delete). Objects are baked
+  // into the PDF only at Download/Export (see onDownload), so they stay editable.
+  const onApply = () => setPreviewPage(null)
 
   const onDownload = () => run(
     (async () => {

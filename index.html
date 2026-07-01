@@ -5,6 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Editor</title>
+    <!-- Some deps (e.g. react-rnd) reference process.env at runtime; the browser
+         has no `process`, which crashes the editor. Provide a minimal shim. -->
+    <script>window.process = window.process || { env: { NODE_ENV: 'production' } };</script>
   </head>
   <body>
     <div id="root"></div>

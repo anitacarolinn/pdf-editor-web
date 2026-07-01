@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { useDocumentStore } from '../services/document-store'
 import { useOverlayStore } from '../services/overlay-store'
-import { makeSamplePdf, getPageCount } from '../test/fixtures'
+import { makeSamplePdf } from '../test/fixtures'
 
 vi.mock('../services/render-service', () => ({
   loadRenderDoc: vi.fn(async () => ({ numPages: 1 })),
@@ -34,7 +34,7 @@ describe('Apply overlay', () => {
     expect(applyBtn).toBeDisabled()
   })
 
-  it('Apply flattens overlay objects into the document and clears them', async () => {
+  it('Apply is non-destructive: closes the modal but KEEPS objects editable', async () => {
     const bytes = await makeSamplePdf(1)
     useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
     render(<App />)
@@ -50,23 +50,17 @@ describe('Apply overlay', () => {
     const applyBtn = await screen.findByRole('button', { name: /apply/i })
     await waitFor(() => expect(applyBtn).not.toBeDisabled())
 
-    // Click Apply
+    // Click Apply → modal closes
     await userEvent.click(applyBtn)
-
-    // Overlay store should be cleared
     await waitFor(() => {
-      expect(useOverlayStore.getState().objects).toHaveLength(0)
+      expect(screen.queryByTestId('modal-backdrop')).not.toBeInTheDocument()
     })
 
-    // Document bytes should have changed (flatten added content)
-    const newBytes = useDocumentStore.getState().bytes!
-    expect(newBytes).not.toEqual(bytes)
-
-    // Page count should be preserved
-    expect(await getPageCount(newBytes)).toBe(1)
-
-    // History should have a past entry (apply was undoable)
-    expect(useDocumentStore.getState().past).toHaveLength(1)
+    // Objects PERSIST (editable layer) — NOT cleared, NOT baked into the doc
+    expect(useOverlayStore.getState().objects).toHaveLength(1)
+    // Working document bytes unchanged (baking happens only at Download)
+    expect(useDocumentStore.getState().bytes).toEqual(bytes)
+    expect(useDocumentStore.getState().past).toHaveLength(0)
   })
 
   it('onOpen clears the overlay store', async () => {

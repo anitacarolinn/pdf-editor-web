@@ -56,3 +56,14 @@ export async function insertBlankPage(
   doc.insertPage(atIndex, size)
   return doc.save()
 }
+
+export async function extractPages(
+  bytes: Uint8Array,
+  indices: number[],
+): Promise<Uint8Array> {
+  const src = await PDFDocument.load(bytes)
+  const out = await PDFDocument.create()
+  const copied = await out.copyPages(src, indices)
+  copied.forEach((p) => out.addPage(p))
+  return out.save()
+}

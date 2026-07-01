@@ -131,8 +131,15 @@ body {
 /* Thin separator between clusters */
 .tb-sep {
   width: 1px;
-  height: 22px;
+  height: 38px;
   background: var(--color-chrome-hairline);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.tbtn-export > svg {
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -153,17 +160,20 @@ body {
   white-space: nowrap;
 }
 
-/* Borderless toolbar button — hover reveals a subtle fill (Linear/Notion feel) */
+/* Borderless toolbar button — icon above label (ribbon style) */
 .tbtn {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 6px 9px;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  min-width: 58px;
   font-family: var(--font-sans);
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.01em;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
   color: var(--color-chrome-secondary);
   background: transparent;
   border: none;
@@ -180,6 +190,8 @@ body {
 
 .tbtn > svg {
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   color: var(--color-chrome-muted);
   transition: color var(--duration-fast) var(--ease-out-quart);
 }
@@ -205,13 +217,15 @@ body {
 /* Export — green primary commit action (reference) */
 .tbtn-export {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 7px 15px;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 14px;
   font-family: var(--font-sans);
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.2;
   letter-spacing: -0.01em;
   color: #fff;
   background: var(--color-success);

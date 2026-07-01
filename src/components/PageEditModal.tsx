@@ -86,6 +86,15 @@ export default function PageEditModal({
     [clamp, currentPage, handleGo],
   )
 
+  const commitZoom = useCallback(
+    (raw: string) => {
+      const pct = Number(raw)
+      if (!Number.isFinite(pct) || pct <= 0) return
+      onZoom(Math.min(5, Math.max(0.25, pct / 100)))
+    },
+    [onZoom],
+  )
+
   // Prevent backdrop click from triggering when clicking on content
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -110,138 +119,97 @@ export default function PageEditModal({
         justifyContent: 'stretch',
       }}
     >
-      {/* ── Header bar ─────────────────────────────────────────────── */}
+      {/* ── Header bar (centered control cluster, X pinned right) ──── */}
       <div
         className="modal-header"
         onClick={(e) => e.stopPropagation()}
         style={{
+          position: 'relative',
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '8px 16px',
+          justifyContent: 'center',
+          gap: '10px',
+          padding: '10px 60px',
           background: 'rgba(30, 30, 36, 0.97)',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
           flexShrink: 0,
           flexWrap: 'wrap',
         }}
       >
-        {/* Zoom controls */}
-        <button
-          aria-label="Zoom out"
-          className="modal-ctrl-btn"
-          onClick={() => onZoom(Math.max(0.25, zoom - 0.25))}
-          style={{ fontSize: '16px', lineHeight: 1 }}
-        >
-          −
-        </button>
-        <span
-          className="modal-zoom-label"
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.6)',
-            fontWeight: 500,
-            minWidth: '38px',
-            textAlign: 'center',
-          }}
-        >
-          {Math.round(zoom * 100)}%
-        </span>
-        <button
-          aria-label="Zoom in"
-          className="modal-ctrl-btn"
-          onClick={() => onZoom(Math.min(5, zoom + 0.25))}
-          style={{ fontSize: '16px', lineHeight: 1 }}
-        >
-          +
-        </button>
-        <button
-          aria-label="Fit width"
-          className="modal-ctrl-btn"
-          onClick={() => onZoom('fit')}
-          style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.02em', padding: '0 8px', width: 'auto' }}
-        >
-          Fit
-        </button>
+        {/* Zoom cluster */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '2px' }}>
+          <button
+            aria-label="Zoom out"
+            className="modal-ctrl-btn"
+            onClick={() => onZoom(Math.max(0.25, Math.round((zoom - 0.1) * 100) / 100))}
+            style={{ fontSize: '18px', lineHeight: 1, width: '30px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            −
+          </button>
+          <input
+            aria-label="Zoom level"
+            type="number"
+            min={25}
+            max={500}
+            defaultValue={Math.round(zoom * 100)}
+            key={`z${Math.round(zoom * 100)}`}
+            onKeyDown={(e) => { if (e.key === 'Enter') commitZoom((e.target as HTMLInputElement).value) }}
+            onBlur={(e) => commitZoom(e.target.value)}
+            style={{ width: '48px', textAlign: 'center', background: 'transparent', border: 'none', color: '#fff', fontSize: '13px', fontWeight: 600, outline: 'none' }}
+          />
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginRight: '2px' }}>%</span>
+          <button
+            aria-label="Zoom in"
+            className="modal-ctrl-btn"
+            onClick={() => onZoom(Math.min(5, Math.round((zoom + 0.1) * 100) / 100))}
+            style={{ fontSize: '18px', lineHeight: 1, width: '30px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            +
+          </button>
+          <button
+            aria-label="Fit width"
+            className="modal-ctrl-btn"
+            onClick={() => onZoom('fit')}
+            style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.02em', padding: '0 10px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+          >
+            Fit
+          </button>
+        </div>
 
-        <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.15)', margin: '0 4px' }} />
-
-        {/* Add text button */}
-        <button
-          aria-label="Add text"
-          className="modal-action-btn"
-          onClick={onAddText}
-          style={{
-            background: 'rgba(99,102,241,0.15)',
-            color: '#a5b4fc',
-            border: '1px solid rgba(99,102,241,0.4)',
-            borderRadius: '5px',
-            padding: '4px 12px',
-            fontSize: '13px',
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          Add text
+        {/* Editing actions */}
+        <button aria-label="Add text" className="modal-action-btn" onClick={onAddText}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+          T&nbsp; Add text
         </button>
-
-        {/* Add picture button */}
-        <button
-          aria-label="Add picture"
-          className="modal-action-btn"
-          onClick={onAddPicture}
-          style={{
-            background: 'rgba(99,102,241,0.15)',
-            color: '#a5b4fc',
-            border: '1px solid rgba(99,102,241,0.4)',
-            borderRadius: '5px',
-            padding: '4px 12px',
-            fontSize: '13px',
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          Add picture
+        <button aria-label="Add picture" className="modal-action-btn" onClick={onAddPicture}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+          🖼&nbsp; Add picture
         </button>
-
-        {/* Apply button */}
-        <button
-          aria-label="Apply"
-          className="modal-action-btn modal-action-btn--apply"
-          disabled={objectCount === 0}
-          onClick={onApply}
-          style={{
-            background: objectCount > 0 ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)',
-            color: objectCount > 0 ? '#86efac' : 'rgba(255,255,255,0.3)',
-            border: `1px solid ${objectCount > 0 ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: '5px',
-            padding: '4px 12px',
-            fontSize: '13px',
-            fontWeight: 500,
-            cursor: objectCount > 0 ? 'pointer' : 'not-allowed',
-          }}
-        >
+        <button aria-label="Apply" className="modal-action-btn modal-action-btn--apply" disabled={objectCount === 0} onClick={onApply}
+          style={{ background: objectCount > 0 ? '#16a34a' : 'rgba(255,255,255,0.06)', color: objectCount > 0 ? '#fff' : 'rgba(255,255,255,0.35)', border: `1px solid ${objectCount > 0 ? '#16a34a' : 'rgba(255,255,255,0.1)'}`, borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: 600, cursor: objectCount > 0 ? 'pointer' : 'not-allowed' }}>
           Apply
         </button>
 
-        {/* Spacer pushes X to the right */}
-        <div style={{ flex: 1 }} />
-
-        {/* Close button */}
+        {/* Close — pinned right */}
         <button
           aria-label="Close"
           className="modal-close-btn"
           onClick={onClose}
           style={{
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: '5px',
-            color: 'rgba(255,255,255,0.8)',
+            position: 'absolute',
+            right: '14px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.16)',
+            borderRadius: '8px',
+            color: 'rgba(255,255,255,0.85)',
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: '15px',
             fontWeight: 700,
             lineHeight: 1,
-            padding: '4px 10px',
+            padding: '6px 11px',
           }}
         >
           ✕

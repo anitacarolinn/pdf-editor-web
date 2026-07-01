@@ -36,7 +36,7 @@ export default function Landing({ onFiles }: LandingProps) {
     <div className="landing-hero">
       {/* Product identity */}
       <div className="landing-identity">
-        <span className="landing-logo" aria-hidden="true">🐢</span>
+        <img className="landing-logo" src="/favicon.svg" alt="" />
         <h1 className="landing-title">PDF Page Editor</h1>
         <p className="landing-tagline">Rearrange, rotate, and edit PDF pages — privately, offline, in your browser.</p>
       </div>

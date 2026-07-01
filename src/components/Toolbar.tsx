@@ -37,7 +37,7 @@ export default function Toolbar(p: ToolbarProps) {
     <header aria-busy={p.busy} className="toolbar-chrome">
       {/* Brand header */}
       <div className="toolbar-brand-group">
-        <span className="toolbar-logo" aria-hidden="true">🐢</span>
+        <img className="toolbar-logo" src="/favicon.svg" alt="PDF Page Editor logo" />
         <span className="toolbar-brand">PDF Page Editor</span>
         <span className="toolbar-offline-badge">offline</span>
       </div>

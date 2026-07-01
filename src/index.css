@@ -657,8 +657,11 @@ body {
 }
 
 .toolbar-logo {
-  font-size: 15px;
-  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: block;
+  border-radius: 5px;
+  flex-shrink: 0;
 }
 
 .toolbar-offline-badge {
@@ -696,8 +699,9 @@ body {
 }
 
 .landing-logo {
-  font-size: 40px;
-  line-height: 1;
+  width: 64px;
+  height: 64px;
+  display: block;
   margin-bottom: 4px;
 }
 

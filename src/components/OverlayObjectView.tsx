@@ -129,9 +129,7 @@ export default function OverlayObjectView({
             overflow: 'hidden',
             userSelect: 'text',
           }}
-        >
-          {obj.text}
-        </div>
+        />
       )}
 
       {obj.type === 'image' && objectURL && (

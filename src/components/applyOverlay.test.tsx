@@ -59,16 +59,21 @@ describe('Apply overlay', () => {
   })
 
   it('onOpen clears the overlay store', async () => {
-    // Seed with a text object
+    // Seed with a text object before rendering
     useOverlayStore.getState().addText(0)
     expect(useOverlayStore.getState().objects).toHaveLength(1)
 
-    const bytes = await makeSamplePdf(1)
-    useDocumentStore.getState().load(bytes, 'test.pdf')
+    render(<App />)
 
-    // onOpen in App calls load + clear; simulate by calling load directly
-    // then clear (as App.onOpen does after our change):
-    useOverlayStore.getState().clear()
-    expect(useOverlayStore.getState().objects).toHaveLength(0)
+    // Upload a PDF via the Open file input (first input[type=file] in the toolbar)
+    const bytes = await makeSamplePdf(1)
+    const file = new File([bytes.buffer as ArrayBuffer], 'sample.pdf', { type: 'application/pdf' })
+    const openInput = document.querySelector('input[type=file]') as HTMLInputElement
+    await userEvent.upload(openInput, file)
+
+    // App.onOpen calls load() then clear() — overlay must be empty
+    await waitFor(() => {
+      expect(useOverlayStore.getState().objects).toHaveLength(0)
+    })
   })
 })

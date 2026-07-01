@@ -207,11 +207,15 @@ export default function App() {
       const mimeType = file.type === 'image/jpeg' ? 'jpeg' : 'png'
       const img = new Image()
       img.onload = () => {
+        URL.revokeObjectURL(img.src)
         const pageW = canvasSizePx.w || 600
         const pageH = canvasSizePx.h || 800
         const wPct = 0.3
         const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
         useOverlayStore.getState().addImage(selected - 1, bytes, mimeType, wPct, hPct)
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src)
       }
       img.src = URL.createObjectURL(file)
     }

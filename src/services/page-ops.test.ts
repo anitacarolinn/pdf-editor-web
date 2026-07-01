@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage, extractPages } from './page-ops'
+import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -67,5 +67,14 @@ describe('extractPages', () => {
     const bytes = await makeSamplePdf(4) // 100,200,300,400
     const out = await extractPages(bytes, [3, 1])
     expect(await getPageWidths(out)).toEqual([400, 200])
+  })
+})
+
+describe('mergePdfs', () => {
+  it('concatenates pages of all inputs in order', async () => {
+    const a = await makeSamplePdf(2) // 100,200
+    const b = await makeSamplePdf(1) // 100
+    const out = await mergePdfs([a, b])
+    expect(await getPageWidths(out)).toEqual([100, 200, 100])
   })
 })

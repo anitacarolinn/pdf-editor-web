@@ -67,3 +67,13 @@ export async function extractPages(
   copied.forEach((p) => out.addPage(p))
   return out.save()
 }
+
+export async function mergePdfs(docs: Uint8Array[]): Promise<Uint8Array> {
+  const out = await PDFDocument.create()
+  for (const bytes of docs) {
+    const src = await PDFDocument.load(bytes)
+    const copied = await out.copyPages(src, src.getPageIndices())
+    copied.forEach((p) => out.addPage(p))
+  }
+  return out.save()
+}

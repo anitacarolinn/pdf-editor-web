@@ -18,16 +18,12 @@ export interface ToolbarProps {
   onPageNumbers: () => void
   onWatermark: () => void
   onShrink: () => void
-  onAddText: () => void
-  onAddImage: (file: File) => void
-  onApply: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
   busy: boolean
   selectionCount: number
   canReplace: boolean
-  objectCount: number
   exportFormat: 'pdf' | 'png' | 'jpeg'
   onExportFormatChange: (format: 'pdf' | 'png' | 'jpeg') => void
 }
@@ -36,7 +32,6 @@ export default function Toolbar(p: ToolbarProps) {
   const openRef = useRef<HTMLInputElement>(null)
   const mergeRef = useRef<HTMLInputElement>(null)
   const replaceRef = useRef<HTMLInputElement>(null)
-  const addImageRef = useRef<HTMLInputElement>(null)
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
@@ -177,37 +172,6 @@ export default function Toolbar(p: ToolbarProps) {
 
       <div className="toolbar-divider" />
 
-      {/* Text & Image group — kept here so existing tests pass; CL3 moves to modal */}
-      <div className="btn-group toolbar-group">
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onAddText}
-          title="Add a text box to the current page"
-        >
-          Add Text
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={() => addImageRef.current?.click()}
-          title="Add an image to the current page"
-        >
-          Add Picture
-        </button>
-        <button
-          className="btn-apply"
-          disabled={p.objectCount === 0 || p.busy}
-          onClick={p.onApply}
-          title="Flatten all overlay objects into the PDF (undoable)"
-          aria-label="Apply"
-        >
-          Apply
-        </button>
-      </div>
-
-      <div className="toolbar-divider" />
-
       {/* History */}
       <div className="btn-group toolbar-group">
         <button
@@ -290,17 +254,6 @@ export default function Toolbar(p: ToolbarProps) {
         onChange={(e) => {
           const f = e.target.files?.[0]
           if (f) p.onReplace(f)
-          e.target.value = ''
-        }}
-      />
-      <input
-        ref={addImageRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) p.onAddImage(f)
           e.target.value = ''
         }}
       />

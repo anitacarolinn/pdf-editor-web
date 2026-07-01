@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist' // type-only: needed for state typing
 import Toolbar from './components/Toolbar'
 import PageGrid from './components/PageGrid'
+import type { CardOpenTool } from './components/PageGrid'
+import PageEditModal from './components/PageEditModal'
 import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
 import { flattenObjects } from './services/flatten'
@@ -32,7 +34,6 @@ import { shrinkPdf } from './services/shrink-service'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
-  const objectCount = useOverlayStore((s) => s.objects.length)
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
@@ -42,6 +43,8 @@ export default function App() {
   const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const [busy, setBusy] = useState(false)
   const [previewPage, setPreviewPage] = useState<number | null>(null)
+  const [modalInitialTool, setModalInitialTool] = useState<CardOpenTool>('preview')
+  const [modalZoom, setModalZoom] = useState(1)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -146,6 +149,8 @@ export default function App() {
       await apply((b) => mergePdfs([b, other]))
     })(),
   )
+
+  // Apply flattens overlay objects for the modal's page (or the selected page)
   const onApply = () => run(
     (async () => {
       await apply((b) => flattenObjects(b, useOverlayStore.getState().objects))
@@ -176,11 +181,19 @@ export default function App() {
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
   const onShrink = () => run(apply((b) => shrinkPdf(b)))
 
-  const onAddText = () => {
-    useOverlayStore.getState().addText(selected - 1)
+  // Modal-scoped Add text: adds to the currently previewed page
+  const onModalAddText = () => {
+    const targetPage = previewPage !== null ? previewPage : selected - 1
+    useOverlayStore.getState().addText(targetPage)
   }
 
-  const onAddImage = (file: File) => {
+  // Modal-scoped Add picture: opens a file picker, then adds to the previewed page
+  const addImageInputRef = useRef<HTMLInputElement>(null)
+  const onModalAddPicture = () => {
+    addImageInputRef.current?.click()
+  }
+
+  const handleAddImageFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const arrayBuffer = e.target?.result
@@ -190,12 +203,12 @@ export default function App() {
       const img = new Image()
       img.onload = () => {
         URL.revokeObjectURL(img.src)
-        // Default page dimensions used for aspect ratio until CL3 modal provides real canvas size
+        const targetPage = previewPage !== null ? previewPage : selected - 1
         const pageW = 600
         const pageH = 800
         const wPct = 0.3
         const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
-        useOverlayStore.getState().addImage(selected - 1, imgBytes, mimeType, wPct, hPct)
+        useOverlayStore.getState().addImage(targetPage, imgBytes, mimeType, wPct, hPct)
       }
       img.onerror = () => {
         URL.revokeObjectURL(img.src)
@@ -203,6 +216,28 @@ export default function App() {
       img.src = URL.createObjectURL(file)
     }
     reader.readAsArrayBuffer(file)
+  }
+
+  // Handle opening the modal from a page card
+  const handleCardOpen = (i: number, tool: CardOpenTool) => {
+    setPreviewPage(i)
+    setModalInitialTool(tool)
+    // If the card tool is 'text', immediately add a text object after opening
+    if (tool === 'text') {
+      useOverlayStore.getState().addText(i)
+    }
+  }
+
+  // Handle modal zoom — support 'fit' as a no-op sentinel (fit-to-width logic
+  // would need canvas measurements; for now fit resets to 1.0)
+  const handleModalZoom = (z: number | 'fit') => {
+    setModalZoom(z === 'fit' ? 1 : z)
+  }
+
+  // Handle modal page navigation (1-based)
+  const handleModalGo = (p: number) => {
+    const clamped = Math.min(Math.max(1, p), pageCount)
+    setPreviewPage(clamped - 1)
   }
 
   return (
@@ -232,10 +267,6 @@ export default function App() {
         onPageNumbers={onPageNumbers}
         onWatermark={onWatermark}
         onShrink={onShrink}
-        onAddText={onAddText}
-        onAddImage={onAddImage}
-        onApply={onApply}
-        objectCount={objectCount}
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
       />
@@ -254,15 +285,44 @@ export default function App() {
           pageCount={pageCount}
           selectedPages={selectedPages}
           onCardClick={handleThumbClick}
-          onCardOpen={(i) => setPreviewPage(i)}
+          onCardOpen={handleCardOpen}
           onHoverRotate={(i) => run(apply((b) => rotatePages(b, [i], 90)))}
           onHoverDelete={(i) => run(apply((b) => deletePages(b, [i])))}
           dragFrom={dragFrom}
           onDrop={(from, to) => run(apply((b) => reorderPages(b, moveIndex(pageCount, from, to))))}
         />
       </main>
-      {/* previewPage modal — rendered by CL3; placeholder keeps state alive */}
-      {previewPage !== null && null}
+
+      {/* Page edit/preview modal */}
+      {previewPage !== null && doc && (
+        <PageEditModal
+          page={previewPage}
+          pageCount={pageCount}
+          doc={doc}
+          zoom={modalZoom}
+          onZoom={handleModalZoom}
+          onGo={handleModalGo}
+          onClose={() => setPreviewPage(null)}
+          onAddText={onModalAddText}
+          onAddPicture={onModalAddPicture}
+          onApply={onApply}
+          initialTool={modalInitialTool}
+        />
+      )}
+
+      {/* Hidden file input for adding images inside the modal */}
+      <input
+        ref={addImageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) handleAddImageFile(f)
+          e.target.value = ''
+        }}
+      />
     </div>
   )
 }

@@ -2,12 +2,14 @@ import React from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import PageCanvas from './PageCanvas'
 
+export type CardOpenTool = 'preview' | 'text' | 'picture'
+
 export interface PageGridProps {
   doc: PDFDocumentProxy | null
   pageCount: number
   selectedPages: Set<number>
   onCardClick: (i: number, e: React.MouseEvent) => void
-  onCardOpen: (i: number) => void
+  onCardOpen: (i: number, tool: CardOpenTool) => void
   onHoverRotate: (i: number) => void
   onHoverDelete: (i: number) => void
   dragFrom: React.MutableRefObject<number | null>
@@ -49,7 +51,7 @@ export default function PageGrid({
             draggable
             className={`page-card${isSelected ? ' page-card--selected' : ''}`}
             onClick={(e) => onCardClick(i, e)}
-            onDoubleClick={() => onCardOpen(i)}
+            onDoubleClick={() => onCardOpen(i, 'preview')}
             onDragStart={() => { dragFrom.current = i }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => {
@@ -73,7 +75,7 @@ export default function PageGrid({
                   className="card-hover-btn"
                   aria-label="Preview page"
                   title="Preview page"
-                  onClick={(e) => { e.stopPropagation(); onCardOpen(i) }}
+                  onClick={(e) => { e.stopPropagation(); onCardOpen(i, 'preview') }}
                 >
                   👁
                 </button>
@@ -81,7 +83,7 @@ export default function PageGrid({
                   className="card-hover-btn"
                   aria-label="Add text to page"
                   title="Add text to page"
-                  onClick={(e) => { e.stopPropagation(); onCardOpen(i) }}
+                  onClick={(e) => { e.stopPropagation(); onCardOpen(i, 'text') }}
                 >
                   T
                 </button>
@@ -89,7 +91,7 @@ export default function PageGrid({
                   className="card-hover-btn"
                   aria-label="Add picture to page"
                   title="Add picture to page"
-                  onClick={(e) => { e.stopPropagation(); onCardOpen(i) }}
+                  onClick={(e) => { e.stopPropagation(); onCardOpen(i, 'picture') }}
                 >
                   🖼
                 </button>

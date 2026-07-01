@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { useDocumentStore } from '../services/document-store'
@@ -17,11 +17,19 @@ beforeEach(() => {
   useOverlayStore.getState().clear()
 })
 
+// Helper: open the modal for page 0 so Add text / Add picture / Apply are rendered
+async function openModal() {
+  // Find the first hover "Preview page" button on the first thumb card
+  const previewBtns = await screen.findAllByRole('button', { name: 'Preview page' })
+  await userEvent.click(previewBtns[0])
+}
+
 describe('Apply overlay', () => {
   it('Apply button is disabled when there are no overlay objects', async () => {
     const bytes = await makeSamplePdf(1)
     useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
     render(<App />)
+    await openModal()
     const applyBtn = await screen.findByRole('button', { name: /apply/i })
     expect(applyBtn).toBeDisabled()
   })
@@ -30,9 +38,12 @@ describe('Apply overlay', () => {
     const bytes = await makeSamplePdf(1)
     useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
     render(<App />)
+    await openModal()
 
     // Add a text object via the store directly
-    useOverlayStore.getState().addText(0)
+    act(() => {
+      useOverlayStore.getState().addText(0)
+    })
     expect(useOverlayStore.getState().objects).toHaveLength(1)
 
     // Apply button should now be enabled

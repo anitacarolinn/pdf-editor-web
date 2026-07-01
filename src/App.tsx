@@ -7,8 +7,19 @@ import PageCanvas from './components/PageCanvas'
 import { useDocumentStore } from './services/document-store'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
-import { getPageCount, rotatePage, deletePages, insertBlankPage, mergePdfs } from './services/page-ops'
+import {
+  getPageCount,
+  rotatePages,
+  duplicatePages,
+  deletePages,
+  insertBlankPage,
+  mergePdfs,
+  extractPages,
+  replacePage,
+  splitPdf,
+} from './services/page-ops'
 import { downloadBytes } from './services/export-service'
+import { downloadZip } from './services/zip-export'
 
 const runOp = (p: Promise<void>) => p.catch((e) => console.error('operation failed', e))
 
@@ -72,8 +83,29 @@ export default function App() {
     }
   }
 
-  const onRotate = () => runOp(apply((b) => rotatePage(b, selected - 1, 90)))
-  const onDelete = () => runOp(apply((b) => deletePages(b, [selected - 1])))
+  const sel = () => (selectedPages.size ? [...selectedPages].sort((a, b) => a - b) : [selected - 1])
+
+  const onRotateL = () => runOp(apply((b) => rotatePages(b, sel(), -90)))
+  const onRotateR = () => runOp(apply((b) => rotatePages(b, sel(), 90)))
+  const onDuplicate = () => runOp(apply((b) => duplicatePages(b, sel())))
+  const onDelete = () => runOp(apply((b) => deletePages(b, sel())))
+  const onExtract = async () => {
+    if (!bytes) return
+    const out = await extractPages(bytes, sel())
+    downloadBytes(out, 'extracted.pdf')
+  }
+  const onSplit = async () => {
+    if (!bytes) return
+    const pages = sel()
+    const parts = await splitPdf(bytes, pages.map((p) => [p]))
+    await downloadZip(parts.map((b, k) => ({ name: `page-${pages[k] + 1}.pdf`, bytes: b })), 'split.pdf.zip')
+  }
+  const onReplace = (file: File) => runOp(
+    (async () => {
+      const other = await readFileAsBytes(file)
+      await apply((b) => replacePage(b, selected - 1, other, 0))
+    })(),
+  )
   const onInsert = () => runOp(apply((b) => {
     // selected is 1-based; passing it as 0-based atIndex inserts AFTER the current page
     return insertBlankPage(b, selected)
@@ -90,8 +122,13 @@ export default function App() {
     <div className="flex h-screen flex-col">
       <Toolbar
         onOpen={onOpen}
-        onRotate={onRotate}
+        onRotateL={onRotateL}
+        onRotateR={onRotateR}
+        onDuplicate={onDuplicate}
         onDelete={onDelete}
+        onExtract={onExtract}
+        onSplit={onSplit}
+        onReplace={onReplace}
         onInsert={onInsert}
         onMerge={onMerge}
         onUndo={undo}
@@ -100,12 +137,8 @@ export default function App() {
         canUndo={canUndo()}
         canRedo={canRedo()}
         hasDoc={!!bytes}
+        selectionCount={selectedPages.size}
       />
-      {bytes && (
-        <span data-testid="selection-count" className="sr-only">
-          selected: {selectedPages.size}
-        </span>
-      )}
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>
           {doc &&

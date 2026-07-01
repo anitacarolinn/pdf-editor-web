@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import type { PDFDocumentProxy } from 'pdfjs-dist'
+import type { PDFDocumentProxy } from 'pdfjs-dist' // type-only: needed for state typing
 import Toolbar from './components/Toolbar'
-import ThumbnailRail from './components/ThumbnailRail'
-import Viewer from './components/Viewer'
-import PageCanvas from './components/PageCanvas'
-import PreviewControls from './components/PreviewControls'
-import OverlayLayer from './components/OverlayLayer'
+import PageGrid from './components/PageGrid'
 import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
 import { flattenObjects } from './services/flatten'
@@ -40,28 +36,12 @@ export default function App() {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
-  const [zoom, setZoom] = useState(1.5)
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
   const [info, setInfo] = useState<PdfInfo | null>(null)
   const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const [busy, setBusy] = useState(false)
-
-  // Measured canvas size for overlay alignment
-  const canvasWrapRef = useRef<HTMLDivElement>(null)
-  const [canvasSizePx, setCanvasSizePx] = useState({ w: 0, h: 0 })
-
-  useEffect(() => {
-    const wrap = canvasWrapRef.current
-    if (!wrap) return
-    const canvas = wrap.querySelector('canvas')
-    if (!canvas) return
-    const ro = new ResizeObserver(() => {
-      setCanvasSizePx({ w: canvas.offsetWidth, h: canvas.offsetHeight })
-    })
-    ro.observe(canvas)
-    return () => ro.disconnect()
-  }, [doc, selected])
+  const [previewPage, setPreviewPage] = useState<number | null>(null)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -205,16 +185,17 @@ export default function App() {
     reader.onload = (e) => {
       const arrayBuffer = e.target?.result
       if (!(arrayBuffer instanceof ArrayBuffer)) return
-      const bytes = new Uint8Array(arrayBuffer)
+      const imgBytes = new Uint8Array(arrayBuffer)
       const mimeType = file.type === 'image/jpeg' ? 'jpeg' : 'png'
       const img = new Image()
       img.onload = () => {
         URL.revokeObjectURL(img.src)
-        const pageW = canvasSizePx.w || 600
-        const pageH = canvasSizePx.h || 800
+        // Default page dimensions used for aspect ratio until CL3 modal provides real canvas size
+        const pageW = 600
+        const pageH = 800
         const wPct = 0.3
         const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
-        useOverlayStore.getState().addImage(selected - 1, bytes, mimeType, wPct, hPct)
+        useOverlayStore.getState().addImage(selected - 1, imgBytes, mimeType, wPct, hPct)
       }
       img.onerror = () => {
         URL.revokeObjectURL(img.src)
@@ -258,70 +239,30 @@ export default function App() {
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
       />
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <ThumbnailRail>
-          {doc &&
-            Array.from({ length: pageCount }, (_, i) => (
-              <div
-                key={i}
-                data-testid="thumb"
-                draggable
-                className={`thumb-card${selectedPages.has(i) ? ' thumb-card--selected' : ''}`}
-                onClick={(e) => handleThumbClick(i, e)}
-                onDragStart={() => (dragFrom.current = i)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => {
-                  if (dragFrom.current !== null && dragFrom.current !== i)
-                    run(apply((b) => reorderPages(b, moveIndex(pageCount, dragFrom.current!, i))))
-                  dragFrom.current = null
-                }}
-              >
-                <PageCanvas
-                  doc={doc}
-                  pageNumber={i + 1}
-                  scale={0.5}
-                  className="max-w-full cursor-pointer"
-                />
-              </div>
-            ))}
-        </ThumbnailRail>
-        <Viewer>
-          {!bytes && (
-            <div className="empty-state">
-              <svg className="empty-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="8" y="4" width="28" height="36" rx="3" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M28 4v10h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round"/>
-                <path d="M16 22h16M16 28h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              <span className="empty-label">Open a PDF to get started</span>
-            </div>
-          )}
-          {doc && (
-            <>
-              <PreviewControls
-                page={selected}
-                pageCount={pageCount}
-                zoom={zoom}
-                onGo={(p) => setSelected(p)}
-                onZoom={(z) => setZoom(z === 'fit' ? 1.5 : z)}
-              />
-              <div
-                ref={canvasWrapRef}
-                style={{ position: 'relative', display: 'inline-block', margin: '0 auto' }}
-              >
-                <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="page-canvas-viewer" />
-                {canvasSizePx.w > 0 && canvasSizePx.h > 0 && (
-                  <OverlayLayer
-                    page={selected - 1}
-                    pageWidthPx={canvasSizePx.w}
-                    pageHeightPx={canvasSizePx.h}
-                  />
-                )}
-              </div>
-            </>
-          )}
-        </Viewer>
-      </div>
+      {/* Status line */}
+      {bytes && (
+        <div className="status-line">
+          <span>{fileName ?? 'document'}</span>
+          <span className="status-sep">·</span>
+          <span>{pageCount} {pageCount === 1 ? 'page' : 'pages'}</span>
+        </div>
+      )}
+      {/* Main grid area */}
+      <main className="grid-area">
+        <PageGrid
+          doc={doc}
+          pageCount={pageCount}
+          selectedPages={selectedPages}
+          onCardClick={handleThumbClick}
+          onCardOpen={(i) => setPreviewPage(i)}
+          onHoverRotate={(i) => run(apply((b) => rotatePages(b, [i], 90)))}
+          onHoverDelete={(i) => run(apply((b) => deletePages(b, [i])))}
+          dragFrom={dragFrom}
+          onDrop={(from, to) => run(apply((b) => reorderPages(b, moveIndex(pageCount, from, to))))}
+        />
+      </main>
+      {/* previewPage modal — rendered by CL3; placeholder keeps state alive */}
+      {previewPage !== null && null}
     </div>
   )
 }

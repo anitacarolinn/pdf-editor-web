@@ -40,23 +40,61 @@ export default function Toolbar(p: ToolbarProps) {
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
-      {/* Brand */}
-      <span className="toolbar-brand">PDF Editor</span>
+      {/* Brand header */}
+      <div className="toolbar-brand-group">
+        <span className="toolbar-logo" aria-hidden="true">🐢</span>
+        <span className="toolbar-brand">PDF Page Editor</span>
+        <span className="toolbar-offline-badge">offline</span>
+      </div>
 
       <div className="toolbar-divider" />
 
-      {/* Primary: Open PDF */}
-      <button
-        className="btn-primary"
-        onClick={() => openRef.current?.click()}
-      >
-        Open PDF
-      </button>
+      {/* Group 1: Open / Insert / Merge */}
+      <div className="btn-group toolbar-group">
+        <button
+          className="btn-primary"
+          onClick={() => openRef.current?.click()}
+        >
+          Open PDF
+        </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={p.onInsert}
+          title="Insert a blank page after the selected page"
+        >
+          Insert Blank
+        </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={() => mergeRef.current?.click()}
+          title="Merge another PDF into this document"
+        >
+          Merge PDF
+        </button>
+      </div>
 
       <div className="toolbar-divider" />
 
-      {/* Transform group */}
-      <div className="btn-group">
+      {/* Group 2: Page manipulation */}
+      <div className="btn-group toolbar-group">
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={p.onDelete}
+          title="Delete selected pages"
+        >
+          Delete Page
+        </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={p.onDuplicate}
+          title="Duplicate selected pages"
+        >
+          Duplicate
+        </button>
         <button
           className="btn-tool"
           disabled={!p.hasDoc || p.busy}
@@ -76,38 +114,10 @@ export default function Toolbar(p: ToolbarProps) {
         <button
           className="btn-tool"
           disabled={!p.hasDoc || p.busy}
-          onClick={p.onDuplicate}
-          title="Duplicate selected pages"
-        >
-          Duplicate
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onDelete}
-          title="Delete selected pages"
-        >
-          Delete Page
-        </button>
-      </div>
-
-      {/* Extraction group */}
-      <div className="btn-group">
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
           onClick={p.onExtract}
           title="Extract selected pages to new PDF"
         >
           Extract
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={p.onSplit}
-          title="Split selected pages into separate PDFs"
-        >
-          Split
         </button>
         <button
           className="btn-tool"
@@ -117,30 +127,20 @@ export default function Toolbar(p: ToolbarProps) {
         >
           Replace
         </button>
-      </div>
-
-      {/* Insert / Merge group */}
-      <div className="btn-group">
         <button
           className="btn-tool"
           disabled={!p.hasDoc || p.busy}
-          onClick={p.onInsert}
-          title="Insert a blank page after the selected page"
+          onClick={p.onSplit}
+          title="Split selected pages into separate PDFs"
         >
-          Insert Blank
-        </button>
-        <button
-          className="btn-tool"
-          disabled={!p.hasDoc || p.busy}
-          onClick={() => mergeRef.current?.click()}
-          title="Merge another PDF into this document"
-        >
-          Merge PDF
+          Split
         </button>
       </div>
 
-      {/* Annotation group */}
-      <div className="btn-group">
+      <div className="toolbar-divider" />
+
+      {/* Group 3: Annotations / metadata */}
+      <div className="btn-group toolbar-group">
         <button
           className="btn-tool"
           disabled={!p.hasDoc || p.busy}
@@ -159,24 +159,26 @@ export default function Toolbar(p: ToolbarProps) {
         </button>
         <button
           className="btn-tool"
-          disabled={!p.hasDoc}
-          onClick={p.onInfo}
-          title="View document metadata"
-        >
-          Info
-        </button>
-        <button
-          className="btn-tool"
           disabled={!p.hasDoc || p.busy}
           onClick={p.onShrink}
           title="Shrink file size by re-encoding pages as JPEG images"
         >
           Shrink file size
         </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc}
+          onClick={p.onInfo}
+          title="View document metadata"
+        >
+          Info
+        </button>
       </div>
 
-      {/* Text & Image group */}
-      <div className="btn-group">
+      <div className="toolbar-divider" />
+
+      {/* Text & Image group — kept here so existing tests pass; CL3 moves to modal */}
+      <div className="btn-group toolbar-group">
         <button
           className="btn-tool"
           disabled={!p.hasDoc || p.busy}
@@ -204,8 +206,10 @@ export default function Toolbar(p: ToolbarProps) {
         </button>
       </div>
 
-      {/* History group */}
-      <div className="btn-group">
+      <div className="toolbar-divider" />
+
+      {/* History */}
+      <div className="btn-group toolbar-group">
         <button
           className="btn-tool"
           disabled={!p.canUndo || p.busy}
@@ -224,7 +228,15 @@ export default function Toolbar(p: ToolbarProps) {
         </button>
       </div>
 
-      <div className="toolbar-divider" />
+      {/* Push the right-side controls to the far right */}
+      <span className="toolbar-spacer" />
+
+      {/* Selection badge */}
+      {p.hasDoc && (
+        <span data-testid="selection-count" className="selection-badge">
+          {p.selectionCount} selected
+        </span>
+      )}
 
       {/* Export format + Download */}
       <select
@@ -245,13 +257,6 @@ export default function Toolbar(p: ToolbarProps) {
       >
         Download
       </button>
-
-      {/* Selection badge */}
-      {p.hasDoc && (
-        <span data-testid="selection-count" className="selection-badge">
-          {p.selectionCount} selected
-        </span>
-      )}
 
       {/* Hidden file inputs */}
       <input

@@ -162,7 +162,7 @@ export default function App() {
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="app-shell">
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
       <Toolbar
         onOpen={onOpen}
@@ -190,7 +190,7 @@ export default function App() {
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
       />
-      <div className="flex flex-1 overflow-hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <ThumbnailRail>
           {doc &&
             Array.from({ length: pageCount }, (_, i) => (
@@ -198,6 +198,7 @@ export default function App() {
                 key={i}
                 data-testid="thumb"
                 draggable
+                className={`thumb-card${selectedPages.has(i) ? ' thumb-card--selected' : ''}`}
                 onClick={(e) => handleThumbClick(i, e)}
                 onDragStart={() => (dragFrom.current = i)}
                 onDragOver={(e) => e.preventDefault()}
@@ -211,17 +212,20 @@ export default function App() {
                   doc={doc}
                   pageNumber={i + 1}
                   scale={0.5}
-                  className={`mb-2 max-w-full cursor-pointer border-2 ${
-                    selectedPages.has(i) ? 'border-blue-500' : 'border-transparent'
-                  }`}
+                  className="max-w-full cursor-pointer"
                 />
               </div>
             ))}
         </ThumbnailRail>
         <Viewer>
           {!bytes && (
-            <div className="grid h-full place-items-center text-slate-500">
-              Open a PDF to get started
+            <div className="empty-state">
+              <svg className="empty-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="4" width="28" height="36" rx="3" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <path d="M28 4v10h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round"/>
+                <path d="M16 22h16M16 28h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span className="empty-label">Open a PDF to get started</span>
             </div>
           )}
           {doc && (
@@ -233,7 +237,7 @@ export default function App() {
                 onGo={(p) => setSelected(p)}
                 onZoom={(z) => setZoom(z === 'fit' ? 1.5 : z)}
               />
-              <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="mx-auto max-w-full bg-white shadow" />
+              <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="page-canvas-viewer mx-auto" />
             </>
           )}
         </Viewer>

@@ -11,22 +11,26 @@ export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: (
     ['Page size', info.pageSizes[0] ? `${info.pageSizes[0].width} × ${info.pageSizes[0].height} pt` : '—'],
   ]
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={onClose}>
-      <div className="w-80 rounded-lg bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="mb-3 text-lg font-semibold">Document Info</h2>
-        <table className="w-full text-sm">
-          <tbody>
-            {rows.map(([k, v]) => (
-              <tr key={k}>
-                <td className="py-1 pr-4 text-slate-500">{k}</td>
-                <td className="py-1">{v}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <button className="mt-4 rounded bg-slate-800 px-3 py-1 text-sm text-white" onClick={onClose}>
-          Close
-        </button>
+    <div className="modal-backdrop" onClick={onClose}>
+      {/* Outer shell — Double-Bezel */}
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Inner core */}
+        <div className="modal-inner">
+          <h2 className="modal-title">Document Info</h2>
+          <table className="modal-table">
+            <tbody>
+              {rows.map(([k, v]) => (
+                <tr key={k}>
+                  <td>{k}</td>
+                  <td>{v}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <button className="modal-close" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   )

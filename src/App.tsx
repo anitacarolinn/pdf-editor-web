@@ -50,11 +50,12 @@ export default function App() {
       setPageCount(count)
       setSelected((s) => {
         const clamped = Math.min(s, count) || 1
-        setSelectedPages((prev) => {
-          const next = new Set(Array.from(prev).filter((p) => p < count))
-          if (next.size === 0) next.add(clamped - 1)
-          return next
-        })
+        // Collapse the multi-selection to the current page after any structural
+        // change (open/edit). Selection indices are not remapped across a
+        // reorder/delete/duplicate, so keeping the old set would highlight — and
+        // target — the wrong pages. Collapsing keeps selection trustworthy.
+        setSelectedPages(new Set([clamped - 1]))
+        setAnchor(clamped - 1)
         return clamped
       })
     })()

@@ -1,4 +1,23 @@
 import { useRef } from 'react'
+import {
+  IconOpen,
+  IconInsertBlank,
+  IconMerge,
+  IconDelete,
+  IconDuplicate,
+  IconRotateLeft,
+  IconRotateRight,
+  IconExtract,
+  IconReplace,
+  IconSplit,
+  IconPageNumber,
+  IconWatermark,
+  IconShrink,
+  IconInfo,
+  IconUndo,
+  IconRedo,
+  IconDownload,
+} from './icons'
 
 export interface ToolbarProps {
   onOpen: (files: File[]) => void
@@ -50,7 +69,7 @@ export default function Toolbar(p: ToolbarProps) {
           className="btn-primary"
           onClick={() => openRef.current?.click()}
         >
-          Open PDF
+          <IconOpen /><span>Open PDF</span>
         </button>
         <button
           className="btn-tool"
@@ -58,7 +77,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onInsert}
           title="Insert a blank page after the selected page"
         >
-          Insert Blank
+          <IconInsertBlank /><span>Insert Blank</span>
         </button>
         <button
           className="btn-tool"
@@ -66,7 +85,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={() => mergeRef.current?.click()}
           title="Merge another PDF into this document"
         >
-          Merge PDF
+          <IconMerge /><span>Merge PDF</span>
         </button>
       </div>
 
@@ -80,7 +99,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onDelete}
           title="Delete selected pages"
         >
-          Delete Page
+          <IconDelete /><span>Delete Page</span>
         </button>
         <button
           className="btn-tool"
@@ -88,7 +107,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onDuplicate}
           title="Duplicate selected pages"
         >
-          Duplicate
+          <IconDuplicate /><span>Duplicate</span>
         </button>
         <button
           className="btn-tool"
@@ -96,7 +115,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onRotateL}
           title="Rotate pages left 90°"
         >
-          Rotate L
+          <IconRotateLeft /><span>Rotate L</span>
         </button>
         <button
           className="btn-tool"
@@ -104,7 +123,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onRotateR}
           title="Rotate pages right 90°"
         >
-          Rotate R
+          <IconRotateRight /><span>Rotate R</span>
         </button>
         <button
           className="btn-tool"
@@ -112,7 +131,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onExtract}
           title="Extract selected pages to new PDF"
         >
-          Extract
+          <IconExtract /><span>Extract</span>
         </button>
         <button
           className="btn-tool"
@@ -120,7 +139,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={() => replaceRef.current?.click()}
           title="Replace the selected page with another PDF"
         >
-          Replace
+          <IconReplace /><span>Replace</span>
         </button>
         <button
           className="btn-tool"
@@ -128,7 +147,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onSplit}
           title="Split selected pages into separate PDFs"
         >
-          Split
+          <IconSplit /><span>Split</span>
         </button>
       </div>
 
@@ -142,7 +161,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onPageNumbers}
           title="Add page numbers"
         >
-          Page #
+          <IconPageNumber /><span>Page #</span>
         </button>
         <button
           className="btn-tool"
@@ -150,7 +169,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onWatermark}
           title="Add a watermark"
         >
-          Watermark
+          <IconWatermark /><span>Watermark</span>
         </button>
         <button
           className="btn-tool"
@@ -158,7 +177,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onShrink}
           title="Shrink file size by re-encoding pages as JPEG images"
         >
-          Shrink file size
+          <IconShrink /><span>Shrink file size</span>
         </button>
         <button
           className="btn-tool"
@@ -166,7 +185,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onInfo}
           title="View document metadata"
         >
-          Info
+          <IconInfo /><span>Info</span>
         </button>
       </div>
 
@@ -180,7 +199,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onUndo}
           title="Undo last action"
         >
-          Undo
+          <IconUndo /><span>Undo</span>
         </button>
         <button
           className="btn-tool"
@@ -188,7 +207,7 @@ export default function Toolbar(p: ToolbarProps) {
           onClick={p.onRedo}
           title="Redo last undone action"
         >
-          Redo
+          <IconRedo /><span>Redo</span>
         </button>
       </div>
 
@@ -219,7 +238,7 @@ export default function Toolbar(p: ToolbarProps) {
         disabled={!p.hasDoc || p.busy}
         onClick={p.onDownload}
       >
-        Download
+        <IconDownload /><span>Download</span>
       </button>
 
       {/* Hidden file inputs */}

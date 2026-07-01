@@ -185,6 +185,9 @@ body {
 
 /* Primary — accent fill */
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--color-accent);
   color: #fff;
   font-weight: 600;
@@ -220,6 +223,9 @@ body {
 
 /* Download — success */
 .btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: var(--color-chrome);
   color: #fff;
   font-weight: 600;

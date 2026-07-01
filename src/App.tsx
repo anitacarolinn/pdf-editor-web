@@ -7,10 +7,11 @@ import PageCanvas from './components/PageCanvas'
 import { useDocumentStore } from './services/document-store'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
-import { getPageCount } from './services/page-ops'
+import { getPageCount, rotatePage, deletePages, insertBlankPage, mergePdfs } from './services/page-ops'
+import { downloadBytes } from './services/export-service'
 
 export default function App() {
-  const { bytes, load } = useDocumentStore()
+  const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
@@ -40,9 +41,32 @@ export default function App() {
     setSelected(1)
   }
 
+  const onRotate = () => apply((b) => rotatePage(b, selected - 1, 90))
+  const onDelete = () => apply((b) => deletePages(b, [selected - 1]))
+  const onInsert = () => apply((b) => insertBlankPage(b, selected))
+  const onMerge = async (file: File) => {
+    const other = await readFileAsBytes(file)
+    await apply((b) => mergePdfs([b, other]))
+  }
+  const onDownload = () => {
+    if (bytes) downloadBytes(bytes, fileName ?? 'edited.pdf')
+  }
+
   return (
     <div className="flex h-screen flex-col">
-      <Toolbar onOpen={onOpen} />
+      <Toolbar
+        onOpen={onOpen}
+        onRotate={onRotate}
+        onDelete={onDelete}
+        onInsert={onInsert}
+        onMerge={onMerge}
+        onUndo={undo}
+        onRedo={redo}
+        onDownload={onDownload}
+        canUndo={canUndo()}
+        canRedo={canRedo()}
+        hasDoc={!!bytes}
+      />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>
           {doc &&

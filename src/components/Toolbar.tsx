@@ -1,34 +1,54 @@
 import { useRef } from 'react'
 
-export default function Toolbar({
-  onOpen,
-  children,
-}: {
+export interface ToolbarProps {
   onOpen: (file: File) => void
-  children?: React.ReactNode
-}) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  onRotate: () => void
+  onDelete: () => void
+  onInsert: () => void
+  onMerge: (file: File) => void
+  onUndo: () => void
+  onRedo: () => void
+  onDownload: () => void
+  canUndo: boolean
+  canRedo: boolean
+  hasDoc: boolean
+}
+
+export default function Toolbar(p: ToolbarProps) {
+  const openRef = useRef<HTMLInputElement>(null)
+  const mergeRef = useRef<HTMLInputElement>(null)
+  const btn = 'rounded px-3 py-1 text-sm disabled:opacity-40'
   return (
     <header className="flex items-center gap-2 border-b bg-white px-4 py-2 shadow-sm">
       <span className="font-semibold text-slate-800">PDF Editor</span>
-      <button
-        className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
-        onClick={() => inputRef.current?.click()}
-      >
+      <button className={`${btn} bg-blue-600 text-white`} onClick={() => openRef.current?.click()}>
         Open PDF
       </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="application/pdf"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) onOpen(f)
-          e.target.value = ''
-        }}
-      />
-      <div className="ml-4 flex items-center gap-2">{children}</div>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onRotate}>
+        Rotate
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onDelete}>
+        Delete Page
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onInsert}>
+        Insert Blank
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={() => mergeRef.current?.click()}>
+        Merge PDF
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.canUndo} onClick={p.onUndo}>
+        Undo
+      </button>
+      <button className={`${btn} bg-slate-100`} disabled={!p.canRedo} onClick={p.onRedo}>
+        Redo
+      </button>
+      <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc} onClick={p.onDownload}>
+        Download
+      </button>
+      <input ref={openRef} type="file" accept="application/pdf" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) p.onOpen(f); e.target.value = '' }} />
+      <input ref={mergeRef} type="file" accept="application/pdf" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) p.onMerge(f); e.target.value = '' }} />
     </header>
   )
 }

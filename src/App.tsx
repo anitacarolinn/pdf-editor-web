@@ -4,6 +4,7 @@ import Toolbar from './components/Toolbar'
 import ThumbnailRail from './components/ThumbnailRail'
 import Viewer from './components/Viewer'
 import PageCanvas from './components/PageCanvas'
+import PreviewControls from './components/PreviewControls'
 import { useDocumentStore } from './services/document-store'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
@@ -30,6 +31,7 @@ export default function App() {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
+  const [zoom, setZoom] = useState(1.5)
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
   const dragFrom = useRef<number | null>(null)
@@ -177,7 +179,16 @@ export default function App() {
             </div>
           )}
           {doc && (
-            <PageCanvas doc={doc} pageNumber={selected} scale={1.5} className="mx-auto max-w-full bg-white shadow" />
+            <>
+              <PreviewControls
+                page={selected}
+                pageCount={pageCount}
+                zoom={zoom}
+                onGo={(p) => setSelected(p)}
+                onZoom={(z) => setZoom(z === 'fit' ? 1.5 : z)}
+              />
+              <PageCanvas doc={doc} pageNumber={selected} scale={zoom} className="mx-auto max-w-full bg-white shadow" />
+            </>
           )}
         </Viewer>
       </div>

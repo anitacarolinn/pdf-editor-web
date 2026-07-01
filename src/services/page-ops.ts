@@ -88,3 +88,17 @@ export async function splitPdf(
   }
   return results
 }
+
+export async function duplicatePages(
+  bytes: Uint8Array,
+  indices: number[],
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(bytes)
+  // highest-first so earlier insertions don't shift not-yet-processed indices
+  const sorted = [...new Set(indices)].sort((a, b) => b - a)
+  for (const i of sorted) {
+    const [copy] = await doc.copyPages(doc, [i])
+    doc.insertPage(i + 1, copy)
+  }
+  return doc.save()
+}

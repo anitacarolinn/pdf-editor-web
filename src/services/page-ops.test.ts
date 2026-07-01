@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf } from './page-ops'
+import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -86,5 +86,19 @@ describe('splitPdf', () => {
     expect(parts).toHaveLength(2)
     expect(await getPageWidths(parts[0])).toEqual([100, 200])
     expect(await getPageWidths(parts[1])).toEqual([300, 400])
+  })
+})
+
+describe('duplicatePages', () => {
+  it('inserts a copy of each page after the original', async () => {
+    const bytes = await makeSamplePdf(3) // widths 100,200,300
+    const out = await duplicatePages(bytes, [1])
+    expect(await getPageWidths(out)).toEqual([100, 200, 200, 300])
+  })
+
+  it('duplicates multiple selected pages correctly', async () => {
+    const bytes = await makeSamplePdf(3)
+    const out = await duplicatePages(bytes, [0, 2])
+    expect(await getPageWidths(out)).toEqual([100, 100, 200, 300, 300])
   })
 })

@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Node.js 18+ required (Vite 5 / Vitest baseline).
+- Node.js 20+ required (installed Vite 8 / Vitest 4 need Node 20+; machine has Node 22).
 - **The UI layer must never import `pdf-lib` or `pdfjs-dist` directly** — only `src/services/*` may. This guarantees the same services power the future Tauri desktop build.
 - **Non-destructive:** every page operation returns *new* bytes; it never mutates the input `Uint8Array`.
 - All page operations are `async` and return `Promise<Uint8Array>` (except `splitPdf` → `Promise<Uint8Array[]>` and read helpers).

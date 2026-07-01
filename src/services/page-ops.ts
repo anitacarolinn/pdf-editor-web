@@ -77,3 +77,14 @@ export async function mergePdfs(docs: Uint8Array[]): Promise<Uint8Array> {
   }
   return out.save()
 }
+
+export async function splitPdf(
+  bytes: Uint8Array,
+  ranges: number[][],
+): Promise<Uint8Array[]> {
+  const results: Uint8Array[] = []
+  for (const range of ranges) {
+    results.push(await extractPages(bytes, range))
+  }
+  return results
+}

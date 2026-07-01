@@ -32,6 +32,7 @@ import { exportPagesAsImages } from './services/image-export'
 import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
+import { shrinkPdf } from './services/shrink-service'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -193,6 +194,7 @@ export default function App() {
   }
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
+  const onShrink = () => run(apply((b) => shrinkPdf(b)))
 
   const onAddText = () => {
     useOverlayStore.getState().addText(selected - 1)
@@ -248,6 +250,7 @@ export default function App() {
         onInfo={onInfo}
         onPageNumbers={onPageNumbers}
         onWatermark={onWatermark}
+        onShrink={onShrink}
         onAddText={onAddText}
         onAddImage={onAddImage}
         onApply={onApply}

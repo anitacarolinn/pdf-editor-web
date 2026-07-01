@@ -17,6 +17,7 @@ export interface ToolbarProps {
   onInfo: () => void
   onPageNumbers: () => void
   onWatermark: () => void
+  onShrink: () => void
   onAddText: () => void
   onAddImage: (file: File) => void
   onApply: () => void
@@ -163,6 +164,14 @@ export default function Toolbar(p: ToolbarProps) {
           title="View document metadata"
         >
           Info
+        </button>
+        <button
+          className="btn-tool"
+          disabled={!p.hasDoc || p.busy}
+          onClick={p.onShrink}
+          title="Shrink file size by re-encoding pages as JPEG images"
+        >
+          Shrink file size
         </button>
       </div>
 

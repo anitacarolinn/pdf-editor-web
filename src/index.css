@@ -253,6 +253,42 @@ body {
   cursor: not-allowed;
 }
 
+/* Apply — primary commit action */
+.btn-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: calc(var(--radius-md) - 3px);
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out-quart),
+    box-shadow var(--duration-fast) var(--ease-out-quart),
+    transform var(--duration-fast) var(--ease-out-quart);
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.2), 0 0 0 1px rgba(217, 119, 6, 0.2);
+}
+
+.btn-apply:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35), 0 0 0 1px rgba(217, 119, 6, 0.3);
+}
+
+.btn-apply:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-apply:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
 /* ── Export select ───────────────────────────────────────────── */
 .export-select {
   font-family: var(--font-sans);

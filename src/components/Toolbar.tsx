@@ -19,12 +19,14 @@ export interface ToolbarProps {
   onWatermark: () => void
   onAddText: () => void
   onAddImage: (file: File) => void
+  onApply: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
   busy: boolean
   selectionCount: number
   canReplace: boolean
+  objectCount: number
   exportFormat: 'pdf' | 'png' | 'jpeg'
   onExportFormatChange: (format: 'pdf' | 'png' | 'jpeg') => void
 }
@@ -181,6 +183,15 @@ export default function Toolbar(p: ToolbarProps) {
           title="Add an image to the current page"
         >
           Add Picture
+        </button>
+        <button
+          className="btn-apply"
+          disabled={p.objectCount === 0 || p.busy}
+          onClick={p.onApply}
+          title="Flatten all overlay objects into the PDF (undoable)"
+          aria-label="Apply"
+        >
+          Apply
         </button>
       </div>
 

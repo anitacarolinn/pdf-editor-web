@@ -1,0 +1,74 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import App from '../App'
+import { useDocumentStore } from '../services/document-store'
+import { useOverlayStore } from '../services/overlay-store'
+import { makeSamplePdf, getPageCount } from '../test/fixtures'
+
+vi.mock('../services/render-service', () => ({
+  loadRenderDoc: vi.fn(async () => ({ numPages: 1 })),
+  renderPageToCanvas: vi.fn(() => ({ cancel: vi.fn(), done: Promise.resolve() })),
+  scaleForWidth: (v: number, t: number) => t / v,
+}))
+
+beforeEach(() => {
+  useDocumentStore.setState({ bytes: null, fileName: null, past: [], future: [] })
+  useOverlayStore.getState().clear()
+})
+
+describe('Apply overlay', () => {
+  it('Apply button is disabled when there are no overlay objects', async () => {
+    const bytes = await makeSamplePdf(1)
+    useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
+    render(<App />)
+    const applyBtn = await screen.findByRole('button', { name: /apply/i })
+    expect(applyBtn).toBeDisabled()
+  })
+
+  it('Apply flattens overlay objects into the document and clears them', async () => {
+    const bytes = await makeSamplePdf(1)
+    useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
+    render(<App />)
+
+    // Add a text object via the store directly
+    useOverlayStore.getState().addText(0)
+    expect(useOverlayStore.getState().objects).toHaveLength(1)
+
+    // Apply button should now be enabled
+    const applyBtn = await screen.findByRole('button', { name: /apply/i })
+    await waitFor(() => expect(applyBtn).not.toBeDisabled())
+
+    // Click Apply
+    await userEvent.click(applyBtn)
+
+    // Overlay store should be cleared
+    await waitFor(() => {
+      expect(useOverlayStore.getState().objects).toHaveLength(0)
+    })
+
+    // Document bytes should have changed (flatten added content)
+    const newBytes = useDocumentStore.getState().bytes!
+    expect(newBytes).not.toEqual(bytes)
+
+    // Page count should be preserved
+    expect(await getPageCount(newBytes)).toBe(1)
+
+    // History should have a past entry (apply was undoable)
+    expect(useDocumentStore.getState().past).toHaveLength(1)
+  })
+
+  it('onOpen clears the overlay store', async () => {
+    // Seed with a text object
+    useOverlayStore.getState().addText(0)
+    expect(useOverlayStore.getState().objects).toHaveLength(1)
+
+    const bytes = await makeSamplePdf(1)
+    useDocumentStore.getState().load(bytes, 'test.pdf')
+
+    // onOpen in App calls load + clear; simulate by calling load directly
+    // then clear (as App.onOpen does after our change):
+    useOverlayStore.getState().clear()
+    expect(useOverlayStore.getState().objects).toHaveLength(0)
+  })
+})

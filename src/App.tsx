@@ -8,6 +8,7 @@ import PreviewControls from './components/PreviewControls'
 import OverlayLayer from './components/OverlayLayer'
 import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
+import { flattenObjects } from './services/flatten'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
 import {
@@ -34,6 +35,7 @@ import InfoModal from './components/InfoModal'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
+  const objectCount = useOverlayStore((s) => s.objects.length)
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
@@ -104,6 +106,7 @@ export default function App() {
     const all = await Promise.all(files.map(readFileAsBytes))
     const merged = all.length === 1 ? all[0] : await mergePdfs(all)
     load(merged, files.length === 1 ? files[0].name : 'combined.pdf')
+    useOverlayStore.getState().clear()
     setSelected(1)
     setSelectedPages(new Set([0]))
     setAnchor(0)
@@ -162,10 +165,22 @@ export default function App() {
       await apply((b) => mergePdfs([b, other]))
     })(),
   )
+  const onApply = () => run(
+    (async () => {
+      await apply((b) => flattenObjects(b, useOverlayStore.getState().objects))
+      useOverlayStore.getState().clear()
+    })(),
+  )
+
   const onDownload = () => run(
     (async () => {
       if (!bytes) return
-      if (exportFormat === 'pdf') { downloadBytes(bytes, fileName ?? 'edited.pdf'); return }
+      if (exportFormat === 'pdf') {
+        const objs = useOverlayStore.getState().objects
+        const outBytes = objs.length ? await flattenObjects(bytes, objs) : bytes
+        downloadBytes(outBytes, fileName ?? 'edited.pdf')
+        return
+      }
       const freshDoc = await loadRenderDoc(bytes)
       const pages = sel().map((i) => i + 1).filter((p) => p >= 1 && p <= freshDoc.numPages) // 1-based for pdf.js
       if (pages.length === 0) return
@@ -231,6 +246,8 @@ export default function App() {
         onWatermark={onWatermark}
         onAddText={onAddText}
         onAddImage={onAddImage}
+        onApply={onApply}
+        objectCount={objectCount}
         exportFormat={exportFormat}
         onExportFormatChange={setExportFormat}
       />

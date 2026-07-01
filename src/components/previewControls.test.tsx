@@ -19,3 +19,13 @@ it('typing a page number jumps to it', async () => {
   await userEvent.type(box, '4{Enter}')
   expect(onGo).toHaveBeenCalledWith(4)
 })
+
+it('blurring the page input commits the value', async () => {
+  const onGo = vi.fn()
+  render(<PreviewControls page={1} pageCount={5} zoom={1} onGo={onGo} onZoom={() => {}} />)
+  const box = screen.getByRole('spinbutton', { name: 'Current page' })
+  await userEvent.clear(box)
+  await userEvent.type(box, '3')
+  await userEvent.tab()
+  expect(onGo).toHaveBeenCalledWith(3)
+})

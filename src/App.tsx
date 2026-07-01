@@ -109,7 +109,7 @@ export default function App() {
   const onReplace = (file: File) => runOp(
     (async () => {
       const other = await readFileAsBytes(file)
-      await apply((b) => replacePage(b, selected - 1, other, 0))
+      await apply((b) => replacePage(b, sel()[0], other, 0))
     })(),
   )
   const onInsert = () => runOp(apply((b) => {
@@ -144,6 +144,7 @@ export default function App() {
         canRedo={canRedo()}
         hasDoc={!!bytes}
         selectionCount={selectedPages.size}
+        canReplace={selectedPages.size === 1}
       />
       <div className="flex flex-1 overflow-hidden">
         <ThumbnailRail>

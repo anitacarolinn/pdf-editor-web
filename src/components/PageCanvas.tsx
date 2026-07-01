@@ -7,13 +7,11 @@ export default function PageCanvas({
   pageNumber,
   scale,
   className,
-  onClick,
 }: {
   doc: PDFDocumentProxy
   pageNumber: number
   scale: number
   className?: string
-  onClick?: () => void
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -23,5 +21,5 @@ export default function PageCanvas({
       return () => handle?.cancel?.()
     }
   }, [doc, pageNumber, scale])
-  return <canvas ref={ref} className={className} onClick={onClick} />
+  return <canvas ref={ref} className={className} />
 }

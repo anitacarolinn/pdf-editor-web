@@ -18,6 +18,7 @@ export interface ToolbarProps {
   canRedo: boolean
   hasDoc: boolean
   selectionCount: number
+  canReplace: boolean
 }
 
 export default function Toolbar(p: ToolbarProps) {
@@ -49,7 +50,7 @@ export default function Toolbar(p: ToolbarProps) {
       <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onSplit}>
         Split
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={() => replaceRef.current?.click()}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || !p.canReplace} onClick={() => replaceRef.current?.click()}>
         Replace
       </button>
       <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onInsert}>

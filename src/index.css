@@ -819,3 +819,107 @@ body {
   text-transform: lowercase;
   flex-shrink: 0;
 }
+
+/* ── Landing hero ────────────────────────────────────────────── */
+.landing-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 64px;
+  gap: 48px;
+}
+
+.landing-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.landing-logo {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.landing-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--color-chrome);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.landing-tagline {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-chrome-muted);
+  letter-spacing: -0.01em;
+  margin: 0;
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+/* ── Drop zone ───────────────────────────────────────────────── */
+.landing-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 48px 32px;
+  background: var(--color-surface-card);
+  border: 2px dashed var(--color-chrome-hairline);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--duration-base) var(--ease-out-quart),
+    background var(--duration-base) var(--ease-out-quart),
+    box-shadow var(--duration-base) var(--ease-out-quart);
+  cursor: default;
+}
+
+.landing-dropzone--active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-surface);
+  box-shadow: 0 0 0 4px var(--color-accent-ring), var(--shadow-card);
+}
+
+.landing-dropzone-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-accent);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.landing-dropzone--active .landing-dropzone-icon {
+  opacity: 1;
+}
+
+.landing-dropzone-headline {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-chrome-secondary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.landing-choose-btn {
+  font-size: 13px;
+  padding: 8px 20px;
+}
+
+.landing-dropzone-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-chrome-muted);
+  letter-spacing: -0.005em;
+  margin: 0;
+  opacity: 0.7;
+}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist' // type-only: needed for state typing
 import Toolbar from './components/Toolbar'
 import PageGrid from './components/PageGrid'
+import Landing from './components/Landing'
 import type { CardOpenTool } from './components/PageGrid'
 import PageEditModal from './components/PageEditModal'
 import { useDocumentStore } from './services/document-store'
@@ -278,20 +279,24 @@ export default function App() {
           <span>{pageCount} {pageCount === 1 ? 'page' : 'pages'}</span>
         </div>
       )}
-      {/* Main grid area */}
-      <main className="grid-area">
-        <PageGrid
-          doc={doc}
-          pageCount={pageCount}
-          selectedPages={selectedPages}
-          onCardClick={handleThumbClick}
-          onCardOpen={handleCardOpen}
-          onHoverRotate={(i) => run(apply((b) => rotatePages(b, [i], 90)))}
-          onHoverDelete={(i) => run(apply((b) => deletePages(b, [i])))}
-          dragFrom={dragFrom}
-          onDrop={(from, to) => run(apply((b) => reorderPages(b, moveIndex(pageCount, from, to))))}
-        />
-      </main>
+      {/* Main grid area — show Landing when no document is loaded */}
+      {!bytes ? (
+        <Landing onFiles={onOpen} />
+      ) : (
+        <main className="grid-area">
+          <PageGrid
+            doc={doc}
+            pageCount={pageCount}
+            selectedPages={selectedPages}
+            onCardClick={handleThumbClick}
+            onCardOpen={handleCardOpen}
+            onHoverRotate={(i) => run(apply((b) => rotatePages(b, [i], 90)))}
+            onHoverDelete={(i) => run(apply((b) => deletePages(b, [i])))}
+            dragFrom={dragFrom}
+            onDrop={(from, to) => run(apply((b) => reorderPages(b, moveIndex(pageCount, from, to))))}
+          />
+        </main>
+      )}
 
       {/* Page edit/preview modal */}
       {previewPage !== null && doc && (

@@ -36,5 +36,5 @@ export async function renderPageToCanvas(
   if (!ctx) throw new Error('2d context unavailable')
   canvas.width = viewport.width
   canvas.height = viewport.height
-  await page.render({ canvasContext: ctx, viewport }).promise
+  await page.render({ canvasContext: ctx, viewport, canvas }).promise
 }

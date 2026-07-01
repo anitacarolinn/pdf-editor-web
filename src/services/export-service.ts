@@ -1,5 +1,5 @@
 export function downloadBytes(bytes: Uint8Array, fileName: string): void {
-  const blob = new Blob([bytes], { type: 'application/pdf' })
+  const blob = new Blob([bytes.slice().buffer], { type: 'application/pdf' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

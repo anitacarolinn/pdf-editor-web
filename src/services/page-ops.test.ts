@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages } from './page-ops'
+import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -24,6 +24,24 @@ describe('rotatePage', () => {
     const copy = bytes.slice()
     await rotatePage(bytes, 0, 90)
     expect(bytes).toEqual(copy)
+  })
+})
+
+describe('rotatePages', () => {
+  it('rotates all listed pages, leaves others', async () => {
+    const bytes = await makeSamplePdf(3)
+    const out = await rotatePages(bytes, [0, 2], 90)
+    const doc = await PDFDocument.load(out)
+    expect(doc.getPage(0).getRotation().angle).toBe(90)
+    expect(doc.getPage(1).getRotation().angle).toBe(0)
+    expect(doc.getPage(2).getRotation().angle).toBe(90)
+  })
+
+  it('normalizes negative degrees (rotate left)', async () => {
+    const bytes = await makeSamplePdf(1)
+    const out = await rotatePages(bytes, [0], -90)
+    const doc = await PDFDocument.load(out)
+    expect(doc.getPage(0).getRotation().angle).toBe(270)
   })
 })
 

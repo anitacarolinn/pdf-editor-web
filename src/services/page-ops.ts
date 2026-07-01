@@ -18,6 +18,20 @@ export async function rotatePage(
   return doc.save()
 }
 
+export async function rotatePages(
+  bytes: Uint8Array,
+  indices: number[],
+  degrees: number,
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(bytes)
+  for (const i of new Set(indices)) {
+    const page = doc.getPage(i)
+    const next = (((page.getRotation().angle + degrees) % 360) + 360) % 360
+    page.setRotation(pdfDegrees(next))
+  }
+  return doc.save()
+}
+
 export async function deletePages(
   bytes: Uint8Array,
   indices: number[],

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, deletePages, reorderPages } from './page-ops'
+import { getPageCount, rotatePage, deletePages, reorderPages, insertBlankPage } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -45,5 +45,19 @@ describe('reorderPages', () => {
   it('throws if newOrder is not a permutation of all pages', async () => {
     const bytes = await makeSamplePdf(3)
     await expect(reorderPages(bytes, [0, 1])).rejects.toThrow()
+  })
+})
+
+describe('insertBlankPage', () => {
+  it('inserts a blank page at the given index', async () => {
+    const bytes = await makeSamplePdf(2) // widths 100,200
+    const out = await insertBlankPage(bytes, 1, [150, 200])
+    expect(await getPageWidths(out)).toEqual([100, 150, 200])
+  })
+
+  it('appends when atIndex equals page count', async () => {
+    const bytes = await makeSamplePdf(2)
+    const out = await insertBlankPage(bytes, 2, [150, 200])
+    expect(await getPageWidths(out)).toEqual([100, 200, 150])
   })
 })

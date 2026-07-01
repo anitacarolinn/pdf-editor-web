@@ -46,3 +46,13 @@ export async function reorderPages(
   copied.forEach((p) => out.addPage(p))
   return out.save()
 }
+
+export async function insertBlankPage(
+  bytes: Uint8Array,
+  atIndex: number,
+  size: [number, number] = [595, 842],
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(bytes)
+  doc.insertPage(atIndex, size)
+  return doc.save()
+}

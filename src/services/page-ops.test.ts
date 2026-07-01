@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages } from './page-ops'
+import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -118,5 +118,14 @@ describe('duplicatePages', () => {
     const bytes = await makeSamplePdf(3)
     const out = await duplicatePages(bytes, [0, 2])
     expect(await getPageWidths(out)).toEqual([100, 100, 200, 300, 300])
+  })
+})
+
+describe('replacePage', () => {
+  it('replaces the page at index with a page from another pdf', async () => {
+    const base = await makeSamplePdf(3) // 100,200,300
+    const other = await makeSamplePdf(5) // 100,200,300,400,500
+    const out = await replacePage(base, 1, other, 3) // put other's page3 (width 400) at index 1
+    expect(await getPageWidths(out)).toEqual([100, 400, 300])
   })
 })

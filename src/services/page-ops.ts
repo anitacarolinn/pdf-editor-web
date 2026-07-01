@@ -116,3 +116,17 @@ export async function duplicatePages(
   }
   return doc.save()
 }
+
+export async function replacePage(
+  bytes: Uint8Array,
+  index: number,
+  otherBytes: Uint8Array,
+  otherIndex = 0,
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(bytes)
+  const src = await PDFDocument.load(otherBytes)
+  const [copy] = await doc.copyPages(src, [otherIndex])
+  doc.insertPage(index, copy) // now the replacement sits BEFORE the old page
+  doc.removePage(index + 1) // remove the old page (shifted by +1)
+  return doc.save()
+}

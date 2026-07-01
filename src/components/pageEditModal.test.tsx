@@ -31,6 +31,7 @@ const defaultProps = {
   onClose: vi.fn(),
   onAddText: vi.fn(),
   onAddPicture: vi.fn(),
+  onSign: vi.fn(),
   onApply: vi.fn(),
   onUndo: vi.fn(),
   onRedo: vi.fn(),

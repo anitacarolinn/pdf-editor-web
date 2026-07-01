@@ -18,6 +18,7 @@ import {
   IconZoomIn,
   IconAddText,
   IconAddPicture,
+  IconSign,
 } from './icons'
 
 export interface PageEditModalProps {
@@ -32,6 +33,7 @@ export interface PageEditModalProps {
   onClose: () => void
   onAddText: () => void
   onAddPicture: () => void
+  onSign: () => void
   onApply: () => void
   // Page-scoped structural operations
   onUndo: () => void
@@ -131,6 +133,7 @@ export default function PageEditModal({
   onClose,
   onAddText,
   onAddPicture,
+  onSign,
   onApply,
   onUndo,
   onRedo,
@@ -397,6 +400,7 @@ export default function PageEditModal({
           <Divider />
           <ToolBtn label="Add text" icon={<IconAddText />} onClick={onAddText} />
           <ToolBtn label="Add picture" icon={<IconAddPicture />} onClick={onAddPicture} />
+          <ToolBtn label="Sign" icon={<IconSign />} onClick={onSign} />
         </div>
       </div>
 

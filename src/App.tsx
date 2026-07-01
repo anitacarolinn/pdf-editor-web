@@ -48,6 +48,9 @@ export default function App() {
   const [modalZoom, setModalZoom] = useState(1)
   const [shrinkOpen, setShrinkOpen] = useState(false)
   const [signOpen, setSignOpen] = useState(false)
+  const [lastSignatureBytes, setLastSignatureBytes] = useState<Uint8Array | null>(null)
+  const [signedThisSession, setSignedThisSession] = useState(false)
+  const [showSavePngDialog, setShowSavePngDialog] = useState(false)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -157,7 +160,14 @@ export default function App() {
   // Non-destructive: "Apply" just closes the modal and KEEPS the objects as an
   // editable layer (re-openable to move/resize/edit/delete). Objects are baked
   // into the PDF only at Download/Export (see onDownload), so they stay editable.
-  const onApply = () => setPreviewPage(null)
+  const onApply = () => {
+    if (signedThisSession) {
+      setShowSavePngDialog(true)
+    } else {
+      setPreviewPage(null)
+      setSignedThisSession(false)
+    }
+  }
 
   const onDownload = () => run(
     (async () => {
@@ -181,7 +191,6 @@ export default function App() {
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
   const onShrink = () => setShrinkOpen(true)
-  const onSign = () => setSignOpen(true)
 
   // Handle a completed signature drawing: convert transparent-PNG bytes to an
   // overlay image at ~30% page width, preserving aspect ratio.
@@ -198,6 +207,8 @@ export default function App() {
       const wPct = 0.3
       const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
       useOverlayStore.getState().addImage(targetPage, sigBytes, 'png', wPct, hPct)
+      setLastSignatureBytes(sigBytes)
+      setSignedThisSession(true)
     }
     img.onerror = () => URL.revokeObjectURL(url)
     img.src = url
@@ -250,6 +261,14 @@ export default function App() {
   const onModalAddPicture = () => {
     addImageTargetPageRef.current = previewPage
     addImageInputRef.current?.click()
+  }
+
+  const onModalSign = () => setSignOpen(true)
+
+  const handleModalClose = () => {
+    setPreviewPage(null)
+    setSignedThisSession(false)
+    setLastSignatureBytes(null)
   }
 
   const handleAddImageFile = (file: File) => {
@@ -334,6 +353,79 @@ export default function App() {
           onClose={() => setSignOpen(false)}
         />
       )}
+      {showSavePngDialog && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2000,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 14,
+              boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+              padding: '28px 32px',
+              minWidth: 360,
+              maxWidth: 420,
+            }}
+          >
+            <h2 style={{ margin: '0 0 10px', fontSize: 17, fontWeight: 700, color: '#111827' }}>
+              Save signature?
+            </h2>
+            <p style={{ margin: '0 0 22px', fontSize: 13.5, color: '#6b7280', lineHeight: 1.5 }}>
+              Save this signature as a PNG file for reuse?
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowSavePngDialog(false)
+                  setSignedThisSession(false)
+                  setPreviewPage(null)
+                }}
+                style={{
+                  padding: '8px 18px',
+                  background: '#f4f4f5',
+                  border: '1px solid rgba(24,24,27,0.09)',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#3f3f46',
+                  cursor: 'pointer',
+                }}
+              >
+                No thanks
+              </button>
+              <button
+                onClick={() => {
+                  if (lastSignatureBytes) downloadBytes(lastSignatureBytes, 'signature.png')
+                  setShowSavePngDialog(false)
+                  setSignedThisSession(false)
+                  setLastSignatureBytes(null)
+                  setPreviewPage(null)
+                }}
+                style={{
+                  padding: '8px 22px',
+                  background: '#d97706',
+                  border: 'none',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                Save PNG
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* The menu bar only appears once a document is open. The landing state is
           just the drop zone — no toolbar. */}
       {bytes && (
@@ -361,7 +453,6 @@ export default function App() {
           onPageNumbers={onPageNumbers}
           onWatermark={onWatermark}
           onShrink={onShrink}
-          onSign={onSign}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
         />
@@ -403,9 +494,10 @@ export default function App() {
           zoom={modalZoom}
           onZoom={handleModalZoom}
           onGo={handleModalGo}
-          onClose={() => setPreviewPage(null)}
+          onClose={handleModalClose}
           onAddText={onModalAddText}
           onAddPicture={onModalAddPicture}
+          onSign={onModalSign}
           onApply={onApply}
           onUndo={undo}
           onRedo={redo}

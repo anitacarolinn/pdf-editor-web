@@ -40,6 +40,10 @@ beforeEach(async () => {
 
 it('Sign button opens the signature modal', async () => {
   render(<App />)
+  // Open the page preview modal first (Sign is now in the modal header)
+  const previewBtn = await screen.findByRole('button', { name: 'Preview page' })
+  await userEvent.click(previewBtn)
+  // Now find and click the Sign button in the modal header
   const signBtn = await screen.findByRole('button', { name: 'Sign' })
   expect(signBtn).not.toBeDisabled()
   await userEvent.click(signBtn)
@@ -52,11 +56,16 @@ it('Sign button opens the signature modal', async () => {
 
 it('Sign modal can be cancelled', async () => {
   render(<App />)
+  // Open the page preview modal first (Sign is now in the modal header)
+  const previewBtn = await screen.findByRole('button', { name: 'Preview page' })
+  await userEvent.click(previewBtn)
+  // Now find and click the Sign button in the modal header
   const signBtn = await screen.findByRole('button', { name: 'Sign' })
   await userEvent.click(signBtn)
   expect(await screen.findByText('Draw your signature')).toBeInTheDocument()
-  const cancelBtn = screen.getByRole('button', { name: 'Cancel' })
-  await userEvent.click(cancelBtn)
-  // Modal should be gone
+  // The signature modal has its own Cancel button — it renders first in the DOM
+  const cancelBtns = screen.getAllByRole('button', { name: 'Cancel' })
+  await userEvent.click(cancelBtns[0])
+  // Signature modal should be gone
   expect(screen.queryByText('Draw your signature')).not.toBeInTheDocument()
 })

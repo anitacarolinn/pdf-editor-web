@@ -37,9 +37,10 @@ export default function App() {
     }
   }, [bytes])
 
-  async function onOpen(file: File) {
-    const b = await readFileAsBytes(file)
-    load(b, file.name)
+  async function onOpen(files: File[]) {
+    const all = await Promise.all(files.map(readFileAsBytes))
+    const merged = all.length === 1 ? all[0] : await mergePdfs(all)
+    load(merged, files.length === 1 ? files[0].name : 'combined.pdf')
     setSelected(1)
   }
 
@@ -80,8 +81,8 @@ export default function App() {
                 key={i}
                 doc={doc}
                 pageNumber={i + 1}
-                scale={0.2}
-                className={`mb-2 w-full cursor-pointer border ${
+                scale={0.5}
+                className={`mb-2 max-w-full cursor-pointer border-2 ${
                   selected === i + 1 ? 'border-blue-500' : 'border-transparent'
                 }`}
                 onClick={() => setSelected(i + 1)}
@@ -95,7 +96,7 @@ export default function App() {
             </div>
           )}
           {doc && (
-            <PageCanvas doc={doc} pageNumber={selected} scale={1} className="mx-auto bg-white shadow" />
+            <PageCanvas doc={doc} pageNumber={selected} scale={1.5} className="mx-auto max-w-full bg-white shadow" />
           )}
         </Viewer>
       </div>

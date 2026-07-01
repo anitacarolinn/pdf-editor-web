@@ -34,11 +34,17 @@ export function renderPageToCanvas(
     await ensureInit()
     const page = await doc.getPage(pageNumber)
     if (cancelled) return
-    const viewport = page.getViewport({ scale })
+    // Render at the device pixel ratio so the output is crisp on HiDPI/Retina
+    // screens. The backing store is sized at scale*dpr; CSS displays it at the
+    // logical size (scale), so the browser never has to upscale a low-res bitmap.
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1
+    const viewport = page.getViewport({ scale: scale * dpr })
     const ctx = canvas.getContext('2d')
     if (!ctx) throw new Error('2d context unavailable')
     canvas.width = viewport.width
     canvas.height = viewport.height
+    canvas.style.width = `${viewport.width / dpr}px`
+    canvas.style.height = `${viewport.height / dpr}px`
     renderTask = page.render({ canvasContext: ctx, viewport, canvas })
     try {
       await renderTask.promise

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 export interface ToolbarProps {
-  onOpen: (file: File) => void
+  onOpen: (files: File[]) => void
   onRotate: () => void
   onDelete: () => void
   onInsert: () => void
@@ -45,8 +45,8 @@ export default function Toolbar(p: ToolbarProps) {
       <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc} onClick={p.onDownload}>
         Download
       </button>
-      <input ref={openRef} type="file" accept="application/pdf" className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) p.onOpen(f); e.target.value = '' }} />
+      <input ref={openRef} type="file" accept="application/pdf" multiple className="hidden"
+        onChange={(e) => { const fs = e.target.files; if (fs && fs.length) p.onOpen(Array.from(fs)); e.target.value = '' }} />
       <input ref={mergeRef} type="file" accept="application/pdf" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) p.onMerge(f); e.target.value = '' }} />
     </header>

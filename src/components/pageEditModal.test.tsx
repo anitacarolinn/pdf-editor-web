@@ -21,87 +21,59 @@ const mockDoc = {
   })),
 } as unknown as import('pdfjs-dist').PDFDocumentProxy
 
+const defaultProps = {
+  page: 0,
+  pageCount: 3,
+  doc: mockDoc,
+  zoom: 1,
+  onZoom: vi.fn(),
+  onGo: vi.fn(),
+  onClose: vi.fn(),
+  onAddText: vi.fn(),
+  onAddPicture: vi.fn(),
+  onApply: vi.fn(),
+  onUndo: vi.fn(),
+  onRedo: vi.fn(),
+  canUndo: false,
+  canRedo: false,
+  onInsert: vi.fn(),
+  onDeletePage: vi.fn(),
+  onDuplicate: vi.fn(),
+  onRotateL: vi.fn(),
+  onRotateR: vi.fn(),
+  onMoveBefore: vi.fn(),
+  onMoveAfter: vi.fn(),
+}
+
 beforeEach(() => {
   useOverlayStore.getState().clear()
 })
 
 describe('PageEditModal', () => {
-  it('renders the modal with Close, Add text, Add picture buttons', () => {
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={vi.fn()}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
-    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  it('renders the modal with Cancel, Add text, Add picture buttons', () => {
+    render(<PageEditModal {...defaultProps} />)
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add text' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add picture' })).toBeInTheDocument()
   })
 
-  it('fires onClose when the Close (X) button is clicked', async () => {
+  it('fires onClose when the Cancel button is clicked', async () => {
     const onClose = vi.fn()
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={onClose}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    render(<PageEditModal {...defaultProps} onClose={onClose} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(onClose).toHaveBeenCalledOnce()
   })
 
   it('fires onClose when pressing Escape', async () => {
     const onClose = vi.fn()
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={onClose}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} onClose={onClose} />)
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledOnce()
   })
 
   it('fires onClose when clicking the backdrop', async () => {
     const onClose = vi.fn()
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={onClose}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} onClose={onClose} />)
     const backdrop = document.querySelector('[data-testid="modal-backdrop"]') as HTMLElement
     await userEvent.click(backdrop)
     expect(onClose).toHaveBeenCalledOnce()
@@ -109,20 +81,7 @@ describe('PageEditModal', () => {
 
   it('fires onGo with a 1-based page number when typing in the page input', async () => {
     const onGo = vi.fn()
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={onGo}
-        onClose={vi.fn()}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} onGo={onGo} />)
     const input = screen.getByRole('spinbutton', { name: 'Current page' })
     await userEvent.clear(input)
     await userEvent.type(input, '2{Enter}')
@@ -131,77 +90,37 @@ describe('PageEditModal', () => {
 
   it('fires onAddText when the Add text button is clicked', async () => {
     const onAddText = vi.fn()
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={vi.fn()}
-        onAddText={onAddText}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} onAddText={onAddText} />)
     await userEvent.click(screen.getByRole('button', { name: 'Add text' }))
     expect(onAddText).toHaveBeenCalledOnce()
   })
 
-  it('renders the Apply button', () => {
-    render(
-      <PageEditModal
-        page={0}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={vi.fn()}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
-    expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument()
+  it('renders the Save & Close button', () => {
+    render(<PageEditModal {...defaultProps} />)
+    expect(screen.getByRole('button', { name: 'Save & Close' })).toBeInTheDocument()
   })
 
   it('shows "Page n / M" indicator in the bottom bar', () => {
-    render(
-      <PageEditModal
-        page={1}
-        pageCount={5}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={vi.fn()}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} page={1} pageCount={5} />)
     // page prop is 0-based, so page=1 means "Page 2"
     expect(screen.getByText('/ 5')).toBeInTheDocument()
   })
 
   it('renders Previous page and Next page navigation buttons', () => {
-    render(
-      <PageEditModal
-        page={1}
-        pageCount={3}
-        doc={mockDoc}
-        zoom={1}
-        onZoom={vi.fn()}
-        onGo={vi.fn()}
-        onClose={vi.fn()}
-        onAddText={vi.fn()}
-        onAddPicture={vi.fn()}
-        onApply={vi.fn()}
-      />,
-    )
+    render(<PageEditModal {...defaultProps} page={1} pageCount={3} />)
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Next page' })).toBeInTheDocument()
+  })
+
+  it('renders the Restore button', () => {
+    render(<PageEditModal {...defaultProps} />)
+    expect(screen.getByRole('button', { name: 'Restore' })).toBeInTheDocument()
+  })
+
+  it('fires onApply when the Save & Close button is clicked', async () => {
+    const onApply = vi.fn()
+    render(<PageEditModal {...defaultProps} onApply={onApply} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Save & Close' }))
+    expect(onApply).toHaveBeenCalledOnce()
   })
 })

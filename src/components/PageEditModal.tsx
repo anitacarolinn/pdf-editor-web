@@ -3,6 +3,22 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 import PageCanvas from './PageCanvas'
 import OverlayLayer from './OverlayLayer'
 import { useOverlayStore } from '../services/overlay-store'
+import type { OverlayObject } from '../services/overlay-store'
+import {
+  IconUndo,
+  IconRedo,
+  IconInsertBlank,
+  IconDelete,
+  IconDuplicate,
+  IconRotateLeft,
+  IconRotateRight,
+  IconMoveBefore,
+  IconMoveAfter,
+  IconZoomOut,
+  IconZoomIn,
+  IconAddText,
+  IconAddPicture,
+} from './icons'
 
 export interface PageEditModalProps {
   /** 0-based page index currently being previewed */
@@ -17,6 +33,92 @@ export interface PageEditModalProps {
   onAddText: () => void
   onAddPicture: () => void
   onApply: () => void
+  // Page-scoped structural operations
+  onUndo: () => void
+  onRedo: () => void
+  canUndo: boolean
+  canRedo: boolean
+  onInsert: () => void
+  onDeletePage: () => void
+  onDuplicate: () => void
+  onRotateL: () => void
+  onRotateR: () => void
+  onMoveBefore: () => void
+  onMoveAfter: () => void
+}
+
+// ── Toolbar button: icon above label ────────────────────────────────────────
+function ToolBtn({
+  label,
+  icon,
+  onClick,
+  disabled = false,
+  emphasized = false,
+}: {
+  label: string
+  icon: React.ReactNode
+  onClick?: () => void
+  disabled?: boolean
+  emphasized?: boolean
+}) {
+  return (
+    <button
+      aria-label={label}
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '4px',
+        padding: '8px 10px 6px',
+        background: 'transparent',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        color: disabled
+          ? '#c0c0c8'
+          : emphasized
+          ? '#111827'
+          : '#374151',
+        opacity: disabled ? 0.45 : 1,
+        fontWeight: emphasized ? 700 : 500,
+        minWidth: '56px',
+        transition: 'background 0.12s, color 0.12s',
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb'
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+      }}
+    >
+      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
+        {icon}
+      </span>
+      <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none' }}>
+        {label}
+      </span>
+    </button>
+  )
+}
+
+// ── Thin vertical divider in toolbar ────────────────────────────────────────
+function Divider() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        width: '1px',
+        height: '40px',
+        background: '#e0e0e6',
+        flexShrink: 0,
+        margin: '0 2px',
+        alignSelf: 'center',
+      }}
+    />
+  )
 }
 
 export default function PageEditModal({
@@ -30,8 +132,35 @@ export default function PageEditModal({
   onAddText,
   onAddPicture,
   onApply,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  onInsert,
+  onDeletePage,
+  onDuplicate,
+  onRotateL,
+  onRotateR,
+  onMoveBefore,
+  onMoveAfter,
 }: PageEditModalProps) {
-  const objectCount = useOverlayStore((s) => s.objects.length)
+  // Snapshot overlay objects when the modal mounts.
+  // Cancel restores from snapshot; Restore restores but stays open.
+  // Structural page ops (rotate, delete, etc.) remain undoable via undo history.
+  const mountSnapshot = useRef<OverlayObject[]>([])
+  useEffect(() => {
+    mountSnapshot.current = useOverlayStore.getState().objects
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally empty — run only on mount
+
+  const handleCancel = useCallback(() => {
+    useOverlayStore.setState({ objects: mountSnapshot.current })
+    onClose()
+  }, [onClose])
+
+  const handleRestore = useCallback(() => {
+    useOverlayStore.setState({ objects: mountSnapshot.current })
+  }, [])
 
   // Measure the rendered canvas to size OverlayLayer correctly
   const canvasWrapRef = useRef<HTMLDivElement>(null)
@@ -53,14 +182,14 @@ export default function PageEditModal({
     return () => ro.disconnect()
   }, [])
 
-  // Escape key closes the modal
+  // Escape key closes the modal (restores snapshot then closes)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') handleCancel()
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [handleCancel])
 
   // 1-based current page for display/navigation
   const currentPage = page + 1
@@ -126,10 +255,13 @@ export default function PageEditModal({
   // Prevent backdrop click from triggering when clicking on content
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) onClose()
+      if (e.target === e.currentTarget) handleCancel()
     },
-    [onClose],
+    [handleCancel],
   )
+
+  const atFirst = currentPage <= 1
+  const atLast = currentPage >= pageCount
 
   return (
     <div
@@ -140,111 +272,127 @@ export default function PageEditModal({
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        background: 'rgba(0, 0, 0, 0.82)',
+        background: 'rgba(0, 0, 0, 0.55)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'stretch',
       }}
     >
-      {/* ── Header bar (centered control cluster, X pinned right) ──── */}
+      {/* ── Top icon-above-label toolbar ─────────────────────────────── */}
       <div
         className="modal-header"
         onClick={(e) => e.stopPropagation()}
         style={{
-          position: 'relative',
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          padding: '10px 60px',
-          background: 'rgba(30, 30, 36, 0.97)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          justifyContent: 'space-between',
+          padding: '4px 12px',
+          background: '#f9fafb',
+          borderBottom: '1px solid #e5e7eb',
           flexShrink: 0,
           flexWrap: 'wrap',
+          gap: '0',
+          minHeight: '68px',
         }}
       >
-        {/* Zoom cluster */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '2px' }}>
-          <button
-            aria-label="Zoom out"
-            className="modal-ctrl-btn"
-            onClick={() => onZoom(Math.max(0.25, Math.round((zoom - 0.1) * 100) / 100))}
-            style={{ fontSize: '18px', lineHeight: 1, width: '30px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            −
-          </button>
-          <input
-            aria-label="Zoom level"
-            type="number"
-            min={25}
-            max={500}
-            defaultValue={Math.round(zoom * 100)}
-            key={`z${Math.round(zoom * 100)}`}
-            onKeyDown={(e) => { if (e.key === 'Enter') commitZoom((e.target as HTMLInputElement).value) }}
-            onBlur={(e) => commitZoom(e.target.value)}
-            style={{ width: '48px', textAlign: 'center', background: 'transparent', border: 'none', color: '#fff', fontSize: '13px', fontWeight: 600, outline: 'none' }}
-          />
-          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginRight: '2px' }}>%</span>
-          <button
-            aria-label="Zoom in"
-            className="modal-ctrl-btn"
-            onClick={() => onZoom(Math.min(5, Math.round((zoom + 0.1) * 100) / 100))}
-            style={{ fontSize: '18px', lineHeight: 1, width: '30px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            +
-          </button>
-          <button
-            aria-label="Fit width"
-            className="modal-ctrl-btn"
-            onClick={() => onZoom(computeFitWidth())}
-            style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.02em', padding: '0 10px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-          >
-            Fit
-          </button>
+        {/* Left group: history + page structure */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+          <ToolBtn label="Undo" icon={<IconUndo />} onClick={onUndo} disabled={!canUndo} />
+          <ToolBtn label="Redo" icon={<IconRedo />} onClick={onRedo} disabled={!canRedo} />
+          <Divider />
+          <ToolBtn label="New page" icon={<IconInsertBlank />} onClick={onInsert} emphasized />
+          <ToolBtn label="Delete page" icon={<IconDelete />} onClick={onDeletePage} disabled={pageCount <= 1} />
+          <ToolBtn label="Duplicate" icon={<IconDuplicate />} onClick={onDuplicate} />
+          <Divider />
+          <ToolBtn label="Rotate left" icon={<IconRotateLeft />} onClick={onRotateL} />
+          <ToolBtn label="Rotate right" icon={<IconRotateRight />} onClick={onRotateR} />
+          <Divider />
+          <ToolBtn label="Move before" icon={<IconMoveBefore />} onClick={onMoveBefore} disabled={atFirst} />
+          <ToolBtn label="Move after" icon={<IconMoveAfter />} onClick={onMoveAfter} disabled={atLast} />
         </div>
 
-        {/* Editing actions */}
-        <button aria-label="Add text" className="modal-action-btn" onClick={onAddText}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-          T&nbsp; Add text
-        </button>
-        <button aria-label="Add picture" className="modal-action-btn" onClick={onAddPicture}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.16)', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
-          🖼&nbsp; Add picture
-        </button>
-        <button aria-label="Apply" className="modal-action-btn modal-action-btn--apply" disabled={objectCount === 0} onClick={onApply}
-          style={{ background: objectCount > 0 ? '#16a34a' : 'rgba(255,255,255,0.06)', color: objectCount > 0 ? '#fff' : 'rgba(255,255,255,0.35)', border: `1px solid ${objectCount > 0 ? '#16a34a' : 'rgba(255,255,255,0.1)'}`, borderRadius: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: 600, cursor: objectCount > 0 ? 'pointer' : 'not-allowed' }}>
-          Apply
-        </button>
+        {/* Center group: zoom + add text/picture */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+          <Divider />
+          {/* Zoom cluster */}
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px', gap: '0' }}>
+            <button
+              aria-label="Zoom out"
+              onClick={() => onZoom(Math.max(0.25, Math.round((zoom - 0.1) * 100) / 100))}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '4px', padding: '8px 8px 6px', background: 'transparent', border: 'none',
+                borderRadius: '6px', cursor: 'pointer', color: '#374151', minWidth: '52px',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
+                <IconZoomOut />
+              </span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Zoom out</span>
+            </button>
 
-        {/* Close — pinned right */}
-        <button
-          aria-label="Close"
-          className="modal-close-btn"
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            right: '14px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.16)',
-            borderRadius: '8px',
-            color: 'rgba(255,255,255,0.85)',
-            cursor: 'pointer',
-            fontSize: '15px',
-            fontWeight: 700,
-            lineHeight: 1,
-            padding: '6px 11px',
-          }}
-        >
-          ✕
-        </button>
+            {/* Typeable zoom % field */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', padding: '3px 6px', margin: '0 4px' }}>
+              <input
+                aria-label="Zoom level"
+                type="number"
+                min={25}
+                max={500}
+                defaultValue={Math.round(zoom * 100)}
+                key={`z${Math.round(zoom * 100)}`}
+                onKeyDown={(e) => { if (e.key === 'Enter') commitZoom((e.target as HTMLInputElement).value) }}
+                onBlur={(e) => commitZoom(e.target.value)}
+                style={{
+                  width: '42px', textAlign: 'center', background: 'transparent', border: 'none',
+                  color: '#111827', fontSize: '12px', fontWeight: 600, outline: 'none',
+                }}
+              />
+              <span style={{ color: '#6b7280', fontSize: '12px' }}>%</span>
+            </div>
+
+            <button
+              aria-label="Zoom in"
+              onClick={() => onZoom(Math.min(5, Math.round((zoom + 0.1) * 100) / 100))}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '4px', padding: '8px 8px 6px', background: 'transparent', border: 'none',
+                borderRadius: '6px', cursor: 'pointer', color: '#374151', minWidth: '52px',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
+                <IconZoomIn />
+              </span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Zoom in</span>
+            </button>
+
+            <button
+              aria-label="Fit width"
+              onClick={() => onZoom(computeFitWidth())}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: '4px', padding: '8px 10px 6px', background: 'transparent', border: 'none',
+                borderRadius: '6px', cursor: 'pointer', color: '#374151', minWidth: '40px',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#e5e7eb' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            >
+              <span style={{ fontSize: '14px', fontWeight: 700, height: 20, display: 'flex', alignItems: 'center' }}>⊟</span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Fit</span>
+            </button>
+          </div>
+          <Divider />
+          <ToolBtn label="Add text" icon={<IconAddText />} onClick={onAddText} />
+          <ToolBtn label="Add picture" icon={<IconAddPicture />} onClick={onAddPicture} />
+        </div>
       </div>
 
-      {/* ── Page canvas area with prev/next arrows ─────────────────── */}
+      {/* ── Page canvas area with prev/next arrows ─────────────────────── */}
       <div
         style={{
           flex: 1,
@@ -252,17 +400,16 @@ export default function PageEditModal({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '0',
           overflow: 'hidden',
           position: 'relative',
+          background: '#f0f0f2',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Previous page arrow — far left */}
+        {/* Previous page arrow */}
         <button
           aria-label="Previous page"
-          className="modal-nav-btn"
-          disabled={currentPage <= 1}
+          disabled={atFirst}
           onClick={() => handleGo(currentPage - 1)}
           style={{
             position: 'absolute',
@@ -270,21 +417,21 @@ export default function PageEditModal({
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 10,
-            fontSize: '28px',
-            background: 'rgba(255,255,255,0.09)',
-            border: '1px solid rgba(255,255,255,0.18)',
+            fontSize: '22px',
+            background: 'rgba(255,255,255,0.92)',
+            border: '1px solid #d1d5db',
             borderRadius: '8px',
-            color: currentPage <= 1 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.85)',
-            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
-            padding: '12px 10px',
+            color: atFirst ? '#d1d5db' : '#374151',
+            cursor: atFirst ? 'not-allowed' : 'pointer',
+            padding: '10px 8px',
             lineHeight: 1,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
           }}
         >
           ◀
         </button>
 
-        {/* Canvas + overlay container — `safe` centering so a tall page at 100%
-            aligns to the top and stays fully scrollable (never clipped). */}
+        {/* Canvas + overlay container */}
         <div
           ref={scrollRef}
           style={{
@@ -294,7 +441,7 @@ export default function PageEditModal({
             flex: 1,
             height: '100%',
             overflow: 'auto',
-            padding: '24px 64px',
+            padding: '32px 72px',
           }}
         >
           <div
@@ -302,9 +449,10 @@ export default function PageEditModal({
             style={{
               position: 'relative',
               display: 'inline-block',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
               borderRadius: '2px',
               overflow: 'hidden',
+              background: '#fff',
             }}
           >
             <PageCanvas
@@ -322,11 +470,10 @@ export default function PageEditModal({
           </div>
         </div>
 
-        {/* Next page arrow — far right */}
+        {/* Next page arrow */}
         <button
           aria-label="Next page"
-          className="modal-nav-btn"
-          disabled={currentPage >= pageCount}
+          disabled={atLast}
           onClick={() => handleGo(currentPage + 1)}
           style={{
             position: 'absolute',
@@ -334,64 +481,127 @@ export default function PageEditModal({
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 10,
-            fontSize: '28px',
-            background: 'rgba(255,255,255,0.09)',
-            border: '1px solid rgba(255,255,255,0.18)',
+            fontSize: '22px',
+            background: 'rgba(255,255,255,0.92)',
+            border: '1px solid #d1d5db',
             borderRadius: '8px',
-            color: currentPage >= pageCount ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.85)',
-            cursor: currentPage >= pageCount ? 'not-allowed' : 'pointer',
-            padding: '12px 10px',
+            color: atLast ? '#d1d5db' : '#374151',
+            cursor: atLast ? 'not-allowed' : 'pointer',
+            padding: '10px 8px',
             lineHeight: 1,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
           }}
         >
           ▶
         </button>
       </div>
 
-      {/* ── Bottom page indicator ──────────────────────────────────── */}
+      {/* ── Bottom bar: page indicator (left) + action footer (right) ─── */}
       <div
         className="modal-footer"
         onClick={(e) => e.stopPropagation()}
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          padding: '8px 16px',
-          background: 'rgba(30, 30, 36, 0.97)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          justifyContent: 'space-between',
+          padding: '10px 20px',
+          background: '#f9fafb',
+          borderTop: '1px solid #e5e7eb',
           flexShrink: 0,
-          fontSize: '13px',
-          color: 'rgba(255,255,255,0.6)',
-          fontWeight: 400,
         }}
       >
-        <span>Page</span>
-        <input
-          aria-label="Current page"
-          type="number"
-          min={1}
-          max={pageCount}
-          defaultValue={currentPage}
-          key={currentPage}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') commitInput((e.target as HTMLInputElement).value)
-          }}
-          onBlur={(e) => commitInput(e.target.value)}
-          style={{
-            width: '44px',
-            textAlign: 'center',
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.18)',
-            borderRadius: '4px',
-            color: 'rgba(255,255,255,0.85)',
-            fontSize: '13px',
-            fontWeight: 500,
-            padding: '2px 4px',
-            outline: 'none',
-          }}
-        />
-        <span>/ {pageCount}</span>
+        {/* Page indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280', fontWeight: 400 }}>
+          <span>Page</span>
+          <input
+            aria-label="Current page"
+            type="number"
+            min={1}
+            max={pageCount}
+            defaultValue={currentPage}
+            key={currentPage}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitInput((e.target as HTMLInputElement).value)
+            }}
+            onBlur={(e) => commitInput(e.target.value)}
+            style={{
+              width: '44px',
+              textAlign: 'center',
+              background: '#fff',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              color: '#111827',
+              fontSize: '13px',
+              fontWeight: 500,
+              padding: '2px 4px',
+              outline: 'none',
+            }}
+          />
+          <span>/ {pageCount}</span>
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Restore — light, restores overlay snapshot but stays open */}
+          <button
+            aria-label="Restore"
+            onClick={handleRestore}
+            style={{
+              padding: '8px 18px',
+              background: '#fff',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              color: '#374151',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
+          >
+            Restore
+          </button>
+
+          {/* Cancel — discards overlay changes, closes modal */}
+          <button
+            aria-label="Cancel"
+            onClick={handleCancel}
+            style={{
+              padding: '8px 18px',
+              background: '#fff',
+              border: '1px solid #9ca3af',
+              borderRadius: '8px',
+              color: '#374151',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
+          >
+            Cancel
+          </button>
+
+          {/* Save & Close — keeps edits, closes modal */}
+          <button
+            aria-label="Save &amp; Close"
+            onClick={onApply}
+            style={{
+              padding: '8px 22px',
+              background: '#ef4444',
+              border: '1px solid #ef4444',
+              borderRadius: '8px',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#dc2626' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#ef4444' }}
+          >
+            Save &amp; Close
+          </button>
+        </div>
       </div>
     </div>
   )

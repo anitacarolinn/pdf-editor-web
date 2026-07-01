@@ -17,7 +17,7 @@ beforeEach(() => {
   useOverlayStore.getState().clear()
 })
 
-// Helper: open the modal for page 0 so Add text / Add picture / Apply are rendered
+// Helper: open the modal for page 0 so Add text / Add picture / Save & Close are rendered
 async function openModal() {
   // Find the first hover "Preview page" button on the first thumb card
   const previewBtns = await screen.findAllByRole('button', { name: 'Preview page' })
@@ -25,16 +25,16 @@ async function openModal() {
 }
 
 describe('Apply overlay', () => {
-  it('Apply button is disabled when there are no overlay objects', async () => {
+  it('Save & Close button is always enabled (applies regardless of object count)', async () => {
     const bytes = await makeSamplePdf(1)
     useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
     render(<App />)
     await openModal()
-    const applyBtn = await screen.findByRole('button', { name: /apply/i })
-    expect(applyBtn).toBeDisabled()
+    const saveBtn = await screen.findByRole('button', { name: 'Save & Close' })
+    expect(saveBtn).not.toBeDisabled()
   })
 
-  it('Apply is non-destructive: closes the modal but KEEPS objects editable', async () => {
+  it('Save & Close is non-destructive: closes the modal but KEEPS objects editable', async () => {
     const bytes = await makeSamplePdf(1)
     useDocumentStore.setState({ bytes, fileName: 'test.pdf', past: [], future: [] })
     render(<App />)
@@ -46,12 +46,12 @@ describe('Apply overlay', () => {
     })
     expect(useOverlayStore.getState().objects).toHaveLength(1)
 
-    // Apply button should now be enabled
-    const applyBtn = await screen.findByRole('button', { name: /apply/i })
-    await waitFor(() => expect(applyBtn).not.toBeDisabled())
+    // Save & Close button should be enabled
+    const saveBtn = await screen.findByRole('button', { name: 'Save & Close' })
+    await waitFor(() => expect(saveBtn).not.toBeDisabled())
 
-    // Click Apply → modal closes
-    await userEvent.click(applyBtn)
+    // Click Save & Close → modal closes
+    await userEvent.click(saveBtn)
     await waitFor(() => {
       expect(screen.queryByTestId('modal-backdrop')).not.toBeInTheDocument()
     })

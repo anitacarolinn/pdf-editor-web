@@ -179,6 +179,38 @@ export default function App() {
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
   const onShrink = () => run(apply((b) => shrinkPdf(b)))
 
+  // Modal-scoped page operations — operate on the currently previewed page
+  const onModalDeletePage = () => {
+    if (previewPage === null) return
+    run(apply((b) => deletePages(b, [previewPage])))
+  }
+  const onModalDuplicate = () => {
+    if (previewPage === null) return
+    run(apply((b) => duplicatePages(b, [previewPage])))
+  }
+  const onModalRotateL = () => {
+    if (previewPage === null) return
+    run(apply((b) => rotatePages(b, [previewPage], -90)))
+  }
+  const onModalRotateR = () => {
+    if (previewPage === null) return
+    run(apply((b) => rotatePages(b, [previewPage], 90)))
+  }
+  // Move the previewed page one position earlier; follow the page after reorder
+  const onModalMoveBefore = () => {
+    if (previewPage === null || previewPage <= 0) return
+    const newOrder = moveIndex(pageCount, previewPage, previewPage - 1)
+    run(apply((b) => reorderPages(b, newOrder)))
+    setPreviewPage(previewPage - 1)
+  }
+  // Move the previewed page one position later; follow the page after reorder
+  const onModalMoveAfter = () => {
+    if (previewPage === null || previewPage >= pageCount - 1) return
+    const newOrder = moveIndex(pageCount, previewPage, previewPage + 1)
+    run(apply((b) => reorderPages(b, newOrder)))
+    setPreviewPage(previewPage + 1)
+  }
+
   // Modal-scoped Add text: adds to the currently previewed page
   const onModalAddText = () => {
     const targetPage = previewPage !== null ? previewPage : selected - 1
@@ -333,6 +365,17 @@ export default function App() {
           onAddText={onModalAddText}
           onAddPicture={onModalAddPicture}
           onApply={onApply}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo()}
+          canRedo={canRedo()}
+          onInsert={onInsert}
+          onDeletePage={onModalDeletePage}
+          onDuplicate={onModalDuplicate}
+          onRotateL={onModalRotateL}
+          onRotateR={onModalRotateR}
+          onMoveBefore={onModalMoveBefore}
+          onMoveAfter={onModalMoveAfter}
         />
       )}
 

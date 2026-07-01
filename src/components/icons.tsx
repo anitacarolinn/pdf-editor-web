@@ -209,3 +209,75 @@ export function IconDownload() {
     </svg>
   )
 }
+
+export function IconMoveBefore() {
+  return (
+    <svg {...BASE}>
+      {/* left arrow with page */}
+      <path d="M6 8H2m0 0l3-3M2 8l3 3" />
+      {/* page stack hint */}
+      <path d="M8 4h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H8" />
+    </svg>
+  )
+}
+
+export function IconMoveAfter() {
+  return (
+    <svg {...BASE}>
+      {/* right arrow with page */}
+      <path d="M10 8h4m0 0l-3-3m3 3l-3 3" />
+      {/* page stack hint */}
+      <path d="M8 4H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h5" />
+    </svg>
+  )
+}
+
+export function IconZoomOut() {
+  return (
+    <svg {...BASE}>
+      {/* magnifier circle */}
+      <circle cx="6.5" cy="6.5" r="4" />
+      {/* minus */}
+      <path d="M4.5 6.5h4" />
+      {/* handle */}
+      <path d="M9.5 9.5L13.5 13.5" />
+    </svg>
+  )
+}
+
+export function IconZoomIn() {
+  return (
+    <svg {...BASE}>
+      {/* magnifier circle */}
+      <circle cx="6.5" cy="6.5" r="4" />
+      {/* plus */}
+      <path d="M4.5 6.5h4M6.5 4.5v4" />
+      {/* handle */}
+      <path d="M9.5 9.5L13.5 13.5" />
+    </svg>
+  )
+}
+
+export function IconAddText() {
+  return (
+    <svg {...BASE}>
+      {/* T glyph */}
+      <path d="M3 4h10M8 4v8" />
+      {/* underline */}
+      <path d="M5 12h6" />
+    </svg>
+  )
+}
+
+export function IconAddPicture() {
+  return (
+    <svg {...BASE}>
+      {/* image frame */}
+      <rect x="1.5" y="3" width="13" height="10" rx="1" />
+      {/* mountain silhouette */}
+      <path d="M1.5 10l3.5-3.5 3 3 2-2 3.5 3.5" />
+      {/* sun dot */}
+      <circle cx="11" cy="6" r="1" />
+    </svg>
+  )
+}

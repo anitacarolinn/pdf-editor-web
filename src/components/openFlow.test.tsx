@@ -8,7 +8,7 @@ import { makeSamplePdf } from '../test/fixtures'
 // jsdom has no canvas 2d; stub the raster render so wiring can be tested
 vi.mock('../services/render-service', () => ({
   loadRenderDoc: vi.fn(async () => ({ numPages: 2 })),
-  renderPageToCanvas: vi.fn(async () => {}),
+  renderPageToCanvas: vi.fn(() => ({ cancel: vi.fn(), done: Promise.resolve() })),
   scaleForWidth: (v: number, t: number) => t / v,
 }))
 

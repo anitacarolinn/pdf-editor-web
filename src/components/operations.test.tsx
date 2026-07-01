@@ -7,7 +7,7 @@ import { makeSamplePdf, getPageCount } from '../test/fixtures'
 
 vi.mock('../services/render-service', () => ({
   loadRenderDoc: vi.fn(async () => ({ numPages: 3 })),
-  renderPageToCanvas: vi.fn(async () => {}),
+  renderPageToCanvas: vi.fn(() => ({ cancel: vi.fn(), done: Promise.resolve() })),
   scaleForWidth: (v: number, t: number) => t / v,
 }))
 

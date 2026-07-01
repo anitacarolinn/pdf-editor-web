@@ -17,13 +17,10 @@ export default function PageCanvas({
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    let cancelled = false
     if (ref.current) {
-      renderPageToCanvas(doc, pageNumber, ref.current, scale).catch(() => {})
-    }
-    return () => {
-      cancelled = true
-      void cancelled
+      const handle = renderPageToCanvas(doc, pageNumber, ref.current, scale)
+      handle?.done?.catch?.(() => {})
+      return () => handle?.cancel?.()
     }
   }, [doc, pageNumber, scale])
   return <canvas ref={ref} className={className} onClick={onClick} />

@@ -10,6 +10,8 @@ import { loadRenderDoc } from './services/render-service'
 import { getPageCount, rotatePage, deletePages, insertBlankPage, mergePdfs } from './services/page-ops'
 import { downloadBytes } from './services/export-service'
 
+const runOp = (p: Promise<void>) => p.catch((e) => console.error('operation failed', e))
+
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
@@ -41,12 +43,15 @@ export default function App() {
     setSelected(1)
   }
 
-  const onRotate = () => apply((b) => rotatePage(b, selected - 1, 90))
-  const onDelete = () => apply((b) => deletePages(b, [selected - 1]))
-  const onInsert = () => apply((b) => insertBlankPage(b, selected))
+  const onRotate = () => runOp(apply((b) => rotatePage(b, selected - 1, 90)))
+  const onDelete = () => runOp(apply((b) => deletePages(b, [selected - 1])))
+  const onInsert = () => runOp(apply((b) => {
+    // selected is 1-based; passing it as 0-based atIndex inserts AFTER the current page
+    return insertBlankPage(b, selected)
+  }))
   const onMerge = async (file: File) => {
     const other = await readFileAsBytes(file)
-    await apply((b) => mergePdfs([b, other]))
+    await runOp(apply((b) => mergePdfs([b, other])))
   }
   const onDownload = () => {
     if (bytes) downloadBytes(bytes, fileName ?? 'edited.pdf')

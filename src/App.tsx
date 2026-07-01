@@ -228,6 +228,7 @@ export default function App() {
 
   // Handle opening the modal from a page card
   const handleCardOpen = (i: number, tool: CardOpenTool) => {
+    setModalZoom(1) // default preview at 100%
     setPreviewPage(i)
     // If the card tool is 'text', immediately add a text object after opening
     if (tool === 'text') {
@@ -239,6 +240,7 @@ export default function App() {
   // ref synchronously (preserving the user-gesture chain), trigger the file
   // picker, and open the modal so the added image is visible.
   const handleCardPicture = (i: number) => {
+    setModalZoom(1) // default preview at 100%
     setPreviewPage(i)
     addImageTargetPageRef.current = i
     addImageInputRef.current?.click()
@@ -259,33 +261,37 @@ export default function App() {
   return (
     <div className="app-shell">
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
-      <Toolbar
-        onOpen={onOpen}
-        onRotateL={onRotateL}
-        onRotateR={onRotateR}
-        onDuplicate={onDuplicate}
-        onDelete={onDelete}
-        onExtract={onExtract}
-        onSplit={onSplit}
-        onReplace={onReplace}
-        onInsert={onInsert}
-        onMerge={onMerge}
-        onUndo={undo}
-        onRedo={redo}
-        onDownload={onDownload}
-        canUndo={canUndo()}
-        canRedo={canRedo()}
-        hasDoc={!!bytes}
-        busy={busy}
-        selectionCount={selectedPages.size}
-        canReplace={selectedPages.size === 1}
-        onInfo={onInfo}
-        onPageNumbers={onPageNumbers}
-        onWatermark={onWatermark}
-        onShrink={onShrink}
-        exportFormat={exportFormat}
-        onExportFormatChange={setExportFormat}
-      />
+      {/* The menu bar only appears once a document is open. The landing state is
+          just the drop zone — no toolbar. */}
+      {bytes && (
+        <Toolbar
+          onOpen={onOpen}
+          onRotateL={onRotateL}
+          onRotateR={onRotateR}
+          onDuplicate={onDuplicate}
+          onDelete={onDelete}
+          onExtract={onExtract}
+          onSplit={onSplit}
+          onReplace={onReplace}
+          onInsert={onInsert}
+          onMerge={onMerge}
+          onUndo={undo}
+          onRedo={redo}
+          onDownload={onDownload}
+          canUndo={canUndo()}
+          canRedo={canRedo()}
+          hasDoc={!!bytes}
+          busy={busy}
+          selectionCount={selectedPages.size}
+          canReplace={selectedPages.size === 1}
+          onInfo={onInfo}
+          onPageNumbers={onPageNumbers}
+          onWatermark={onWatermark}
+          onShrink={onShrink}
+          exportFormat={exportFormat}
+          onExportFormatChange={setExportFormat}
+        />
+      )}
       {/* Status line */}
       {bytes && (
         <div className="status-line">

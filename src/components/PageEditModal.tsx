@@ -120,14 +120,8 @@ export default function PageEditModal({
     return Math.max(0.1, Math.min(5, (el.clientWidth - 80) / pageDims.w))
   }, [pageDims])
 
-  // Open in fit-to-width reading mode once measurements are available.
-  const autoFitted = useRef(false)
-  useEffect(() => {
-    if (!autoFitted.current && pageDims && scrollRef.current) {
-      autoFitted.current = true
-      onZoom(computeFitWidth())
-    }
-  }, [pageDims, computeFitWidth, onZoom])
+  // The preview opens at 100% (default zoom = 1). Fit-to-width is available on
+  // demand via the "Fit" button, but is no longer forced on open.
 
   // Prevent backdrop click from triggering when clicking on content
   const handleBackdropClick = useCallback(

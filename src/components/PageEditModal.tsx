@@ -95,6 +95,40 @@ export default function PageEditModal({
     [onZoom],
   )
 
+  // Scroll region + the page's intrinsic point size, for fit-to-width.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [pageDims, setPageDims] = useState<{ w: number; h: number } | null>(null)
+  useEffect(() => {
+    let active = true
+    const pending = (doc as { getPage?: (n: number) => Promise<{ getViewport: (o: { scale: number }) => { width: number; height: number } }> })?.getPage?.(currentPage)
+    if (!pending || typeof pending.then !== 'function') return
+    pending
+      .then((p) => {
+        const vp = p.getViewport({ scale: 1 })
+        if (active) setPageDims({ w: vp.width, h: vp.height })
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [doc, currentPage])
+
+  // Fit-to-width: page fills the available width (reading mode).
+  const computeFitWidth = useCallback(() => {
+    const el = scrollRef.current
+    if (!el || !pageDims) return 1
+    return Math.max(0.1, Math.min(5, (el.clientWidth - 80) / pageDims.w))
+  }, [pageDims])
+
+  // Open in fit-to-width reading mode once measurements are available.
+  const autoFitted = useRef(false)
+  useEffect(() => {
+    if (!autoFitted.current && pageDims && scrollRef.current) {
+      autoFitted.current = true
+      onZoom(computeFitWidth())
+    }
+  }, [pageDims, computeFitWidth, onZoom])
+
   // Prevent backdrop click from triggering when clicking on content
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -170,7 +204,7 @@ export default function PageEditModal({
           <button
             aria-label="Fit width"
             className="modal-ctrl-btn"
-            onClick={() => onZoom('fit')}
+            onClick={() => onZoom(computeFitWidth())}
             style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.02em', padding: '0 10px', height: '28px', color: '#e5e7eb', background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
           >
             Fit
@@ -255,16 +289,18 @@ export default function PageEditModal({
           ◀
         </button>
 
-        {/* Canvas + overlay container */}
+        {/* Canvas + overlay container — `safe` centering so a tall page at 100%
+            aligns to the top and stays fully scrollable (never clipped). */}
         <div
+          ref={scrollRef}
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: 'safe center',
+            justifyContent: 'safe center',
             flex: 1,
             height: '100%',
             overflow: 'auto',
-            padding: '24px 72px',
+            padding: '24px 64px',
           }}
         >
           <div

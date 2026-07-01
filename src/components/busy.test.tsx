@@ -20,24 +20,24 @@ beforeEach(async () => {
 it('disables ops while an operation is in flight', async () => {
   // Slow down rotatePages so busy stays true long enough to observe
   const originalBytes = useDocumentStore.getState().bytes!
-  let resolveRotate!: () => void
-  const slowRotate = vi.spyOn(pageOps, 'rotatePages').mockImplementation(
-    (_bytes, _pages, _angle) =>
+  let resolveDup!: () => void
+  const slowDup = vi.spyOn(pageOps, 'duplicatePages').mockImplementation(
+    (_bytes, _pages) =>
       new Promise<Uint8Array>((resolve) => {
-        resolveRotate = () => resolve(originalBytes)
+        resolveDup = () => resolve(originalBytes)
       }),
   )
 
   render(<App />)
   const toolbar = await screen.findByRole('banner')
-  const rotate = await screen.findByRole('button', { name: 'Rotate R' })
+  const dup = await screen.findByRole('button', { name: 'Duplicate' })
   const open = await screen.findByRole('button', { name: 'Open PDF' })
 
   // Initially not busy
   expect(toolbar).not.toHaveAttribute('aria-busy', 'true')
 
   // Trigger a slow operation
-  await userEvent.click(rotate)
+  await userEvent.click(dup)
 
   // aria-busy should be true while op is in flight
   await waitFor(() => expect(toolbar).toHaveAttribute('aria-busy', 'true'))
@@ -45,33 +45,33 @@ it('disables ops while an operation is in flight', async () => {
   // Open PDF button stays enabled while busy
   expect(open).not.toBeDisabled()
 
-  // Rotate R button should be disabled while busy
-  expect(rotate).toBeDisabled()
+  // Duplicate button should be disabled while busy
+  expect(dup).toBeDisabled()
 
   // Resolve the slow operation
-  resolveRotate()
+  resolveDup()
 
   // aria-busy should clear after op settles
   await waitFor(() => expect(toolbar).not.toHaveAttribute('aria-busy', 'true'))
-  expect(rotate).not.toBeDisabled()
+  expect(dup).not.toBeDisabled()
 
-  slowRotate.mockRestore()
+  slowDup.mockRestore()
 })
 
 it('busy resets even if operation throws', async () => {
-  const throwingRotate = vi.spyOn(pageOps, 'rotatePages').mockRejectedValue(
+  const throwingDup = vi.spyOn(pageOps, 'duplicatePages').mockRejectedValue(
     new Error('simulated failure'),
   )
 
   render(<App />)
   const toolbar = await screen.findByRole('banner')
-  const rotate = await screen.findByRole('button', { name: 'Rotate R' })
+  const dup = await screen.findByRole('button', { name: 'Duplicate' })
 
-  await userEvent.click(rotate)
+  await userEvent.click(dup)
 
   // aria-busy should clear after error settles (finally block resets busy)
   await waitFor(() => expect(toolbar).not.toHaveAttribute('aria-busy', 'true'))
-  expect(rotate).not.toBeDisabled()
+  expect(dup).not.toBeDisabled()
 
-  throwingRotate.mockRestore()
+  throwingDup.mockRestore()
 })

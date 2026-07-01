@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { motion } from 'motion/react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import PageCanvas from './PageCanvas'
 import CardOverlayPreview from './CardOverlayPreview'
@@ -19,13 +18,6 @@ export interface PageGridProps {
   onHoverDelete: (i: number) => void
   dragFrom: React.MutableRefObject<number | null>
   onDrop: (from: number, to: number) => void
-}
-
-function arrayMove<T>(arr: T[], from: number, to: number): T[] {
-  const next = arr.slice()
-  const [item] = next.splice(from, 1)
-  next.splice(to, 0, item)
-  return next
 }
 
 export default function PageGrid({
@@ -72,10 +64,8 @@ export default function PageGrid({
         const isDragging = dragPos === pos
         const isOver = overPos === pos && dragPos !== null && dragPos !== pos
         return (
-          <motion.div
+          <div
             key={pageIdx}
-            layout
-            transition={{ duration: 0.24, ease: [0.25, 1, 0.5, 1] }}
             data-testid="thumb"
             draggable
             className={`page-card${isSelected ? ' page-card--selected' : ''}${isOver ? ' page-card--drop-target' : ''}`}
@@ -90,8 +80,8 @@ export default function PageGrid({
               setDragPos(null)
               setOverPos(null)
               if (from !== null && from !== pageIdx) {
-                // Animate the slide locally, then commit to the PDF bytes.
-                setOrder((o) => arrayMove(o, o.indexOf(from), o.indexOf(pageIdx)))
+                // Single clean reorder: commit to the PDF bytes; the reload
+                // repositions once (no optimistic slide → no double animation).
                 onDrop(from, pageIdx)
               }
               dragFrom.current = null
@@ -155,7 +145,7 @@ export default function PageGrid({
             </div>
             {/* Page label */}
             <span className="page-card__label">page {pos + 1}</span>
-          </motion.div>
+          </div>
         )
       })}
     </div>

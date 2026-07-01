@@ -31,9 +31,11 @@ beforeEach(async () => {
 
 afterEach(() => vi.restoreAllMocks())
 
-it('Rotate R rotates the selected page', async () => {
+it('Rotate (per-card hover) rotates the page', async () => {
   render(<App />)
-  await userEvent.click(await screen.findByRole('button', { name: 'Rotate R' }))
+  // Rotation lives on the per-card hover toolbar (removed from the main toolbar).
+  const rotateBtns = await screen.findAllByRole('button', { name: 'Rotate page' })
+  await userEvent.click(rotateBtns[0])
   await waitFor(async () => {
     const doc = await PDFDocument.load(useDocumentStore.getState().bytes!)
     expect(doc.getPage(0).getRotation().angle).toBe(90)

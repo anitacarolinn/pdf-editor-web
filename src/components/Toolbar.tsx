@@ -5,8 +5,6 @@ import {
   IconMerge,
   IconDelete,
   IconDuplicate,
-  IconRotateLeft,
-  IconRotateRight,
   IconExtract,
   IconReplace,
   IconSplit,
@@ -58,9 +56,8 @@ export default function Toolbar(p: ToolbarProps) {
     <header aria-busy={p.busy} className="toolbar-chrome">
       {/* Brand */}
       <div className="toolbar-brand-group">
-        <img className="toolbar-logo" src="/favicon.svg" alt="PDF Page Editor logo" />
-        <span className="toolbar-brand">PDF Page Editor</span>
-        <span className="toolbar-offline-badge">offline</span>
+        <img className="toolbar-logo" src="/favicon.svg" alt="PDF Editor logo" />
+        <span className="toolbar-brand">PDF Editor</span>
       </div>
 
       {/* Actions — flat chips grouped by whitespace, like the reference */}
@@ -93,18 +90,6 @@ export default function Toolbar(p: ToolbarProps) {
           </button>
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate} title="Duplicate selected pages">
             <IconDuplicate /><span>Duplicate</span>
-          </button>
-        </div>
-
-        <span className="tb-sep" aria-hidden />
-
-        {/* Rotate */}
-        <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onRotateL} title="Rotate pages left 90°">
-            <IconRotateLeft /><span>Rotate L</span>
-          </button>
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onRotateR} title="Rotate pages right 90°">
-            <IconRotateRight /><span>Rotate R</span>
           </button>
         </div>
 

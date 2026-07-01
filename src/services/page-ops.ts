@@ -17,3 +17,14 @@ export async function rotatePage(
   page.setRotation(pdfDegrees(next))
   return doc.save()
 }
+
+export async function deletePages(
+  bytes: Uint8Array,
+  indices: number[],
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(bytes)
+  // remove from highest index down so earlier indices stay valid
+  const sorted = [...new Set(indices)].sort((a, b) => b - a)
+  for (const i of sorted) doc.removePage(i)
+  return doc.save()
+}

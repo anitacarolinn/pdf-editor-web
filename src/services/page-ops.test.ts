@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { makeSamplePdf } from '../test/fixtures'
-import { getPageCount, rotatePage } from './page-ops'
+import { makeSamplePdf, getPageWidths } from '../test/fixtures'
+import { getPageCount, rotatePage, deletePages } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
@@ -24,5 +24,13 @@ describe('rotatePage', () => {
     const copy = bytes.slice()
     await rotatePage(bytes, 0, 90)
     expect(bytes).toEqual(copy)
+  })
+})
+
+describe('deletePages', () => {
+  it('removes the given pages and keeps survivor order', async () => {
+    const bytes = await makeSamplePdf(4) // widths 100,200,300,400
+    const out = await deletePages(bytes, [1, 3])
+    expect(await getPageWidths(out)).toEqual([100, 300])
   })
 })

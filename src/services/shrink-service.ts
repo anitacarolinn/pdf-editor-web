@@ -6,6 +6,25 @@ export function estimateScale(targetLongEdgePx: number, pageLongEdgePt: number):
   return Math.min(2, targetLongEdgePx / pageLongEdgePt)
 }
 
+export type CompressionLevel = 'less' | 'recommended' | 'extreme'
+
+export const LEVEL_CONFIG: Record<
+  CompressionLevel,
+  { quality: number; targetLongEdgePx: number }
+> = {
+  less:        { quality: 0.8, targetLongEdgePx: 2400 },
+  recommended: { quality: 0.6, targetLongEdgePx: 1600 },
+  extreme:     { quality: 0.4, targetLongEdgePx: 1100 },
+}
+
+export async function shrinkPdfWithLevel(
+  bytes: Uint8Array,
+  level: CompressionLevel,
+): Promise<Uint8Array> {
+  const { quality, targetLongEdgePx } = LEVEL_CONFIG[level]
+  return shrinkPdf(bytes, { quality, targetLongEdgePx })
+}
+
 export async function shrinkPdf(
   bytes: Uint8Array,
   opts: { quality?: number; targetLongEdgePx?: number } = {},

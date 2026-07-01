@@ -31,7 +31,7 @@ import { exportPagesAsImages } from './services/image-export'
 import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
-import { shrinkPdf } from './services/shrink-service'
+import ShrinkModal from './components/ShrinkModal'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -45,6 +45,7 @@ export default function App() {
   const [busy, setBusy] = useState(false)
   const [previewPage, setPreviewPage] = useState<number | null>(null)
   const [modalZoom, setModalZoom] = useState(1)
+  const [shrinkOpen, setShrinkOpen] = useState(false)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -177,7 +178,7 @@ export default function App() {
   }
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
   const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
-  const onShrink = () => run(apply((b) => shrinkPdf(b)))
+  const onShrink = () => setShrinkOpen(true)
 
   // Modal-scoped page operations — operate on the currently previewed page
   const onModalDeletePage = () => {
@@ -293,6 +294,16 @@ export default function App() {
   return (
     <div className="app-shell">
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
+      {shrinkOpen && bytes && (
+        <ShrinkModal
+          bytes={bytes}
+          onApply={(resultBytes) => {
+            run(apply(() => Promise.resolve(resultBytes)))
+            setShrinkOpen(false)
+          }}
+          onClose={() => setShrinkOpen(false)}
+        />
+      )}
       {/* The menu bar only appears once a document is open. The landing state is
           just the drop zone — no toolbar. */}
       {bytes && (

@@ -87,7 +87,7 @@ export default function SignatureModal({ onAdd, onClose }: SignatureModalProps) 
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1500 }}>
       <div
         className="modal-card"
         onClick={(e) => e.stopPropagation()}

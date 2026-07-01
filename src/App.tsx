@@ -148,9 +148,10 @@ export default function App() {
     (async () => {
       if (!bytes) return
       if (exportFormat === 'pdf') { downloadBytes(bytes, fileName ?? 'edited.pdf'); return }
-      if (!doc) return
-      const pages = sel().map((i) => i + 1) // 1-based for pdf.js
-      const files = await exportPagesAsImages(doc, pages, exportFormat, 2)
+      const freshDoc = await loadRenderDoc(bytes)
+      const pages = sel().map((i) => i + 1).filter((p) => p >= 1 && p <= freshDoc.numPages) // 1-based for pdf.js
+      if (pages.length === 0) return
+      const files = await exportPagesAsImages(freshDoc, pages, exportFormat, 2)
       await downloadZip(files, 'images.zip')
     })(),
   )

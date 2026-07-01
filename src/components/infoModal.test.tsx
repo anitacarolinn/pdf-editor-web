@@ -12,4 +12,5 @@ it('shows metadata fields', () => {
   expect(screen.getByText('T')).toBeInTheDocument()
   expect(screen.getByText(/Pages/)).toBeInTheDocument()
   expect(screen.getByText('3')).toBeInTheDocument()
+  expect(screen.getByText(/100 × 200/)).toBeInTheDocument()
 })

@@ -8,6 +8,7 @@ export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: (
     ['Subject', info.subject || '—'],
     ['Creator', info.creator || '—'],
     ['Producer', info.producer || '—'],
+    ['Page size', info.pageSizes[0] ? `${info.pageSizes[0].width} × ${info.pageSizes[0].height} pt` : '—'],
   ]
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={onClose}>

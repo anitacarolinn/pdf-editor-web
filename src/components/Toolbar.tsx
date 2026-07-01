@@ -84,7 +84,7 @@ export default function Toolbar(p: ToolbarProps) {
       <button className={`${btn} bg-green-600 text-white`} disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
         Download
       </button>
-      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onInfo}>
+      <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc} onClick={p.onInfo}>
         Info
       </button>
       <button className={`${btn} bg-slate-100`} disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers}>

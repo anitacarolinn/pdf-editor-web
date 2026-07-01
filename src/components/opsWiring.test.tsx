@@ -1,4 +1,4 @@
-import { it, expect, beforeEach, vi } from 'vitest'
+import { it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
@@ -17,6 +17,8 @@ beforeEach(async () => {
   const bytes = await makeSamplePdf(2)
   useDocumentStore.setState({ bytes, fileName: 'a.pdf', past: [], future: [] })
 })
+
+afterEach(() => vi.restoreAllMocks())
 
 it('Rotate R rotates the selected page', async () => {
   render(<App />)

@@ -1,32 +1,26 @@
-# React + TypeScript + Vite
+# PDF Editor (Web)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A privacy-first, in-browser PDF editor. All page editing happens locally — no file is uploaded.
 
-Currently, two official plugins are available:
+## Features (foundation)
+- Open a PDF and preview pages
+- Rotate, delete, insert blank pages
+- Merge another PDF, undo/redo
+- Download the edited PDF
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Develop
+```bash
+npm install
+npm run dev      # start the app
+npm test         # run the test suite
+npm run build    # production build (static, host anywhere)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Architecture
+UI (React) calls framework-free services in `src/services/`:
+- `page-ops` — pure PDF page operations (pdf-lib)
+- `render-service` — page rendering (pdf.js)
+- `document-store` — working document + undo/redo (zustand)
+- `export-service` / `file-io` — download & file reading
+
+The UI never imports pdf-lib/pdf.js directly, so the same services power the future desktop (Tauri) build.

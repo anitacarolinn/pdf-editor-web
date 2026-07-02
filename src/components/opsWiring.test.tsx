@@ -46,7 +46,7 @@ it('Page # adds numbers without changing page count', async () => {
   render(<App />)
   const before = useDocumentStore.getState().bytes!
   const beforeCount = await getPageCount(before)
-  await userEvent.click(await screen.findByRole('button', { name: 'Page #' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Numbers' }))
   await waitFor(async () => {
     const after = useDocumentStore.getState().bytes!
     expect(after).not.toBe(before)
@@ -66,7 +66,7 @@ it('Watermark opens the WatermarkModal', async () => {
 
 it('Shrink file size opens the ShrinkModal', async () => {
   render(<App />)
-  await userEvent.click(await screen.findByRole('button', { name: 'Shrink file size' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Shrink' }))
   // Options step should appear
   expect(await screen.findByText('Compress PDF')).toBeInTheDocument()
   expect(screen.getByText('Less compression')).toBeInTheDocument()

@@ -31,7 +31,7 @@ it('disables ops while an operation is in flight', async () => {
   render(<App />)
   const toolbar = await screen.findByRole('banner')
   const dup = await screen.findByRole('button', { name: 'Duplicate' })
-  const open = await screen.findByRole('button', { name: 'Open PDF' })
+  const open = await screen.findByRole('button', { name: 'Open' })
 
   // Initially not busy
   expect(toolbar).not.toHaveAttribute('aria-busy', 'true')

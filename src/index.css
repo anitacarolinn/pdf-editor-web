@@ -104,43 +104,57 @@ body {
 .toolbar-chrome {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 9px 16px;
+  gap: 16px;
+  height: 64px;
+  padding: 0 18px;
   background: var(--color-surface-card);
   border-bottom: 1px solid var(--color-chrome-hairline);
   box-shadow: 0 1px 0 rgba(24, 24, 27, 0.04);
-  flex-wrap: wrap;
   position: relative;
   z-index: 10;
 }
 
-/* Action clusters: borderless buttons grouped by thin dividers */
+/* Segmented command tray: inset surface holding the action clusters,
+   chunked by hairline dividers. Scrolls horizontally on tight widths
+   instead of wrapping (which used to orphan the Export button). */
 .toolbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  row-gap: 6px;
+  gap: 2px;
+  padding: 4px;
+  background: var(--color-surface-base);
+  border: 1px solid rgba(24, 24, 27, 0.07);
+  border-radius: 13px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toolbar-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .tb-group {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
-/* Thin separator between clusters */
+/* Hairline divider between clusters */
 .tb-sep {
   width: 1px;
-  height: 38px;
+  height: 26px;
   background: var(--color-chrome-hairline);
   flex-shrink: 0;
   align-self: center;
+  margin: 0 5px;
 }
 
 .tbtn-export > svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
 }
 
@@ -148,7 +162,7 @@ body {
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -167,29 +181,33 @@ body {
   white-space: nowrap;
 }
 
-/* Borderless toolbar button — icon above label (ribbon style) */
+/* Borderless toolbar button — icon above label (ribbon style).
+   Sits transparent inside the tray; hover lifts a white raised chip. */
 .tbtn {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 6px 8px;
-  min-width: 58px;
+  padding: 6px 9px;
+  min-width: 54px;
+  height: 48px;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.005em;
-  color: var(--color-chrome-secondary);
+  color: var(--color-chrome-muted);
   background: transparent;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   transition:
     background var(--duration-fast) var(--ease-out-quart),
     color var(--duration-fast) var(--ease-out-quart),
+    box-shadow var(--duration-fast) var(--ease-out-quart),
     transform var(--duration-fast) var(--ease-spring);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -199,13 +217,14 @@ body {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  color: var(--color-chrome-muted);
+  color: var(--color-chrome-secondary);
   transition: color var(--duration-fast) var(--ease-out-quart);
 }
 
 .tbtn:hover:not(:disabled) {
-  background: var(--color-surface-base);
+  background: var(--color-surface-card);
   color: var(--color-chrome);
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.1), 0 0 0 1px rgba(24, 24, 27, 0.04);
 }
 
 .tbtn:hover:not(:disabled) > svg {
@@ -217,27 +236,28 @@ body {
 }
 
 .tbtn:disabled {
-  opacity: 0.38;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Export — green primary commit action (reference) */
+/* Export — green primary commit action, horizontal pill "island" */
 .tbtn-export {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 14px;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.01em;
   color: #fff;
   background: var(--color-success);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 11px;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(22, 163, 74, 0.3), 0 0 0 1px rgba(22, 163, 74, 0.15);
@@ -843,10 +863,10 @@ body {
 }
 
 .toolbar-logo {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: block;
-  border-radius: 5px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 

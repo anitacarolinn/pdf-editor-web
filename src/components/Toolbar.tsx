@@ -63,9 +63,9 @@ export default function Toolbar(p: ToolbarProps) {
         <span className="toolbar-brand">PDF Editor</span>
       </button>
 
-      {/* Actions — flat chips grouped by whitespace, like the reference */}
+      {/* Actions — inset segmented command tray, chunked into 5 clusters */}
       <div className="toolbar-actions">
-        {/* New / Open */}
+        {/* Input — New / Open / Merge */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onInsert} title={t.tbNewPageTitle}>
             <IconInsertBlank /><span>{t.tbNewPage}</span>
@@ -73,12 +73,6 @@ export default function Toolbar(p: ToolbarProps) {
           <button className="tbtn" onClick={() => openRef.current?.click()} title={t.tbOpenPdfTitle}>
             <IconOpen /><span>{t.tbOpenPdf}</span>
           </button>
-        </div>
-
-        <span className="tb-sep" aria-hidden />
-
-        {/* Add / Merge */}
-        <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()} title={t.tbAddMergeTitle}>
             <IconMerge /><span>{t.tbAddMerge}</span>
           </button>
@@ -86,7 +80,7 @@ export default function Toolbar(p: ToolbarProps) {
 
         <span className="tb-sep" aria-hidden />
 
-        {/* Delete / Duplicate */}
+        {/* Pages — Delete / Duplicate / Extract / Replace / Split */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDelete} title={t.tbDeletePageTitle}>
             <IconDelete /><span>{t.tbDeletePage}</span>
@@ -94,12 +88,6 @@ export default function Toolbar(p: ToolbarProps) {
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate} title={t.tbDuplicateTitle}>
             <IconDuplicate /><span>{t.tbDuplicate}</span>
           </button>
-        </div>
-
-        <span className="tb-sep" aria-hidden />
-
-        {/* Extract / Replace / Split */}
-        <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onExtract} title={t.tbExtractPageTitle}>
             <IconExtract /><span>{t.tbExtractPage}</span>
           </button>
@@ -113,7 +101,7 @@ export default function Toolbar(p: ToolbarProps) {
 
         <span className="tb-sep" aria-hidden />
 
-        {/* Page # / Watermark / Shrink / Info */}
+        {/* Enhance — Page # / Watermark / Shrink / Info */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers} title={t.tbPageNumTitle}>
             <IconPageNumber /><span>{t.tbPageNum}</span>
@@ -143,7 +131,7 @@ export default function Toolbar(p: ToolbarProps) {
 
         <span className="tb-sep" aria-hidden />
 
-        {/* History */}
+        {/* History — Undo / Redo */}
         <div className="tb-group">
           <button className="tbtn" disabled={!p.canUndo || p.busy} onClick={p.onUndo} title={t.tbUndoTitle}>
             <IconUndo /><span>{t.tbUndo}</span>

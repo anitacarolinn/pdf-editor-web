@@ -9,7 +9,8 @@ import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
 import { flattenObjects } from './services/flatten'
 import { readFileAsBytes } from './services/file-io'
-import { loadRenderDoc } from './services/render-service'
+import { loadRenderDoc, isPdfEncrypted } from './services/render-service'
+import { unlockPdf } from './services/lock-service'
 import { useI18n } from './services/i18n'
 import {
   getPageCount,
@@ -38,6 +39,7 @@ import LockModal from './components/LockModal'
 import UnlockModal from './components/UnlockModal'
 import WatermarkModal from './components/WatermarkModal'
 import PageNumbersModal from './components/PageNumbersModal'
+import PasswordPrompt from './components/PasswordPrompt'
 import type { WatermarkOpts, PageNumberOpts } from './services/page-ops'
 import { imagesToPdf } from './services/image-to-pdf'
 
@@ -66,6 +68,15 @@ export default function App() {
   const [watermarkOpen, setWatermarkOpen] = useState(false)
   const [pageNumOpen, setPageNumOpen] = useState(false)
   const [officeToast, setOfficeToast] = useState(false)
+  // Password prompt for locked PDFs opened via drag/drop or the file picker.
+  // `pwFileName` names the file currently being prompted (null = no prompt).
+  const [pwFileName, setPwFileName] = useState<string | null>(null)
+  const [pwError, setPwError] = useState<string | null>(null)
+  const [pwBusy, setPwBusy] = useState(false)
+  // The unlock queue: locked files awaiting a password, plus a resolver that the
+  // prompt callbacks fulfil with the decrypted bytes (or null when skipped).
+  const pwQueueRef = useRef<{ name: string; bytes: Uint8Array }[]>([])
+  const pwResolveRef = useRef<((decrypted: Uint8Array | null) => void) | null>(null)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -107,6 +118,54 @@ export default function App() {
     }
   }, [bytes])
 
+  // Show the PasswordPrompt for one locked file and wait for the outcome.
+  // Resolves with the decrypted bytes (correct password) or null (cancelled).
+  // Wrong passwords keep the prompt open with an inline error (handled in
+  // handlePasswordSubmit), so this promise only settles on success or cancel.
+  const resolveLockedPdf = (name: string, encrypted: Uint8Array): Promise<Uint8Array | null> => {
+    return new Promise((resolve) => {
+      pwQueueRef.current.push({ name, bytes: encrypted })
+      pwResolveRef.current = resolve
+      setPwError(null)
+      setPwBusy(false)
+      setPwFileName(name)
+    })
+  }
+
+  const handlePasswordSubmit = async (password: string) => {
+    const current = pwQueueRef.current[0]
+    if (!current) return
+    setPwBusy(true)
+    setPwError(null)
+    try {
+      // Decrypt via lock-service (qpdf-wasm) so the result flows through the
+      // normal pdf-lib pipeline (merge/edit/export) — pdf-lib cannot open an
+      // encrypted PDF, so we hand it plaintext bytes.
+      const decrypted = await unlockPdf(current.bytes, password)
+      pwQueueRef.current.shift()
+      const resolve = pwResolveRef.current
+      pwResolveRef.current = null
+      setPwFileName(null)
+      setPwBusy(false)
+      resolve?.(decrypted)
+    } catch (e) {
+      // Wrong password (or unreadable) → keep the prompt open, show the error.
+      console.error('unlock on open failed', e)
+      setPwBusy(false)
+      setPwError(t.ppErrWrongPassword)
+    }
+  }
+
+  const handlePasswordCancel = () => {
+    pwQueueRef.current.shift()
+    const resolve = pwResolveRef.current
+    pwResolveRef.current = null
+    setPwFileName(null)
+    setPwError(null)
+    setPwBusy(false)
+    resolve?.(null)
+  }
+
   async function onOpen(files: File[]) {
     const pdfFiles: File[] = []
     const imageFiles: File[] = []
@@ -134,7 +193,35 @@ export default function App() {
 
     if (imageFiles.length === 0 && pdfFiles.length === 0) return
 
-    const pdfBytes = await Promise.all(pdfFiles.map(readFileAsBytes))
+    // Read every PDF, then detect which are password-protected. Locked files are
+    // queued and unlocked one at a time via the PasswordPrompt (see resolveLockedPdf).
+    // Encryption detection + rendering go through render-service (pdfjs); the
+    // actual decryption goes through lock-service (qpdf-wasm) — the UI never
+    // imports pdfjs/qpdf directly. A cancelled/failed unlock simply skips the file.
+    const rawPdfs = await Promise.all(
+      pdfFiles.map(async (f) => ({ name: f.name, bytes: await readFileAsBytes(f) })),
+    )
+    const pdfBytes: Uint8Array[] = []
+    for (const item of rawPdfs) {
+      let locked = false
+      try {
+        locked = await isPdfEncrypted(item.bytes)
+      } catch {
+        // If detection itself fails, fall through and let the normal pipeline
+        // surface any error — don't block the open on a detection hiccup.
+        locked = false
+      }
+      if (!locked) {
+        pdfBytes.push(item.bytes)
+        continue
+      }
+      const decrypted = await resolveLockedPdf(item.name, item.bytes)
+      if (decrypted) pdfBytes.push(decrypted)
+      // Cancelled / failed unlock → skip this file (don't add it).
+    }
+
+    if (imageFiles.length === 0 && pdfBytes.length === 0) return
+
     let result: Uint8Array
 
     if (imageFiles.length > 0) {
@@ -485,6 +572,15 @@ export default function App() {
             setUnlockOpen(false)
           }}
           onClose={() => setUnlockOpen(false)}
+        />
+      )}
+      {pwFileName !== null && (
+        <PasswordPrompt
+          fileName={pwFileName}
+          error={pwError}
+          busy={pwBusy}
+          onSubmit={handlePasswordSubmit}
+          onCancel={handlePasswordCancel}
         />
       )}
       {signOpen && (

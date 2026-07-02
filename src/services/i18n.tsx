@@ -146,6 +146,15 @@ const en = {
   umErrChooseFile: 'Choose a PDF file.',
   umErrWrongPassword: 'Wrong password.',
 
+  // PasswordPrompt (locked file on open)
+  ppTitle: 'Password required',
+  ppSubtitle: 'This PDF is password-protected. Enter its password to open it.',
+  ppPasswordLabel: 'Password',
+  ppUnlock: 'Unlock',
+  ppUnlocking: 'Unlocking…',
+  ppCancel: 'Cancel',
+  ppErrWrongPassword: 'Incorrect password',
+
   // WatermarkModal
   wmTitle: 'Add Watermark',
   wmText: 'Text',
@@ -352,6 +361,15 @@ const zh = {
   umErrChooseFile: '請選擇 PDF 檔案。',
   umErrWrongPassword: '密碼錯誤。',
 
+  // PasswordPrompt (locked file on open)
+  ppTitle: '需要密碼',
+  ppSubtitle: '此 PDF 受密碼保護。請輸入密碼以開啟。',
+  ppPasswordLabel: '密碼',
+  ppUnlock: '解密開啟',
+  ppUnlocking: '解密中…',
+  ppCancel: '取消',
+  ppErrWrongPassword: '密碼錯誤',
+
   // WatermarkModal
   wmTitle: '加入浮水印',
   wmText: '文字',
@@ -536,6 +554,14 @@ interface Dict {
   umUnlockOpen: string
   umErrChooseFile: string
   umErrWrongPassword: string
+
+  ppTitle: string
+  ppSubtitle: string
+  ppPasswordLabel: string
+  ppUnlock: string
+  ppUnlocking: string
+  ppCancel: string
+  ppErrWrongPassword: string
 
   wmTitle: string
   wmText: string

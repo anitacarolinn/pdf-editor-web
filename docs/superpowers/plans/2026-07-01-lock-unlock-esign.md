@@ -65,11 +65,31 @@
 
 **Interfaces:**
 - **Lock** button → prompt for a password (a small modal, not window.prompt if avoidable) → `run(apply(b => encryptPdf(b, pw)))`. **Unlock** button → prompt password → `run(apply(b => decryptPdf(b, pw)))` with a clear error on wrong password (surface it, don't crash). Buttons gated `!hasDoc || busy`.
-- Also: on OPEN, if a PDF is password-protected, prompt for the password and decrypt to load it (nice-to-have; can be a follow-up).
+- Password-protected file on OPEN is handled as a dedicated flow — see **Task 5**.
 
 - [ ] Failing test: Lock button present + gated; clicking with a password triggers apply with encryptPdf (mock crypto-service). Unlock symmetric; wrong-password path surfaces an error, no crash.
 - [ ] Implement; keep names/testids; no engine import in UI. FULL `npm test` + `npm run build` clean.
 - [ ] Commit: `feat: wire Lock/Unlock (password) UI`
+
+---
+
+### Task 5 (Lock/Unlock): password prompt when opening a locked PDF
+
+**Goal:** When the user drags in / opens a password-protected PDF, don't fail silently — show a modal that names the file and asks for the password, then load it once unlocked. Handles the common real-world case of receiving an already-encrypted document.
+
+**Files:** modify the open/drop path (`src/App.tsx` and/or the file-open hook) + `src/services/render-service` usage; extend the crypto/render service; test extend.
+
+**Detection & unlock (client-side, no upload):**
+- pdfjs-dist natively detects encryption: `getDocument({ data })` rejects with a `PasswordException` (or fires the `onPassword` callback with `PasswordResponses.NEED_PASSWORD` / `INCORRECT_PASSWORD`). Use this to detect a locked file at open time.
+- To *render* the locked file, pass the password to pdfjs `getDocument({ data, password })`. To also *edit* it with pdf-lib (which can't open encrypted PDFs), decrypt the bytes first via `decryptPdf(bytes, password)` from `crypto-service` (Task 3), then proceed with the normal pipeline.
+
+**Interfaces / flow:**
+- On open, if a file is detected as encrypted → open a `PasswordPrompt` modal: `{ fileName: string; onSubmit(password): void; onCancel(): void }`. The modal **shows the file name** so the user knows which file needs the password (important when several files are dragged at once — queue them and prompt per-locked-file).
+- On submit: attempt unlock. **Wrong password → keep the modal open and show an inline error** ("Incorrect password"), let them retry. **Cancel → skip that file** (don't add it to the document), no crash.
+
+- [x] Failing test: opening a fixture encrypted PDF surfaces the `PasswordPrompt` with the correct `fileName`; submitting the correct password loads it (page count > 0); wrong password shows an inline error and keeps the modal open; Cancel skips the file. (Mock crypto/render service; a small real encrypted fixture is fine.)
+- [x] Implement; multi-file drop queues locked files and prompts one at a time; keep names/testids; no engine import in UI (services only). FULL `npm test` + `npm run build` clean.
+- [x] Commit: `feat: prompt for password when opening a locked PDF`
 
 ---
 

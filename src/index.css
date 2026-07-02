@@ -720,6 +720,15 @@ body {
     0 4px 16px rgba(217, 119, 6, 0.24);
 }
 
+/* Keep the amber selection ring on hover (otherwise the generic hover shadow
+   overrides it and the outline disappears). */
+.page-card--selected:hover .page-card__canvas-wrap {
+  box-shadow:
+    0 0 0 2.5px var(--color-accent),
+    0 6px 20px rgba(217, 119, 6, 0.30);
+  transform: translateY(-1px);
+}
+
 /* Drop target during drag-reorder */
 .page-card--drop-target .page-card__canvas-wrap {
   box-shadow:

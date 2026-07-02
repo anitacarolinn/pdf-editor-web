@@ -1445,14 +1445,13 @@ body {
 /* Display headline */
 .lp-headline {
   font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(44px, 5.4vw, 78px);
+  font-size: clamp(44px, 5.42vw, 78px);
   font-weight: 900;
   letter-spacing: -0.035em;
-  line-height: 1.0;
+  line-height: 0.92;
   color: #0a0a0a;
   margin: 0;
   max-width: 660px;
-  text-wrap: balance;
 }
 
 /* Subline */

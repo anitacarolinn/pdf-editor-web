@@ -6,8 +6,8 @@ export type Lang = 'en' | 'zh'
 
 const en = {
   // Landing
-  headline: 'Edit, sign & lock PDFs — right in your browser.',
-  tagline: 'Merge, split, rotate, watermark, e-sign, compress, and password-protect — no upload, no account.',
+  headline: 'Edit, sign & lock PDFs.',
+  tagline: 'The complete PDF toolkit, right in your browser — nothing uploads, nothing leaves your device.',
   privacyNote: '100% on-device. Your files never leave your browser.',
   metaTag: 'RUNS IN YOUR BROWSER',
   dropHeadline: 'Drag & drop a PDF or image here',
@@ -36,8 +36,8 @@ const en = {
 } as const
 
 const zh = {
-  headline: '編輯、簽署、加密 PDF — 就在您的瀏覽器中。',
-  tagline: '合併、分割、旋轉、浮水印、電子簽名、壓縮、密碼保護 — 無需上傳，無需帳號。',
+  headline: '編輯、簽署、加密 PDF。',
+  tagline: '完整的 PDF 工具箱，就在您的瀏覽器中 — 不上傳，檔案絕不離開您的裝置。',
   privacyNote: '100% 在本機執行，您的檔案絕不離開瀏覽器。',
   metaTag: '在您的瀏覽器中執行',
   dropHeadline: '將 PDF 或圖片拖曳至此',

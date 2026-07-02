@@ -1292,6 +1292,21 @@ body {
   will-change: transform;
 }
 
+/* Second orb — softer warm-rose glow, offset + slower for a mesh feel */
+.lp-orb--2 {
+  right: -150px;
+  bottom: -215px;
+  width: 440px;
+  height: 440px;
+  animation-duration: 13s;
+  animation-delay: -4s;
+}
+
+.lp-orb-glow--rose {
+  background: radial-gradient(circle, rgba(244, 114, 94, 0.22) 0%, rgba(244, 114, 94, 0.09) 46%, rgba(244, 114, 94, 0) 72%);
+  filter: blur(52px);
+}
+
 /* Grain over the glow — texture, faded to the circle so no hard edge */
 .lp-orb-grain {
   position: absolute;

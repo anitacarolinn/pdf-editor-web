@@ -545,6 +545,16 @@ const Ctx = createContext<I18nCtx>({
 
 const LS_KEY = 'pdf-editor-lang'
 
+function detectBrowserLang(): Lang {
+  try {
+    const nav = navigator.language || (navigator.languages && navigator.languages[0]) || ''
+    if (/^zh/i.test(nav)) return 'zh'
+  } catch {
+    // ignore
+  }
+  return 'en'
+}
+
 function readStoredLang(): Lang {
   try {
     const v = localStorage.getItem(LS_KEY)
@@ -552,7 +562,8 @@ function readStoredLang(): Lang {
   } catch {
     // ignore
   }
-  return 'en'
+  // No saved choice → follow the browser language (Chinese browsers open in 中文).
+  return detectBrowserLang()
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {

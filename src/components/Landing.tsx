@@ -50,6 +50,9 @@ export default function Landing({ onFiles }: LandingProps) {
   // cursor. The farther the cursor from the bottom-right, the more it emerges.
   const orbX = useSpring(0, { stiffness: 45, damping: 18, mass: 0.7 })
   const orbY = useSpring(0, { stiffness: 45, damping: 18, mass: 0.7 })
+  // Second orb drifts less (parallax depth) and softer
+  const orbX2 = useSpring(0, { stiffness: 32, damping: 20, mass: 0.9 })
+  const orbY2 = useSpring(0, { stiffness: 32, damping: 20, mass: 0.9 })
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (prefersReduced) return
@@ -58,6 +61,8 @@ export default function Landing({ onFiles }: LandingProps) {
     const dy = e.clientY - window.innerHeight
     orbX.set(Math.max(-110, dx * 0.07))
     orbY.set(Math.max(-90, dy * 0.07))
+    orbX2.set(Math.max(-64, dx * 0.038))
+    orbY2.set(Math.max(-54, dy * 0.038))
   }
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
@@ -110,6 +115,9 @@ export default function Landing({ onFiles }: LandingProps) {
       <div className="lp-orb" aria-hidden="true">
         <motion.div className="lp-orb-glow" style={{ x: orbX, y: orbY }} />
         <motion.div className="lp-orb-grain" style={{ x: orbX, y: orbY }} />
+      </div>
+      <div className="lp-orb lp-orb--2" aria-hidden="true">
+        <motion.div className="lp-orb-glow lp-orb-glow--rose" style={{ x: orbX2, y: orbY2 }} />
       </div>
 
       {/* LEFT — Feature filmstrip */}

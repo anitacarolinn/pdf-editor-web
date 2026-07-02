@@ -24,8 +24,13 @@ const hairline = 'rgba(24,24,27,0.09)'
 export default function ExportModal({ defaultName, busy, shrink, onExport, onClose }: ExportModalProps) {
   const { t } = useI18n()
   const shrinkPct = shrink && shrink.original > 0 ? Math.max(0, Math.round((1 - shrink.shrunk / shrink.original) * 100)) : 0
-  // Edit the base name; ".pdf" is shown as a fixed suffix.
-  const [name, setName] = useState(() => defaultName.replace(/\.pdf$/i, ''))
+  // Edit the base name; ".pdf" is shown as a fixed suffix. Default to
+  // "<original>-edited" so the export doesn't overwrite the source (no double
+  // "-edited" on re-export).
+  const [name, setName] = useState(() => {
+    const base = defaultName.replace(/\.pdf$/i, '')
+    return /-edited$/.test(base) ? base : `${base}-edited`
+  })
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

@@ -160,6 +160,8 @@ const en = {
   infoTitle: 'Document Info',
   infoClose: 'Close',
   infoPages: 'Pages',
+  infoFileSize: 'File size',
+  infoCompressed: 'Compressed',
   infoPageTitle: 'Title',
   infoAuthor: 'Author',
   infoSubject: 'Subject',
@@ -349,6 +351,8 @@ const zh = {
   infoTitle: '文件資訊',
   infoClose: '關閉',
   infoPages: '頁數',
+  infoFileSize: '檔案大小',
+  infoCompressed: '已壓縮',
   infoPageTitle: '標題',
   infoAuthor: '作者',
   infoSubject: '主旨',
@@ -515,6 +519,8 @@ interface Dict {
   infoTitle: string
   infoClose: string
   infoPages: string
+  infoFileSize: string
+  infoCompressed: string
   infoPageTitle: string
   infoAuthor: string
   infoSubject: string

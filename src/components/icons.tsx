@@ -161,11 +161,12 @@ export function IconWatermark() {
 export function IconShrink() {
   return (
     <svg {...BASE}>
-      {/* four inward-pointing arrows */}
-      <path d="M3 3l3.5 3.5M3 3h3M3 3v3" />
-      <path d="M13 3l-3.5 3.5M13 3h-3M13 3v3" />
-      <path d="M3 13l3.5-3.5M3 13h3M3 13v-3" />
-      <path d="M13 13l-3.5-3.5M13 13h-3M13 13v-3" />
+      {/* compress: two arrows squeezing toward a center line */}
+      <path d="M3.5 8h9" />
+      <path d="M8 2.5v3" />
+      <path d="M6 4l2 2 2-2" />
+      <path d="M8 13.5v-3" />
+      <path d="M6 12l2-2 2 2" />
     </svg>
   )
 }

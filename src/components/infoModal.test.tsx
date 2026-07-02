@@ -6,6 +6,7 @@ it('shows metadata fields', () => {
   render(
     <InfoModal
       info={{ pageCount: 3, title: 'T', author: 'A', subject: '', creator: '', producer: 'P', pageSizes: [{ width: 100, height: 200 }] }}
+      fileSize={12345}
       onClose={() => {}}
     />,
   )

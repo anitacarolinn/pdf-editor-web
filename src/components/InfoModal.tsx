@@ -1,10 +1,24 @@
 import type { PdfInfo } from '../services/metadata'
 import { useI18n } from '../services/i18n'
 
-export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: () => void }) {
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
+  return `${(n / 1024 / 1024).toFixed(1)} MB`
+}
+
+interface InfoModalProps {
+  info: PdfInfo
+  fileSize: number
+  shrink?: { original: number; shrunk: number } | null
+  onClose: () => void
+}
+
+export default function InfoModal({ info, fileSize, shrink, onClose }: InfoModalProps) {
   const { t } = useI18n()
   const rows: [string, string | number][] = [
     [t.infoPages, info.pageCount],
+    [t.infoFileSize, formatBytes(fileSize)],
     [t.infoPageTitle, info.title || '—'],
     [t.infoAuthor, info.author || '—'],
     [t.infoSubject, info.subject || '—'],
@@ -12,6 +26,10 @@ export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: (
     [t.infoProducer, info.producer || '—'],
     [t.infoPageSize, info.pageSizes[0] ? `${info.pageSizes[0].width} × ${info.pageSizes[0].height} pt` : '—'],
   ]
+  if (shrink && shrink.original > 0) {
+    const pct = Math.max(0, Math.round((1 - shrink.shrunk / shrink.original) * 100))
+    rows.push([t.infoCompressed, `${formatBytes(shrink.original)} → ${formatBytes(shrink.shrunk)}  (−${pct}%)`])
+  }
   return (
     <div className="modal-backdrop" onClick={onClose}>
       {/* Outer shell — Double-Bezel */}

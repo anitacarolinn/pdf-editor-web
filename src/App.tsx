@@ -54,6 +54,8 @@ export default function App() {
   const [modalZoom, setModalZoom] = useState(1)
   const [shrinkOpen, setShrinkOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  // Remembers the last shrink result so Info can show the compression achieved.
+  const [shrinkInfo, setShrinkInfo] = useState<{ original: number; shrunk: number } | null>(null)
   const [lockOpen, setLockOpen] = useState(false)
   const [unlockOpen, setUnlockOpen] = useState(false)
   const [signOpen, setSignOpen] = useState(false)
@@ -155,6 +157,7 @@ export default function App() {
     const finalName = (pdfFiles.length + imageFiles.length) === 1 ? firstName : 'combined.pdf'
     load(result, finalName)
     useOverlayStore.getState().clear()
+    setShrinkInfo(null)
     setSelected(1)
     setSelectedPages(new Set([0]))
     setAnchor(0)
@@ -418,12 +421,14 @@ export default function App() {
           {t.officeToast}
         </div>
       )}
-      {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
+      {info && <InfoModal info={info} fileSize={bytes ? bytes.length : 0} shrink={shrinkInfo} onClose={() => setInfo(null)} />}
       {shrinkOpen && bytes && (
         <ShrinkModal
           bytes={bytes}
           onApply={(resultBytes) => {
+            const original = bytes.length
             run(apply(() => Promise.resolve(resultBytes)))
+            setShrinkInfo({ original, shrunk: resultBytes.length })
             setShrinkOpen(false)
           }}
           onClose={() => setShrinkOpen(false)}

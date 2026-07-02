@@ -52,7 +52,7 @@ export default function Toolbar(p: ToolbarProps) {
   const openRef = useRef<HTMLInputElement>(null)
   const mergeRef = useRef<HTMLInputElement>(null)
   const replaceRef = useRef<HTMLInputElement>(null)
-  const { lang, setLang, t } = useI18n()
+  const { t } = useI18n()
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
@@ -160,27 +160,6 @@ export default function Toolbar(p: ToolbarProps) {
             {t.tbSelected(p.selectionCount)}
           </span>
         )}
-
-        {/* Language toggle */}
-        <div className="lp-lang-toggle" role="group" aria-label="Language" style={{ marginRight: 8 }}>
-          <button
-            type="button"
-            className={`lp-lang-btn${lang === 'en' ? ' lp-lang-btn--active' : ''}`}
-            aria-pressed={lang === 'en'}
-            onClick={() => setLang('en')}
-          >
-            {t.langEn}
-          </button>
-          <span className="lp-lang-sep" aria-hidden="true" />
-          <button
-            type="button"
-            className={`lp-lang-btn${lang === 'zh' ? ' lp-lang-btn--active' : ''}`}
-            aria-pressed={lang === 'zh'}
-            onClick={() => setLang('zh')}
-          >
-            {t.langZh}
-          </button>
-        </div>
 
         <button className="tbtn-export" disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
           <IconDownload /><span>{t.tbExport}</span>

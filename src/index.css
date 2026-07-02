@@ -860,7 +860,7 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 64px;
   padding: 32px 40px 48px;
   min-height: 0;
   overflow: hidden;
@@ -929,73 +929,49 @@ body {
 
 /* ── LEFT column: feature loop pill container ────────────────── */
 .landing-loop-col {
-  flex: 0 0 280px;
-  height: 440px;
+  flex: 0 0 340px;
+  height: 520px;
   display: flex;
   flex-direction: column;
   align-self: center;
 }
 
 .landing-loop-container {
-  /* The "sealed pill" — clips content, fades edges */
+  /* Clips the scrolling stream and fades top/bottom edges — no oval frame. */
   flex: 1;
-  border-radius: 140px; /* very large pill radius */
-  background: var(--color-surface-card);
-  box-shadow:
-    inset 0 2px 8px rgba(24, 24, 27, 0.06),
-    0 0 0 1px rgba(24, 24, 27, 0.07),
-    0 8px 24px rgba(24, 24, 27, 0.07);
   overflow: hidden;
   position: relative;
-  /* Soft fade at top and bottom edges */
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 12%,
-    black 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 12%,
-    black 88%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%);
 }
 
-/* Animated track — will be driven by motion */
-.landing-loop-track {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 8px 0;
-  will-change: transform;
-}
-
-/* Static fallback for prefers-reduced-motion */
+/* Animated track — driven by motion */
+.landing-loop-track,
 .landing-loop-static {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 12px 0;
-  overflow: hidden;
-  height: 100%;
+  gap: 12px;
+  padding: 8px 4px;
+  will-change: transform;
 }
 
-/* ── Feature card ────────────────────────────────────────────── */
+/* ── Feature card — a distinct container per function ────────── */
 .feature-card {
   display: flex;
   align-items: flex-start;
-  gap: 11px;
-  padding: 11px 20px;
+  gap: 13px;
+  padding: 14px 16px;
   flex-shrink: 0;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-chrome-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 
 .feature-card-icon {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1005,8 +981,8 @@ body {
 }
 
 .feature-card-icon > svg {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
 }
 
 .feature-card-body {
@@ -1017,7 +993,7 @@ body {
 }
 
 .feature-card-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-chrome);
   letter-spacing: -0.015em;

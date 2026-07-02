@@ -81,6 +81,9 @@ export default function Landing({ onFiles }: LandingProps) {
 
   return (
     <div className="landing-hero landing-hero--two-col">
+      {/* Subtle film-grain overlay for tactile depth */}
+      <div className="landing-grain" aria-hidden="true" />
+
       {/* Language toggle — top-right */}
       <div className="landing-lang-toggle" role="group" aria-label="Language">
         <button
@@ -146,8 +149,11 @@ export default function Landing({ onFiles }: LandingProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.05 }}
         >
-          <img className="landing-logo" src="/favicon.svg" alt="" />
-          <h1 className="landing-title">PDF Editor</h1>
+          <div className="landing-wordmark">
+            <img className="landing-logo" src="/favicon.svg" alt="" />
+            <span>PDF Editor</span>
+          </div>
+          <h1 className="landing-title">{t.headline}</h1>
           <p className="landing-tagline">{t.tagline}</p>
           <p className="landing-privacy-note">{t.privacyNote}</p>
         </motion.div>

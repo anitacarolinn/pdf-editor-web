@@ -6,9 +6,10 @@ export type Lang = 'en' | 'zh'
 
 const en = {
   // Landing
-  tagline: 'Rearrange, rotate, and edit PDF pages — privately, offline, in your browser.',
-  privacyNote: 'All processing happens locally. Your files never leave your device.',
-  dropHeadline: 'Drag & drop a PDF here, or',
+  headline: 'Edit, sign & lock PDFs — right in your browser.',
+  tagline: 'Merge, split, rotate, watermark, e-sign, compress, and password-protect — no upload, no account.',
+  privacyNote: '100% on-device. Your files never leave your browser.',
+  dropHeadline: 'Drag & drop a PDF or image here, or',
   chooseFile: 'Choose file',
   openHint: 'Open a PDF to get started',
   langEn: 'EN',
@@ -34,9 +35,10 @@ const en = {
 } as const
 
 const zh = {
-  tagline: '重新排列、旋轉並編輯 PDF 頁面 — 私密、離線，完全在瀏覽器中完成。',
-  privacyNote: '所有處理皆在本地端完成，您的檔案絕不離開您的裝置。',
-  dropHeadline: '將 PDF 拖曳至此，或',
+  headline: '編輯、簽署、加密 PDF — 就在您的瀏覽器中。',
+  tagline: '合併、分割、旋轉、浮水印、電子簽名、壓縮、密碼保護 — 無需上傳，無需帳號。',
+  privacyNote: '100% 在本機執行，您的檔案絕不離開瀏覽器。',
+  dropHeadline: '將 PDF 或圖片拖曳至此，或',
   chooseFile: '選擇檔案',
   openHint: 'Open a PDF to get started',
   langEn: 'EN',
@@ -63,6 +65,7 @@ const zh = {
 // Use a structural type so both en and zh satisfy it without exact-literal constraint
 type FeatureItem = { name: string; desc: string }
 interface Dict {
+  headline: string
   tagline: string
   privacyNote: string
   dropHeadline: string

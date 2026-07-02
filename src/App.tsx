@@ -36,6 +36,7 @@ import LockModal from './components/LockModal'
 import UnlockModal from './components/UnlockModal'
 import WatermarkModal from './components/WatermarkModal'
 import type { WatermarkOpts } from './services/page-ops'
+import { imagesToPdf } from './services/image-to-pdf'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -56,6 +57,7 @@ export default function App() {
   const [signedThisSession, setSignedThisSession] = useState(false)
   const [showSavePngDialog, setShowSavePngDialog] = useState(false)
   const [watermarkOpen, setWatermarkOpen] = useState(false)
+  const [officeToast, setOfficeToast] = useState(false)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -98,9 +100,56 @@ export default function App() {
   }, [bytes])
 
   async function onOpen(files: File[]) {
-    const all = await Promise.all(files.map(readFileAsBytes))
-    const merged = all.length === 1 ? all[0] : await mergePdfs(all)
-    load(merged, files.length === 1 ? files[0].name : 'combined.pdf')
+    const pdfFiles: File[] = []
+    const imageFiles: File[] = []
+    const officeExts = ['.docx', '.xlsx', '.pptx', '.doc', '.xls', '.ppt', '.odt', '.ods', '.odp']
+    let hasOffice = false
+
+    for (const f of files) {
+      const nameLower = f.name.toLowerCase()
+      if (f.type === 'application/pdf' || nameLower.endsWith('.pdf')) {
+        pdfFiles.push(f)
+      } else if (f.type === 'image/png' || nameLower.endsWith('.png')) {
+        imageFiles.push(f)
+      } else if (f.type === 'image/jpeg' || nameLower.endsWith('.jpg') || nameLower.endsWith('.jpeg')) {
+        imageFiles.push(f)
+      } else if (officeExts.some((ext) => nameLower.endsWith(ext))) {
+        hasOffice = true
+      }
+      // Unknown types silently skipped
+    }
+
+    if (hasOffice) {
+      setOfficeToast(true)
+      setTimeout(() => setOfficeToast(false), 4000)
+    }
+
+    if (imageFiles.length === 0 && pdfFiles.length === 0) return
+
+    const pdfBytes = await Promise.all(pdfFiles.map(readFileAsBytes))
+    let result: Uint8Array
+
+    if (imageFiles.length > 0) {
+      // Convert images to one PDF, then merge with any PDF files
+      const imgItems = await Promise.all(
+        imageFiles.map(async (f) => ({
+          bytes: await readFileAsBytes(f),
+          type: (f.type === 'image/jpeg' || f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.jpeg'))
+            ? 'jpeg' as const
+            : 'png' as const,
+        })),
+      )
+      const imgPdf = await imagesToPdf(imgItems)
+      const allPdfs = pdfBytes.length > 0 ? [...pdfBytes, imgPdf] : [imgPdf]
+      result = allPdfs.length === 1 ? allPdfs[0] : await mergePdfs(allPdfs)
+    } else {
+      // PDF-only (original behavior)
+      result = pdfBytes.length === 1 ? pdfBytes[0] : await mergePdfs(pdfBytes)
+    }
+
+    const firstName = pdfFiles[0]?.name ?? imageFiles[0]?.name ?? 'converted.pdf'
+    const finalName = (pdfFiles.length + imageFiles.length) === 1 ? firstName : 'combined.pdf'
+    load(result, finalName)
     useOverlayStore.getState().clear()
     setSelected(1)
     setSelectedPages(new Set([0]))
@@ -337,6 +386,28 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {officeToast && (
+        <div
+          role="alert"
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 3000,
+            background: '#1c1917',
+            color: '#fef3c7',
+            padding: '10px 20px',
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 500,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+            pointerEvents: 'none',
+          }}
+        >
+          Word/Excel/PowerPoint conversion isn&apos;t available in the browser version yet.
+        </div>
+      )}
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
       {shrinkOpen && bytes && (
         <ShrinkModal

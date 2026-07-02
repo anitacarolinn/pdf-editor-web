@@ -58,8 +58,9 @@ export default function Landing({ onFiles }: LandingProps) {
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
     setDragOver(false)
+    const ACCEPTED_TYPES = ['application/pdf', 'image/png', 'image/jpeg']
     const files = Array.from(e.dataTransfer.files).filter(
-      (f) => f.type === 'application/pdf' || f.name.endsWith('.pdf'),
+      (f) => ACCEPTED_TYPES.includes(f.type) || f.name.endsWith('.pdf') || f.name.endsWith('.png') || f.name.endsWith('.jpg') || f.name.endsWith('.jpeg'),
     )
     if (files.length) onFiles(files)
   }
@@ -185,7 +186,7 @@ export default function Landing({ onFiles }: LandingProps) {
           <input
             ref={inputRef}
             type="file"
-            accept="application/pdf,.pdf"
+            accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg"
             multiple
             aria-label="Choose PDF file"
             style={{ display: 'none' }}

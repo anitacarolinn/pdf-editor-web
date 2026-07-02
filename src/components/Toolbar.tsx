@@ -168,7 +168,7 @@ export default function Toolbar(p: ToolbarProps) {
       <input
         ref={openRef}
         type="file"
-        accept="application/pdf"
+        accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg"
         multiple
         className="hidden"
         onChange={(e) => {

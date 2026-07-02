@@ -41,6 +41,32 @@ describe('isPdfEncrypted', () => {
     const { isPdfEncrypted } = await import('./render-service')
     expect(await isPdfEncrypted(new Uint8Array([1, 2, 3]))).toBe(true)
   })
+
+  it('returns true when pdfjs rejects with a PasswordException (real pdfjs 6.x behavior)', async () => {
+    // Verified against real pdfjs-dist 6.1.200 + a real qpdf-encrypted PDF:
+    // getDocument does NOT invoke onPassword — it REJECTS the load promise with
+    // a PasswordException ("No password given"). Detection must treat that as
+    // encrypted, not as a generic load failure.
+    const passwordException = Object.assign(new Error('No password given'), {
+      name: 'PasswordException',
+      code: 1, // PasswordResponses.NEED_PASSWORD
+    })
+    getDocument.mockImplementation(() => ({
+      promise: Promise.reject(passwordException),
+      destroy: vi.fn(),
+    }))
+    const { isPdfEncrypted } = await import('./render-service')
+    expect(await isPdfEncrypted(new Uint8Array([1, 2, 3]))).toBe(true)
+  })
+
+  it('returns false when pdfjs rejects for a non-password reason (broken file)', async () => {
+    getDocument.mockImplementation(() => ({
+      promise: Promise.reject(new Error('Invalid PDF structure')),
+      destroy: vi.fn(),
+    }))
+    const { isPdfEncrypted } = await import('./render-service')
+    expect(await isPdfEncrypted(new Uint8Array([1, 2, 3]))).toBe(false)
+  })
 })
 
 describe('loadRenderDocWithPassword', () => {

@@ -76,9 +76,13 @@ export async function isPdfEncrypted(bytes: Uint8Array): Promise<boolean> {
     }
     task.promise.then(
       () => finish(false),
-      // A rejection that is not a password request means the file is broken, not
-      // locked — treat as "not encrypted" so the normal error path handles it.
-      () => finish(false),
+      // Real pdf.js (v6.x) does NOT invoke onPassword for the yes/no case — it
+      // REJECTS the load promise with a PasswordException ("No password given").
+      // That rejection is the reliable "encrypted" signal. Any OTHER rejection
+      // means the file is broken, not locked → treat as "not encrypted" so the
+      // normal error path handles it.
+      (err: unknown) =>
+        finish((err as { name?: string })?.name === 'PasswordException'),
     )
   })
 }

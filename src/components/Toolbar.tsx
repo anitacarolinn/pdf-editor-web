@@ -45,8 +45,6 @@ export interface ToolbarProps {
   busy: boolean
   selectionCount: number
   canReplace: boolean
-  exportFormat: 'pdf' | 'png' | 'jpeg'
-  onExportFormatChange: (format: 'pdf' | 'png' | 'jpeg') => void
 }
 
 export default function Toolbar(p: ToolbarProps) {
@@ -160,18 +158,6 @@ export default function Toolbar(p: ToolbarProps) {
             selected: {p.selectionCount}
           </span>
         )}
-
-        <select
-          data-testid="export-format"
-          value={p.exportFormat}
-          onChange={(e) => p.onExportFormatChange(e.target.value as 'pdf' | 'png' | 'jpeg')}
-          className="export-select"
-          aria-label="Export format"
-        >
-          <option value="pdf">PDF</option>
-          <option value="png">PNG</option>
-          <option value="jpeg">JPG</option>
-        </select>
 
         <button className="tbtn-export" disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
           <IconDownload /><span>Export</span>

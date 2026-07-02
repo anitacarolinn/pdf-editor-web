@@ -27,7 +27,6 @@ import {
 import { moveIndex } from './services/order-util'
 import { downloadBytes } from './services/export-service'
 import { downloadZip } from './services/zip-export'
-import { exportPagesAsImages } from './services/image-export'
 import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
@@ -44,7 +43,6 @@ export default function App() {
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set([0]))
   const [anchor, setAnchor] = useState(0)
   const [info, setInfo] = useState<PdfInfo | null>(null)
-  const [exportFormat, setExportFormat] = useState<'pdf' | 'png' | 'jpeg'>('pdf')
   const [busy, setBusy] = useState(false)
   const [previewPage, setPreviewPage] = useState<number | null>(null)
   const [modalZoom, setModalZoom] = useState(1)
@@ -176,17 +174,11 @@ export default function App() {
   const onDownload = () => run(
     (async () => {
       if (!bytes) return
-      if (exportFormat === 'pdf') {
-        const objs = useOverlayStore.getState().objects
-        const outBytes = objs.length ? await flattenObjects(bytes, objs) : bytes
-        downloadBytes(outBytes, fileName ?? 'edited.pdf')
-        return
-      }
-      const freshDoc = await loadRenderDoc(bytes)
-      const pages = sel().map((i) => i + 1).filter((p) => p >= 1 && p <= freshDoc.numPages) // 1-based for pdf.js
-      if (pages.length === 0) return
-      const files = await exportPagesAsImages(freshDoc, pages, exportFormat, 2)
-      await downloadZip(files, 'images.zip')
+      // Export is always PDF: bake any overlay objects (text/image/signature)
+      // into the bytes, then download.
+      const objs = useOverlayStore.getState().objects
+      const outBytes = objs.length ? await flattenObjects(bytes, objs) : bytes
+      downloadBytes(outBytes, fileName ?? 'edited.pdf')
     })(),
   )
   const onInfo = async () => {
@@ -487,8 +479,6 @@ export default function App() {
           onShrink={onShrink}
           onLock={onLock}
           onUnlock={onUnlock}
-          exportFormat={exportFormat}
-          onExportFormatChange={setExportFormat}
         />
       )}
       {/* Status line */}

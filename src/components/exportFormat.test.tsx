@@ -16,13 +16,13 @@ beforeEach(async () => {
   useDocumentStore.setState({ bytes, fileName: 'a.pdf', past: [], future: [] })
 })
 
-it('exposes an export format selector defaulting to PDF; PDF download works', async () => {
+it('Export downloads a PDF (no format options — PDF only)', async () => {
   const spy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
   globalThis.URL.createObjectURL = vi.fn(() => 'blob:x')
   globalThis.URL.revokeObjectURL = vi.fn()
   render(<App />)
-  const sel = screen.getByTestId('export-format') as HTMLSelectElement
-  expect(sel.value).toBe('pdf')
+  // The format selector has been removed — export is always PDF.
+  expect(screen.queryByTestId('export-format')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Export' }))
   expect(spy).toHaveBeenCalled()
   spy.mockRestore()

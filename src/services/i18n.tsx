@@ -168,6 +168,9 @@ const en = {
   pnCancel: 'Cancel',
   pnApply: 'Add numbers',
 
+  pageLabel: (n: number) => `page ${n}`,
+  gridEmpty: 'Open a PDF to get started',
+
   // InfoModal
   infoTitle: 'Document Info',
   infoClose: 'Close',
@@ -371,6 +374,9 @@ const zh = {
   pnCancel: '取消',
   pnApply: '加入頁碼',
 
+  pageLabel: (n: number) => `第 ${n} 頁`,
+  gridEmpty: '開啟 PDF 以開始',
+
   // InfoModal
   infoTitle: '文件資訊',
   infoClose: '關閉',
@@ -551,6 +557,9 @@ interface Dict {
   pnStartAt: string
   pnCancel: string
   pnApply: string
+
+  pageLabel: (n: number) => string
+  gridEmpty: string
 
   infoTitle: string
   infoClose: string

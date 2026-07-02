@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { PdfInfo } from '../services/metadata'
 import { useI18n } from '../services/i18n'
 
@@ -16,6 +17,14 @@ interface InfoModalProps {
 
 export default function InfoModal({ info, fileSize, shrink, onClose }: InfoModalProps) {
   const { t } = useI18n()
+
+  // Escape closes — parity with the other modals.
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  }, [onClose])
+
   const rows: [string, string | number][] = [
     [t.infoPages, info.pageCount],
     [t.infoFileSize, formatBytes(fileSize)],

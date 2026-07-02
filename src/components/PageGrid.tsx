@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import PageCanvas from './PageCanvas'
 import CardOverlayPreview from './CardOverlayPreview'
+import { useI18n } from '../services/i18n'
 
 export type CardOpenTool = 'preview' | 'text' | 'picture'
 
@@ -32,6 +33,7 @@ export default function PageGrid({
   dragFrom,
   onDrop,
 }: PageGridProps) {
+  const { t } = useI18n()
   // Local display order (display position -> page index). Reset to identity
   // whenever the document reloads (open / edit / reorder commit). Reordering
   // this array animates the cards' positions via motion `layout` before the
@@ -52,7 +54,7 @@ export default function PageGrid({
           <path d="M28 4v10h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" />
           <path d="M16 22h16M16 28h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
-        <span className="empty-label">Open a PDF to get started</span>
+        <span className="empty-label">{t.gridEmpty}</span>
       </div>
     )
   }
@@ -144,7 +146,7 @@ export default function PageGrid({
               </div>
             </div>
             {/* Page label */}
-            <span className="page-card__label">page {pos + 1}</span>
+            <span className="page-card__label">{t.pageLabel(pos + 1)}</span>
           </div>
         )
       })}

@@ -147,17 +147,42 @@ describe('addPageNumbers', () => {
 })
 
 describe('addWatermark', () => {
-  it('stamps text on every page, preserving count', async () => {
+  it('stamps text on every page, preserving count (new opts shape)', async () => {
     const bytes = await makeSamplePdf(2)
-    const out = await addWatermark(bytes, 'DRAFT')
+    const out = await addWatermark(bytes, { kind: 'text', text: 'DRAFT' })
     expect(await getPageCount(out)).toBe(2)
     expect(out.length).not.toBe(bytes.length)
   })
 
-  it('does not mutate the input', async () => {
+  it('does not mutate the input (text)', async () => {
     const bytes = await makeSamplePdf(1)
     const copy = bytes.slice()
-    await addWatermark(bytes, 'X')
+    await addWatermark(bytes, { kind: 'text', text: 'X' })
     expect(bytes).toEqual(copy)
+  })
+
+  it('stamps an image on every page, preserving count', async () => {
+    // Minimal 1x1 white PNG (67 bytes)
+    const PNG_1X1 = new Uint8Array([
+      0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a, // PNG signature
+      0x00,0x00,0x00,0x0d, // IHDR length
+      0x49,0x48,0x44,0x52, // "IHDR"
+      0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01, // 1x1
+      0x08,0x02,           // bit depth 8, color type RGB
+      0x00,0x00,0x00,      // compression/filter/interlace
+      0x90,0x77,0x53,0xde, // CRC
+      0x00,0x00,0x00,0x0c, // IDAT length
+      0x49,0x44,0x41,0x54, // "IDAT"
+      0x08,0xd7,0x63,0xf8,0xcf,0xc0,0x00,0x00, // compressed pixel
+      0x00,0x02,0x00,0x01, // rest
+      0xe2,0x21,0xbc,0x33, // CRC
+      0x00,0x00,0x00,0x00, // IEND length
+      0x49,0x45,0x4e,0x44, // "IEND"
+      0xae,0x42,0x60,0x82, // CRC
+    ])
+    const bytes = await makeSamplePdf(2)
+    const out = await addWatermark(bytes, { kind: 'image', imageBytes: PNG_1X1, imageType: 'png', opacity: 0.3 })
+    expect(await getPageCount(out)).toBe(2)
+    expect(out.length).not.toBe(bytes.length)
   })
 })

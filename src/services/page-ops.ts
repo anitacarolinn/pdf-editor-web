@@ -154,26 +154,52 @@ export async function addPageNumbers(
   return doc.save()
 }
 
+export type WatermarkOpts =
+  | { kind: 'text'; text: string; opacity?: number; fontSize?: number }
+  | { kind: 'image'; imageBytes: Uint8Array; imageType: 'png' | 'jpeg'; opacity?: number }
+
 export async function addWatermark(
   bytes: Uint8Array,
-  text: string,
-  opts: { fontSize?: number; opacity?: number } = {},
+  opts: WatermarkOpts,
 ): Promise<Uint8Array> {
-  const { fontSize = 48, opacity = 0.25 } = opts
   const doc = await PDFDocument.load(bytes)
-  const font = await doc.embedFont(StandardFonts.Helvetica)
-  for (const page of doc.getPages()) {
-    const { width, height } = page.getSize()
-    const textWidth = font.widthOfTextAtSize(text, fontSize)
-    page.drawText(text, {
-      x: width / 2 - textWidth / 2,
-      y: height / 2,
-      size: fontSize,
-      font,
-      color: rgb(0.5, 0.5, 0.5),
-      opacity,
-      rotate: pdfDegrees(45),
-    })
+  const pages = doc.getPages()
+
+  if (opts.kind === 'text') {
+    const { text, fontSize = 48, opacity = 0.25 } = opts
+    const font = await doc.embedFont(StandardFonts.Helvetica)
+    for (const page of pages) {
+      const { width, height } = page.getSize()
+      const textWidth = font.widthOfTextAtSize(text, fontSize)
+      page.drawText(text, {
+        x: width / 2 - textWidth / 2,
+        y: height / 2,
+        size: fontSize,
+        font,
+        color: rgb(0.5, 0.5, 0.5),
+        opacity,
+        rotate: pdfDegrees(45),
+      })
+    }
+  } else {
+    // image watermark: center at ~40% page width
+    const { imageBytes, imageType, opacity = 0.3 } = opts
+    const embeddedImage = imageType === 'png'
+      ? await doc.embedPng(imageBytes)
+      : await doc.embedJpg(imageBytes)
+    for (const page of pages) {
+      const { width, height } = page.getSize()
+      const targetW = width * 0.4
+      const scale = targetW / embeddedImage.width
+      const targetH = embeddedImage.height * scale
+      page.drawImage(embeddedImage, {
+        x: (width - targetW) / 2,
+        y: (height - targetH) / 2,
+        width: targetW,
+        height: targetH,
+        opacity,
+      })
+    }
   }
   return doc.save()
 }

@@ -33,6 +33,159 @@ const en = {
     { name: 'Export', desc: 'Download your finished PDF in one click.' },
     { name: 'No Upload', desc: 'Everything runs in your browser — private by design.' },
   ] as Array<{ name: string; desc: string }>,
+
+  // Toolbar
+  tbNewPage: 'New Page',
+  tbNewPageTitle: 'Insert a blank page after the selected page',
+  tbOpenPdf: 'Open PDF',
+  tbOpenPdfTitle: 'Open a PDF',
+  tbAddMerge: 'Add / Merge',
+  tbAddMergeTitle: 'Add / merge another PDF into this document',
+  tbDeletePage: 'Delete page',
+  tbDeletePageTitle: 'Delete selected pages',
+  tbDuplicate: 'Duplicate',
+  tbDuplicateTitle: 'Duplicate selected pages',
+  tbExtractPage: 'Extract page',
+  tbExtractPageTitle: 'Extract selected pages to a new PDF',
+  tbReplacePage: 'Replace page',
+  tbReplacePageTitle: 'Replace the selected page with another PDF',
+  tbSplit: 'Split',
+  tbSplitTitle: 'Split selected pages into separate PDFs',
+  tbPageNum: 'Page #',
+  tbPageNumTitle: 'Add page numbers',
+  tbWatermark: 'Watermark',
+  tbWatermarkTitle: 'Add a watermark',
+  tbShrink: 'Shrink file size',
+  tbShrinkTitle: 'Shrink file size by re-encoding pages as JPEG images',
+  tbInfo: 'Info',
+  tbInfoTitle: 'View document metadata',
+  tbLock: 'Lock',
+  tbLockTitle: 'Password-protect (encrypt) this document and download it',
+  tbUnlock: 'Unlock',
+  tbUnlockTitle: 'Open a password-protected PDF and decrypt it',
+  tbUndo: 'Undo',
+  tbUndoTitle: 'Undo last action',
+  tbRedo: 'Redo',
+  tbRedoTitle: 'Redo last undone action',
+  tbExport: 'Export',
+  tbSelected: (n: number) => `selected: ${n}`,
+
+  // PageEditModal toolbar
+  emUndo: 'Undo',
+  emRedo: 'Redo',
+  emNewPage: 'New page',
+  emDeletePage: 'Delete page',
+  emDuplicate: 'Duplicate',
+  emRotateLeft: 'Rotate left',
+  emRotateRight: 'Rotate right',
+  emMoveBefore: 'Move before',
+  emMoveAfter: 'Move after',
+  emZoomOut: 'Zoom out',
+  emZoomIn: 'Zoom in',
+  emFit: 'Fit',
+  emOriginal: 'Original',
+  emFitWidthLabel: 'Fit width',
+  emZoomLevel: 'Zoom level',
+  emAddText: 'Add text',
+  emAddPicture: 'Add picture',
+  emSign: 'Sign',
+  // Footer
+  emPage: 'Page',
+  emRestore: 'Restore',
+  emCancel: 'Cancel',
+  emSaveClose: 'Save & Close',
+  // Navigation
+  emPrevPage: 'Previous page',
+  emNextPage: 'Next page',
+  emCurrentPage: 'Current page',
+
+  // ShrinkModal
+  smTitle: 'Compress PDF',
+  smSubtitle: 'Choose a compression level. You can review the result before applying.',
+  smLevelLessLabel: 'Less compression',
+  smLevelLessDesc: 'High quality, small size reduction — best for print-ready documents.',
+  smLevelRecommendedLabel: 'Recommended',
+  smLevelRecommendedDesc: 'Good quality and good reduction — best for most use cases.',
+  smLevelExtremeLabel: 'Extreme compression',
+  smLevelExtremeDesc: 'Smallest file, lower image quality — best for email and uploads.',
+  smCancel: 'Cancel',
+  smCompress: 'Compress',
+  smCompressing: 'Compressing…',
+  smResultTitle: 'Compression result',
+  smOriginal: 'Original',
+  smNewSize: 'New size',
+  smReducedBy: 'Reduced by',
+  smResult: 'Result',
+  smAlreadyOptimized: 'Already optimized — no reduction',
+  smBack: 'Back',
+  smApply: 'Apply',
+  smClose: 'Close',
+
+  // LockModal
+  lmTitle: 'Lock PDF',
+  lmSubtitle: 'Set a password to encrypt this document (256-bit AES). The encrypted copy is downloaded — your working document is unchanged.',
+  lmPasswordLabel: 'Password',
+  lmConfirmLabel: 'Confirm password',
+  lmShowPassword: 'Show password',
+  lmCancel: 'Cancel',
+  lmLocking: 'Locking…',
+  lmLockDownload: 'Lock & Download',
+  lmErrEnterPassword: 'Enter a password.',
+  lmErrNoMatch: 'Passwords do not match.',
+  lmErrFailed: 'Could not lock the PDF.',
+
+  // UnlockModal
+  umTitle: 'Unlock PDF',
+  umSubtitle: 'Choose a password-protected PDF and enter its password. The decrypted document opens in the editor.',
+  umPdfFileLabel: 'PDF file',
+  umChooseFile: 'Choose file…',
+  umPasswordLabel: 'Password',
+  umCancel: 'Cancel',
+  umUnlocking: 'Unlocking…',
+  umUnlockOpen: 'Unlock & Open',
+  umErrChooseFile: 'Choose a PDF file.',
+  umErrWrongPassword: 'Wrong password.',
+
+  // WatermarkModal
+  wmTitle: 'Add Watermark',
+  wmText: 'Text',
+  wmImage: 'Image',
+  wmWatermarkText: 'Watermark text',
+  wmOpacity: 'Opacity',
+  wmImageLabel: 'Image (PNG or JPG)',
+  wmCancel: 'Cancel',
+  wmApply: 'Apply',
+
+  // InfoModal
+  infoTitle: 'Document Info',
+  infoClose: 'Close',
+  infoPages: 'Pages',
+  infoPageTitle: 'Title',
+  infoAuthor: 'Author',
+  infoSubject: 'Subject',
+  infoCreator: 'Creator',
+  infoProducer: 'Producer',
+  infoPageSize: 'Page size',
+
+  // SignatureModal
+  sigTitle: 'Draw your signature',
+  sigSubtitle: 'Draw in the box below. The signature will be placed as a movable overlay on the page.',
+  sigHintEmpty: 'Draw your signature above',
+  sigHintReady: 'Looking good — click "Add signature" when ready',
+  sigClear: 'Clear',
+  sigCancel: 'Cancel',
+  sigAdd: 'Add signature',
+
+  // App status line
+  statusPage: 'page',
+  statusPages: 'pages',
+  officeToast: "Word/Excel/PowerPoint conversion isn't available in the browser version yet.",
+
+  // Save signature dialog
+  saveSigTitle: 'Save signature?',
+  saveSigBody: 'Save this signature as a PNG file for reuse?',
+  saveSigNo: 'No thanks',
+  saveSigSave: 'Save PNG',
 } as const
 
 const zh = {
@@ -62,6 +215,159 @@ const zh = {
     { name: '匯出', desc: '一鍵下載您完成的 PDF。' },
     { name: '無須上傳', desc: '一切在瀏覽器中執行，私密設計。' },
   ] as Array<{ name: string; desc: string }>,
+
+  // Toolbar
+  tbNewPage: '新增頁面',
+  tbNewPageTitle: '在選取頁面後插入空白頁',
+  tbOpenPdf: '開啟 PDF',
+  tbOpenPdfTitle: '開啟 PDF 檔案',
+  tbAddMerge: '加入 / 合併',
+  tbAddMergeTitle: '將另一個 PDF 加入或合併至此文件',
+  tbDeletePage: '刪除頁面',
+  tbDeletePageTitle: '刪除選取的頁面',
+  tbDuplicate: '複製',
+  tbDuplicateTitle: '複製選取的頁面',
+  tbExtractPage: '提取頁面',
+  tbExtractPageTitle: '將選取頁面提取為新 PDF',
+  tbReplacePage: '替換頁面',
+  tbReplacePageTitle: '以其他 PDF 替換選取的頁面',
+  tbSplit: '分割',
+  tbSplitTitle: '將選取頁面分割為個別 PDF',
+  tbPageNum: '頁碼',
+  tbPageNumTitle: '加入頁碼',
+  tbWatermark: '浮水印',
+  tbWatermarkTitle: '加入浮水印',
+  tbShrink: '縮小檔案',
+  tbShrinkTitle: '將頁面重新編碼為 JPEG 圖片以縮小檔案大小',
+  tbInfo: '資訊',
+  tbInfoTitle: '查看文件中繼資料',
+  tbLock: '加密',
+  tbLockTitle: '為此文件設定密碼保護（加密）並下載',
+  tbUnlock: '解密',
+  tbUnlockTitle: '開啟受密碼保護的 PDF 並解密',
+  tbUndo: '復原',
+  tbUndoTitle: '復原上一個動作',
+  tbRedo: '重做',
+  tbRedoTitle: '重做上一個已復原的動作',
+  tbExport: '匯出',
+  tbSelected: (n: number) => `已選取：${n}`,
+
+  // PageEditModal toolbar
+  emUndo: '復原',
+  emRedo: '重做',
+  emNewPage: '新增頁面',
+  emDeletePage: '刪除頁面',
+  emDuplicate: '複製',
+  emRotateLeft: '向左旋轉',
+  emRotateRight: '向右旋轉',
+  emMoveBefore: '向前移動',
+  emMoveAfter: '向後移動',
+  emZoomOut: '縮小',
+  emZoomIn: '放大',
+  emFit: '符合寬度',
+  emOriginal: '原始大小',
+  emFitWidthLabel: '符合寬度',
+  emZoomLevel: '縮放比例',
+  emAddText: '加入文字',
+  emAddPicture: '加入圖片',
+  emSign: '簽名',
+  // Footer
+  emPage: '頁面',
+  emRestore: '還原',
+  emCancel: '取消',
+  emSaveClose: '儲存並關閉',
+  // Navigation
+  emPrevPage: '上一頁',
+  emNextPage: '下一頁',
+  emCurrentPage: '目前頁面',
+
+  // ShrinkModal
+  smTitle: '壓縮 PDF',
+  smSubtitle: '選擇壓縮等級。您可以在套用前預覽結果。',
+  smLevelLessLabel: '輕度壓縮',
+  smLevelLessDesc: '高品質，小幅縮減檔案大小，適合列印文件。',
+  smLevelRecommendedLabel: '建議',
+  smLevelRecommendedDesc: '品質與縮減均衡，適合大多數用途。',
+  smLevelExtremeLabel: '極度壓縮',
+  smLevelExtremeDesc: '檔案最小，圖片品質較低，適合電子郵件與上傳。',
+  smCancel: '取消',
+  smCompress: '壓縮',
+  smCompressing: '壓縮中…',
+  smResultTitle: '壓縮結果',
+  smOriginal: '原始大小',
+  smNewSize: '新大小',
+  smReducedBy: '縮減了',
+  smResult: '結果',
+  smAlreadyOptimized: '已最佳化，無法進一步縮減',
+  smBack: '返回',
+  smApply: '套用',
+  smClose: '關閉',
+
+  // LockModal
+  lmTitle: '加密 PDF',
+  lmSubtitle: '設定密碼以加密此文件（256 位元 AES）。加密副本將被下載，您的工作文件不受影響。',
+  lmPasswordLabel: '密碼',
+  lmConfirmLabel: '確認密碼',
+  lmShowPassword: '顯示密碼',
+  lmCancel: '取消',
+  lmLocking: '加密中…',
+  lmLockDownload: '加密並下載',
+  lmErrEnterPassword: '請輸入密碼。',
+  lmErrNoMatch: '密碼不相符。',
+  lmErrFailed: '無法加密 PDF。',
+
+  // UnlockModal
+  umTitle: '解密 PDF',
+  umSubtitle: '選擇受密碼保護的 PDF 並輸入密碼。解密後的文件將在編輯器中開啟。',
+  umPdfFileLabel: 'PDF 檔案',
+  umChooseFile: '選擇檔案…',
+  umPasswordLabel: '密碼',
+  umCancel: '取消',
+  umUnlocking: '解密中…',
+  umUnlockOpen: '解密並開啟',
+  umErrChooseFile: '請選擇 PDF 檔案。',
+  umErrWrongPassword: '密碼錯誤。',
+
+  // WatermarkModal
+  wmTitle: '加入浮水印',
+  wmText: '文字',
+  wmImage: '圖片',
+  wmWatermarkText: '浮水印文字',
+  wmOpacity: '透明度',
+  wmImageLabel: '圖片（PNG 或 JPG）',
+  wmCancel: '取消',
+  wmApply: '套用',
+
+  // InfoModal
+  infoTitle: '文件資訊',
+  infoClose: '關閉',
+  infoPages: '頁數',
+  infoPageTitle: '標題',
+  infoAuthor: '作者',
+  infoSubject: '主旨',
+  infoCreator: '建立者',
+  infoProducer: '產生程式',
+  infoPageSize: '頁面大小',
+
+  // SignatureModal
+  sigTitle: '繪製您的簽名',
+  sigSubtitle: '在下方框內繪製。簽名將作為可移動的覆蓋層放置於頁面上。',
+  sigHintEmpty: '請在上方繪製您的簽名',
+  sigHintReady: '看起來不錯 — 準備好後請點選「加入簽名」',
+  sigClear: '清除',
+  sigCancel: '取消',
+  sigAdd: '加入簽名',
+
+  // App status line
+  statusPage: '頁',
+  statusPages: '頁',
+  officeToast: 'Word/Excel/PowerPoint 轉換功能尚未在瀏覽器版本中提供。',
+
+  // Save signature dialog
+  saveSigTitle: '儲存簽名？',
+  saveSigBody: '將此簽名儲存為 PNG 檔案以便重複使用？',
+  saveSigNo: '不，謝謝',
+  saveSigSave: '儲存 PNG',
 } as const
 
 // Use a structural type so both en and zh satisfy it without exact-literal constraint
@@ -77,6 +383,147 @@ interface Dict {
   langEn: string
   langZh: string
   features: FeatureItem[]
+
+  tbNewPage: string
+  tbNewPageTitle: string
+  tbOpenPdf: string
+  tbOpenPdfTitle: string
+  tbAddMerge: string
+  tbAddMergeTitle: string
+  tbDeletePage: string
+  tbDeletePageTitle: string
+  tbDuplicate: string
+  tbDuplicateTitle: string
+  tbExtractPage: string
+  tbExtractPageTitle: string
+  tbReplacePage: string
+  tbReplacePageTitle: string
+  tbSplit: string
+  tbSplitTitle: string
+  tbPageNum: string
+  tbPageNumTitle: string
+  tbWatermark: string
+  tbWatermarkTitle: string
+  tbShrink: string
+  tbShrinkTitle: string
+  tbInfo: string
+  tbInfoTitle: string
+  tbLock: string
+  tbLockTitle: string
+  tbUnlock: string
+  tbUnlockTitle: string
+  tbUndo: string
+  tbUndoTitle: string
+  tbRedo: string
+  tbRedoTitle: string
+  tbExport: string
+  tbSelected: (n: number) => string
+
+  emUndo: string
+  emRedo: string
+  emNewPage: string
+  emDeletePage: string
+  emDuplicate: string
+  emRotateLeft: string
+  emRotateRight: string
+  emMoveBefore: string
+  emMoveAfter: string
+  emZoomOut: string
+  emZoomIn: string
+  emFit: string
+  emOriginal: string
+  emFitWidthLabel: string
+  emZoomLevel: string
+  emAddText: string
+  emAddPicture: string
+  emSign: string
+  emPage: string
+  emRestore: string
+  emCancel: string
+  emSaveClose: string
+  emPrevPage: string
+  emNextPage: string
+  emCurrentPage: string
+
+  smTitle: string
+  smSubtitle: string
+  smLevelLessLabel: string
+  smLevelLessDesc: string
+  smLevelRecommendedLabel: string
+  smLevelRecommendedDesc: string
+  smLevelExtremeLabel: string
+  smLevelExtremeDesc: string
+  smCancel: string
+  smCompress: string
+  smCompressing: string
+  smResultTitle: string
+  smOriginal: string
+  smNewSize: string
+  smReducedBy: string
+  smResult: string
+  smAlreadyOptimized: string
+  smBack: string
+  smApply: string
+  smClose: string
+
+  lmTitle: string
+  lmSubtitle: string
+  lmPasswordLabel: string
+  lmConfirmLabel: string
+  lmShowPassword: string
+  lmCancel: string
+  lmLocking: string
+  lmLockDownload: string
+  lmErrEnterPassword: string
+  lmErrNoMatch: string
+  lmErrFailed: string
+
+  umTitle: string
+  umSubtitle: string
+  umPdfFileLabel: string
+  umChooseFile: string
+  umPasswordLabel: string
+  umCancel: string
+  umUnlocking: string
+  umUnlockOpen: string
+  umErrChooseFile: string
+  umErrWrongPassword: string
+
+  wmTitle: string
+  wmText: string
+  wmImage: string
+  wmWatermarkText: string
+  wmOpacity: string
+  wmImageLabel: string
+  wmCancel: string
+  wmApply: string
+
+  infoTitle: string
+  infoClose: string
+  infoPages: string
+  infoPageTitle: string
+  infoAuthor: string
+  infoSubject: string
+  infoCreator: string
+  infoProducer: string
+  infoPageSize: string
+
+  sigTitle: string
+  sigSubtitle: string
+  sigHintEmpty: string
+  sigHintReady: string
+  sigClear: string
+  sigCancel: string
+  sigAdd: string
+
+  statusPage: string
+  statusPages: string
+  officeToast: string
+
+  saveSigTitle: string
+  saveSigBody: string
+  saveSigNo: string
+  saveSigSave: string
 }
 
 const DICTS: Record<Lang, Dict> = { en, zh }

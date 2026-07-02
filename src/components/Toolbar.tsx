@@ -18,6 +18,7 @@ import {
   IconRedo,
   IconDownload,
 } from './icons'
+import { useI18n } from '../services/i18n'
 
 export interface ToolbarProps {
   onOpen: (files: File[]) => void
@@ -51,6 +52,7 @@ export default function Toolbar(p: ToolbarProps) {
   const openRef = useRef<HTMLInputElement>(null)
   const mergeRef = useRef<HTMLInputElement>(null)
   const replaceRef = useRef<HTMLInputElement>(null)
+  const { lang, setLang, t } = useI18n()
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
@@ -64,11 +66,11 @@ export default function Toolbar(p: ToolbarProps) {
       <div className="toolbar-actions">
         {/* New / Open */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onInsert} title="Insert a blank page after the selected page">
-            <IconInsertBlank /><span>New Page</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onInsert} title={t.tbNewPageTitle}>
+            <IconInsertBlank /><span>{t.tbNewPage}</span>
           </button>
-          <button className="tbtn" onClick={() => openRef.current?.click()} title="Open a PDF">
-            <IconOpen /><span>Open PDF</span>
+          <button className="tbtn" onClick={() => openRef.current?.click()} title={t.tbOpenPdfTitle}>
+            <IconOpen /><span>{t.tbOpenPdf}</span>
           </button>
         </div>
 
@@ -76,8 +78,8 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* Add / Merge */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()} title="Add / merge another PDF into this document">
-            <IconMerge /><span>Add / Merge</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={() => mergeRef.current?.click()} title={t.tbAddMergeTitle}>
+            <IconMerge /><span>{t.tbAddMerge}</span>
           </button>
         </div>
 
@@ -85,11 +87,11 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* Delete / Duplicate */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDelete} title="Delete selected pages">
-            <IconDelete /><span>Delete page</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDelete} title={t.tbDeletePageTitle}>
+            <IconDelete /><span>{t.tbDeletePage}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate} title="Duplicate selected pages">
-            <IconDuplicate /><span>Duplicate</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onDuplicate} title={t.tbDuplicateTitle}>
+            <IconDuplicate /><span>{t.tbDuplicate}</span>
           </button>
         </div>
 
@@ -97,14 +99,14 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* Extract / Replace / Split */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onExtract} title="Extract selected pages to a new PDF">
-            <IconExtract /><span>Extract page</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onExtract} title={t.tbExtractPageTitle}>
+            <IconExtract /><span>{t.tbExtractPage}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc || !p.canReplace || p.busy} onClick={() => replaceRef.current?.click()} title="Replace the selected page with another PDF">
-            <IconReplace /><span>Replace page</span>
+          <button className="tbtn" disabled={!p.hasDoc || !p.canReplace || p.busy} onClick={() => replaceRef.current?.click()} title={t.tbReplacePageTitle}>
+            <IconReplace /><span>{t.tbReplacePage}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onSplit} title="Split selected pages into separate PDFs">
-            <IconSplit /><span>Split</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onSplit} title={t.tbSplitTitle}>
+            <IconSplit /><span>{t.tbSplit}</span>
           </button>
         </div>
 
@@ -112,17 +114,17 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* Page # / Watermark / Shrink / Info */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers} title="Add page numbers">
-            <IconPageNumber /><span>Page #</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onPageNumbers} title={t.tbPageNumTitle}>
+            <IconPageNumber /><span>{t.tbPageNum}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onWatermark} title="Add a watermark">
-            <IconWatermark /><span>Watermark</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onWatermark} title={t.tbWatermarkTitle}>
+            <IconWatermark /><span>{t.tbWatermark}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onShrink} title="Shrink file size by re-encoding pages as JPEG images">
-            <IconShrink /><span>Shrink file size</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onShrink} title={t.tbShrinkTitle}>
+            <IconShrink /><span>{t.tbShrink}</span>
           </button>
-          <button className="tbtn" disabled={!p.hasDoc} onClick={p.onInfo} title="View document metadata">
-            <IconInfo /><span>Info</span>
+          <button className="tbtn" disabled={!p.hasDoc} onClick={p.onInfo} title={t.tbInfoTitle}>
+            <IconInfo /><span>{t.tbInfo}</span>
           </button>
         </div>
 
@@ -130,11 +132,11 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* Security — Lock / Unlock */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onLock} title="Password-protect (encrypt) this document and download it">
-            <IconLock /><span>Lock</span>
+          <button className="tbtn" disabled={!p.hasDoc || p.busy} onClick={p.onLock} title={t.tbLockTitle}>
+            <IconLock /><span>{t.tbLock}</span>
           </button>
-          <button className="tbtn" disabled={p.busy} onClick={p.onUnlock} title="Open a password-protected PDF and decrypt it">
-            <IconUnlock /><span>Unlock</span>
+          <button className="tbtn" disabled={p.busy} onClick={p.onUnlock} title={t.tbUnlockTitle}>
+            <IconUnlock /><span>{t.tbUnlock}</span>
           </button>
         </div>
 
@@ -142,11 +144,11 @@ export default function Toolbar(p: ToolbarProps) {
 
         {/* History */}
         <div className="tb-group">
-          <button className="tbtn" disabled={!p.canUndo || p.busy} onClick={p.onUndo} title="Undo last action">
-            <IconUndo /><span>Undo</span>
+          <button className="tbtn" disabled={!p.canUndo || p.busy} onClick={p.onUndo} title={t.tbUndoTitle}>
+            <IconUndo /><span>{t.tbUndo}</span>
           </button>
-          <button className="tbtn" disabled={!p.canRedo || p.busy} onClick={p.onRedo} title="Redo last undone action">
-            <IconRedo /><span>Redo</span>
+          <button className="tbtn" disabled={!p.canRedo || p.busy} onClick={p.onRedo} title={t.tbRedoTitle}>
+            <IconRedo /><span>{t.tbRedo}</span>
           </button>
         </div>
       </div>
@@ -155,12 +157,33 @@ export default function Toolbar(p: ToolbarProps) {
       <div className="toolbar-right">
         {p.hasDoc && (
           <span data-testid="selection-count" className="tb-selected">
-            selected: {p.selectionCount}
+            {t.tbSelected(p.selectionCount)}
           </span>
         )}
 
+        {/* Language toggle */}
+        <div className="lp-lang-toggle" role="group" aria-label="Language" style={{ marginRight: 8 }}>
+          <button
+            type="button"
+            className={`lp-lang-btn${lang === 'en' ? ' lp-lang-btn--active' : ''}`}
+            aria-pressed={lang === 'en'}
+            onClick={() => setLang('en')}
+          >
+            {t.langEn}
+          </button>
+          <span className="lp-lang-sep" aria-hidden="true" />
+          <button
+            type="button"
+            className={`lp-lang-btn${lang === 'zh' ? ' lp-lang-btn--active' : ''}`}
+            aria-pressed={lang === 'zh'}
+            onClick={() => setLang('zh')}
+          >
+            {t.langZh}
+          </button>
+        </div>
+
         <button className="tbtn-export" disabled={!p.hasDoc || p.busy} onClick={p.onDownload}>
-          <IconDownload /><span>Export</span>
+          <IconDownload /><span>{t.tbExport}</span>
         </button>
       </div>
 

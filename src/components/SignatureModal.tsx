@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
+import { useI18n } from '../services/i18n'
 
 interface SignatureModalProps {
   onAdd: (bytes: Uint8Array) => void
@@ -62,6 +63,7 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
 }
 
 export default function SignatureModal({ onAdd, onClose }: SignatureModalProps) {
+  const { t } = useI18n()
   const sigRef = useRef<SignatureCanvas>(null)
   const [isEmpty, setIsEmpty] = useState(true)
 
@@ -97,9 +99,9 @@ export default function SignatureModal({ onAdd, onClose }: SignatureModalProps) 
           className="modal-inner"
           style={{ minWidth: 'unset', maxWidth: 'unset', width: 460 }}
         >
-          <h2 className="modal-title">Draw your signature</h2>
+          <h2 className="modal-title">{t.sigTitle}</h2>
           <p style={{ fontSize: 12.5, color: chromeMuted, marginTop: 0, marginBottom: 12 }}>
-            Draw in the box below. The signature will be placed as a movable overlay on the page.
+            {t.sigSubtitle}
           </p>
 
           {/* Signature pad container */}
@@ -130,17 +132,17 @@ export default function SignatureModal({ onAdd, onClose }: SignatureModalProps) 
 
           {/* Hint */}
           <p style={{ fontSize: 11.5, color: chromeMuted, marginTop: 0, marginBottom: 16, textAlign: 'center' }}>
-            {isEmpty ? 'Draw your signature above' : 'Looking good — click "Add signature" when ready'}
+            {isEmpty ? t.sigHintEmpty : t.sigHintReady}
           </p>
 
           {/* Action row */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center' }}>
             <button style={secondaryBtnStyle} onClick={handleClear} title="Clear the drawing">
-              Clear
+              {t.sigClear}
             </button>
             <div style={{ display: 'flex', gap: 8 }}>
               <button style={secondaryBtnStyle} onClick={onClose}>
-                Cancel
+                {t.sigCancel}
               </button>
               <button
                 style={isEmpty ? primaryBtnDisabledStyle : primaryBtnStyle}
@@ -148,7 +150,7 @@ export default function SignatureModal({ onAdd, onClose }: SignatureModalProps) 
                 onClick={handleAdd}
                 title="Place signature on page"
               >
-                Add signature
+                {t.sigAdd}
               </button>
             </div>
           </div>

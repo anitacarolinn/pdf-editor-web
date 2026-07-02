@@ -10,6 +10,7 @@ import { useOverlayStore } from './services/overlay-store'
 import { flattenObjects } from './services/flatten'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc } from './services/render-service'
+import { useI18n } from './services/i18n'
 import {
   getPageCount,
   rotatePages,
@@ -39,6 +40,7 @@ import type { WatermarkOpts } from './services/page-ops'
 import { imagesToPdf } from './services/image-to-pdf'
 
 export default function App() {
+  const { t } = useI18n()
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
@@ -405,7 +407,7 @@ export default function App() {
             pointerEvents: 'none',
           }}
         >
-          Word/Excel/PowerPoint conversion isn&apos;t available in the browser version yet.
+          {t.officeToast}
         </div>
       )}
       {info && <InfoModal info={info} onClose={() => setInfo(null)} />}
@@ -483,10 +485,10 @@ export default function App() {
             }}
           >
             <h2 style={{ margin: '0 0 10px', fontSize: 17, fontWeight: 700, color: '#111827' }}>
-              Save signature?
+              {t.saveSigTitle}
             </h2>
             <p style={{ margin: '0 0 22px', fontSize: 13.5, color: '#6b7280', lineHeight: 1.5 }}>
-              Save this signature as a PNG file for reuse?
+              {t.saveSigBody}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button
@@ -506,7 +508,7 @@ export default function App() {
                   cursor: 'pointer',
                 }}
               >
-                No thanks
+                {t.saveSigNo}
               </button>
               <button
                 onClick={() => {
@@ -527,7 +529,7 @@ export default function App() {
                   cursor: 'pointer',
                 }}
               >
-                Save PNG
+                {t.saveSigSave}
               </button>
             </div>
           </div>
@@ -569,7 +571,7 @@ export default function App() {
         <div className="status-line">
           <span>{fileName ?? 'document'}</span>
           <span className="status-sep">·</span>
-          <span>{pageCount} {pageCount === 1 ? 'page' : 'pages'}</span>
+          <span>{pageCount} {pageCount === 1 ? t.statusPage : t.statusPages}</span>
         </div>
       )}
       {/* Main grid area — show Landing when no document is loaded */}

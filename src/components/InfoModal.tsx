@@ -1,14 +1,16 @@
 import type { PdfInfo } from '../services/metadata'
+import { useI18n } from '../services/i18n'
 
 export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: () => void }) {
+  const { t } = useI18n()
   const rows: [string, string | number][] = [
-    ['Pages', info.pageCount],
-    ['Title', info.title || '—'],
-    ['Author', info.author || '—'],
-    ['Subject', info.subject || '—'],
-    ['Creator', info.creator || '—'],
-    ['Producer', info.producer || '—'],
-    ['Page size', info.pageSizes[0] ? `${info.pageSizes[0].width} × ${info.pageSizes[0].height} pt` : '—'],
+    [t.infoPages, info.pageCount],
+    [t.infoPageTitle, info.title || '—'],
+    [t.infoAuthor, info.author || '—'],
+    [t.infoSubject, info.subject || '—'],
+    [t.infoCreator, info.creator || '—'],
+    [t.infoProducer, info.producer || '—'],
+    [t.infoPageSize, info.pageSizes[0] ? `${info.pageSizes[0].width} × ${info.pageSizes[0].height} pt` : '—'],
   ]
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -16,7 +18,7 @@ export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: (
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Inner core */}
         <div className="modal-inner">
-          <h2 className="modal-title">Document Info</h2>
+          <h2 className="modal-title">{t.infoTitle}</h2>
           <table className="modal-table">
             <tbody>
               {rows.map(([k, v]) => (
@@ -28,7 +30,7 @@ export default function InfoModal({ info, onClose }: { info: PdfInfo; onClose: (
             </tbody>
           </table>
           <button className="modal-close" onClick={onClose}>
-            Close
+            {t.infoClose}
           </button>
         </div>
       </div>

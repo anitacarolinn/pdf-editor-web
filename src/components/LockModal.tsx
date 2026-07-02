@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { lockPdf } from '../services/lock-service'
+import { useI18n } from '../services/i18n'
 
 interface LockModalProps {
   bytes: Uint8Array
@@ -70,6 +71,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) {
+  const { t } = useI18n()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [show, setShow] = useState(false)
@@ -79,11 +81,11 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
   const handleLock = async () => {
     setError(null)
     if (!password) {
-      setError('Enter a password.')
+      setError(t.lmErrEnterPassword)
       return
     }
     if (password !== confirm) {
-      setError('Passwords do not match.')
+      setError(t.lmErrNoMatch)
       return
     }
     setBusy(true)
@@ -92,7 +94,7 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
       onLocked(out)
     } catch (e) {
       console.error('lock failed', e)
-      setError(e instanceof Error ? e.message : 'Could not lock the PDF.')
+      setError(e instanceof Error ? e.message : t.lmErrFailed)
       setBusy(false)
     }
   }
@@ -101,14 +103,13 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ minWidth: 380 }}>
         <div className="modal-inner" style={{ minWidth: 'unset', maxWidth: 'unset', width: 380 }}>
-          <h2 className="modal-title">Lock PDF</h2>
+          <h2 className="modal-title">{t.lmTitle}</h2>
           <p style={{ fontSize: 12.5, color: chromeMuted, marginTop: 0, marginBottom: 16 }}>
-            Set a password to encrypt this document (256-bit AES). The encrypted
-            copy is downloaded — your working document is unchanged.
+            {t.lmSubtitle}
           </p>
 
           <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle} htmlFor="lock-password">Password</label>
+            <label style={labelStyle} htmlFor="lock-password">{t.lmPasswordLabel}</label>
             <input
               id="lock-password"
               type={show ? 'text' : 'password'}
@@ -120,7 +121,7 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
           </div>
 
           <div style={{ marginBottom: 10 }}>
-            <label style={labelStyle} htmlFor="lock-confirm">Confirm password</label>
+            <label style={labelStyle} htmlFor="lock-confirm">{t.lmConfirmLabel}</label>
             <input
               id="lock-confirm"
               type={show ? 'text' : 'password'}
@@ -133,7 +134,7 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: chromeMuted, marginBottom: 18, cursor: 'pointer' }}>
             <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} />
-            Show password
+            {t.lmShowPassword}
           </label>
 
           {error && (
@@ -143,9 +144,9 @@ export default function LockModal({ bytes, onLocked, onClose }: LockModalProps) 
           )}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button style={secondaryBtnStyle} onClick={onClose} disabled={busy}>Cancel</button>
+            <button style={secondaryBtnStyle} onClick={onClose} disabled={busy}>{t.lmCancel}</button>
             <button style={primaryBtnStyle} onClick={handleLock} disabled={busy}>
-              {busy ? 'Locking…' : 'Lock & Download'}
+              {busy ? t.lmLocking : t.lmLockDownload}
             </button>
           </div>
         </div>

@@ -20,6 +20,7 @@ import {
   IconAddPicture,
   IconSign,
 } from './icons'
+import { useI18n } from '../services/i18n'
 
 export interface PageEditModalProps {
   /** 0-based page index currently being previewed */
@@ -147,6 +148,8 @@ export default function PageEditModal({
   onMoveBefore,
   onMoveAfter,
 }: PageEditModalProps) {
+  const { t } = useI18n()
+
   // Snapshot overlay objects when the modal mounts.
   // Cancel restores from snapshot; Restore restores but stays open.
   // Structural page ops (rotate, delete, etc.) remain undoable via undo history.
@@ -304,18 +307,18 @@ export default function PageEditModal({
       >
         {/* Left group: history + page structure */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
-          <ToolBtn label="Undo" icon={<IconUndo />} onClick={onUndo} disabled={!canUndo} />
-          <ToolBtn label="Redo" icon={<IconRedo />} onClick={onRedo} disabled={!canRedo} />
+          <ToolBtn label={t.emUndo} icon={<IconUndo />} onClick={onUndo} disabled={!canUndo} />
+          <ToolBtn label={t.emRedo} icon={<IconRedo />} onClick={onRedo} disabled={!canRedo} />
           <Divider />
-          <ToolBtn label="New page" icon={<IconInsertBlank />} onClick={onInsert} emphasized />
-          <ToolBtn label="Delete page" icon={<IconDelete />} onClick={onDeletePage} disabled={pageCount <= 1} />
-          <ToolBtn label="Duplicate" icon={<IconDuplicate />} onClick={onDuplicate} />
+          <ToolBtn label={t.emNewPage} icon={<IconInsertBlank />} onClick={onInsert} emphasized />
+          <ToolBtn label={t.emDeletePage} icon={<IconDelete />} onClick={onDeletePage} disabled={pageCount <= 1} />
+          <ToolBtn label={t.emDuplicate} icon={<IconDuplicate />} onClick={onDuplicate} />
           <Divider />
-          <ToolBtn label="Rotate left" icon={<IconRotateLeft />} onClick={onRotateL} />
-          <ToolBtn label="Rotate right" icon={<IconRotateRight />} onClick={onRotateR} />
+          <ToolBtn label={t.emRotateLeft} icon={<IconRotateLeft />} onClick={onRotateL} />
+          <ToolBtn label={t.emRotateRight} icon={<IconRotateRight />} onClick={onRotateR} />
           <Divider />
-          <ToolBtn label="Move before" icon={<IconMoveBefore />} onClick={onMoveBefore} disabled={atFirst} />
-          <ToolBtn label="Move after" icon={<IconMoveAfter />} onClick={onMoveAfter} disabled={atLast} />
+          <ToolBtn label={t.emMoveBefore} icon={<IconMoveBefore />} onClick={onMoveBefore} disabled={atFirst} />
+          <ToolBtn label={t.emMoveAfter} icon={<IconMoveAfter />} onClick={onMoveAfter} disabled={atLast} />
         </div>
 
         {/* Center group: zoom + add text/picture */}
@@ -324,7 +327,7 @@ export default function PageEditModal({
           {/* Zoom cluster */}
           <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px', gap: '0' }}>
             <button
-              aria-label="Zoom out"
+              aria-label={t.emZoomOut}
               onClick={() => onZoom(Math.max(0.25, Math.round((zoom - 0.1) * 100) / 100))}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -337,13 +340,13 @@ export default function PageEditModal({
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
                 <IconZoomOut />
               </span>
-              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Zoom out</span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>{t.emZoomOut}</span>
             </button>
 
             {/* Typeable zoom % field */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '6px', padding: '3px 6px', margin: '0 4px' }}>
               <input
-                aria-label="Zoom level"
+                aria-label={t.emZoomLevel}
                 type="number"
                 min={25}
                 max={500}
@@ -360,7 +363,7 @@ export default function PageEditModal({
             </div>
 
             <button
-              aria-label="Zoom in"
+              aria-label={t.emZoomIn}
               onClick={() => onZoom(Math.min(5, Math.round((zoom + 0.1) * 100) / 100))}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -373,11 +376,11 @@ export default function PageEditModal({
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}>
                 <IconZoomIn />
               </span>
-              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>Zoom in</span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>{t.emZoomIn}</span>
             </button>
 
             <button
-              aria-label="Fit width"
+              aria-label={t.emFitWidthLabel}
               onClick={() => {
                 // Toggle: if already at fit-width, snap back to original 100%.
                 const fw = computeFitWidth()
@@ -394,13 +397,13 @@ export default function PageEditModal({
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = fitActive ? '#fef3c7' : 'transparent' }}
             >
               <span style={{ fontSize: '14px', fontWeight: 700, height: 20, display: 'flex', alignItems: 'center' }}>⊟</span>
-              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>{fitActive ? 'Original' : 'Fit'}</span>
+              <span style={{ fontSize: '11px', lineHeight: 1.2, whiteSpace: 'nowrap', userSelect: 'none', fontWeight: 500 }}>{fitActive ? t.emOriginal : t.emFit}</span>
             </button>
           </div>
           <Divider />
-          <ToolBtn label="Add text" icon={<IconAddText />} onClick={onAddText} />
-          <ToolBtn label="Add picture" icon={<IconAddPicture />} onClick={onAddPicture} />
-          <ToolBtn label="Sign" icon={<IconSign />} onClick={onSign} />
+          <ToolBtn label={t.emAddText} icon={<IconAddText />} onClick={onAddText} />
+          <ToolBtn label={t.emAddPicture} icon={<IconAddPicture />} onClick={onAddPicture} />
+          <ToolBtn label={t.emSign} icon={<IconSign />} onClick={onSign} />
         </div>
       </div>
 
@@ -420,7 +423,7 @@ export default function PageEditModal({
       >
         {/* Previous page arrow */}
         <button
-          aria-label="Previous page"
+          aria-label={t.emPrevPage}
           disabled={atFirst}
           onClick={() => handleGo(currentPage - 1)}
           style={{
@@ -484,7 +487,7 @@ export default function PageEditModal({
 
         {/* Next page arrow */}
         <button
-          aria-label="Next page"
+          aria-label={t.emNextPage}
           disabled={atLast}
           onClick={() => handleGo(currentPage + 1)}
           style={{
@@ -524,9 +527,9 @@ export default function PageEditModal({
       >
         {/* Page indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280', fontWeight: 400 }}>
-          <span>Page</span>
+          <span>{t.emPage}</span>
           <input
-            aria-label="Current page"
+            aria-label={t.emCurrentPage}
             type="number"
             min={1}
             max={pageCount}
@@ -556,7 +559,7 @@ export default function PageEditModal({
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Restore — light, restores overlay snapshot but stays open */}
           <button
-            aria-label="Restore"
+            aria-label={t.emRestore}
             onClick={handleRestore}
             style={{
               padding: '8px 18px',
@@ -571,12 +574,12 @@ export default function PageEditModal({
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
           >
-            Restore
+            {t.emRestore}
           </button>
 
           {/* Cancel — discards overlay changes, closes modal */}
           <button
-            aria-label="Cancel"
+            aria-label={t.emCancel}
             onClick={handleCancel}
             style={{
               padding: '8px 18px',
@@ -591,7 +594,7 @@ export default function PageEditModal({
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f3f4f6' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#fff' }}
           >
-            Cancel
+            {t.emCancel}
           </button>
 
           {/* Save & Close — keeps edits, closes modal */}
@@ -611,7 +614,7 @@ export default function PageEditModal({
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#dc2626' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#ef4444' }}
           >
-            Save &amp; Close
+            {t.emSaveClose}
           </button>
         </div>
       </div>

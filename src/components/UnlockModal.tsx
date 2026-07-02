@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { unlockPdf } from '../services/lock-service'
 import { readFileAsBytes } from '../services/file-io'
+import { useI18n } from '../services/i18n'
 
 interface UnlockModalProps {
   // Called with the decrypted bytes + a suggested file name; the caller loads
@@ -69,6 +70,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
+  const { t } = useI18n()
   const [file, setFile] = useState<File | null>(null)
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -78,7 +80,7 @@ export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
   const handleUnlock = async () => {
     setError(null)
     if (!file) {
-      setError('Choose a PDF file.')
+      setError(t.umErrChooseFile)
       return
     }
     setBusy(true)
@@ -89,7 +91,7 @@ export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
       onUnlocked(out, name)
     } catch (e) {
       console.error('unlock failed', e)
-      setError(e instanceof Error ? e.message : 'Wrong password.')
+      setError(e instanceof Error ? e.message : t.umErrWrongPassword)
       setBusy(false)
     }
   }
@@ -98,14 +100,13 @@ export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ minWidth: 380 }}>
         <div className="modal-inner" style={{ minWidth: 'unset', maxWidth: 'unset', width: 380 }}>
-          <h2 className="modal-title">Unlock PDF</h2>
+          <h2 className="modal-title">{t.umTitle}</h2>
           <p style={{ fontSize: 12.5, color: chromeMuted, marginTop: 0, marginBottom: 16 }}>
-            Choose a password-protected PDF and enter its password. The decrypted
-            document opens in the editor.
+            {t.umSubtitle}
           </p>
 
           <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>PDF file</label>
+            <label style={labelStyle}>{t.umPdfFileLabel}</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -122,12 +123,12 @@ export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
               style={{ ...secondaryBtnStyle, width: '100%', padding: '9px 12px', justifyContent: 'flex-start' }}
               onClick={() => fileInputRef.current?.click()}
             >
-              {file ? file.name : 'Choose file…'}
+              {file ? file.name : t.umChooseFile}
             </button>
           </div>
 
           <div style={{ marginBottom: 18 }}>
-            <label style={labelStyle} htmlFor="unlock-password">Password</label>
+            <label style={labelStyle} htmlFor="unlock-password">{t.umPasswordLabel}</label>
             <input
               id="unlock-password"
               type="password"
@@ -146,9 +147,9 @@ export default function UnlockModal({ onUnlocked, onClose }: UnlockModalProps) {
           )}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button style={secondaryBtnStyle} onClick={onClose} disabled={busy}>Cancel</button>
+            <button style={secondaryBtnStyle} onClick={onClose} disabled={busy}>{t.umCancel}</button>
             <button style={primaryBtnStyle} onClick={handleUnlock} disabled={busy}>
-              {busy ? 'Unlocking…' : 'Unlock & Open'}
+              {busy ? t.umUnlocking : t.umUnlockOpen}
             </button>
           </div>
         </div>

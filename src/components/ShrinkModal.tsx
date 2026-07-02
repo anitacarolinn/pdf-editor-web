@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { shrinkPdfWithLevel } from '../services/shrink-service'
 import type { CompressionLevel } from '../services/shrink-service'
+import { useI18n } from '../services/i18n'
 
 interface ShrinkModalProps {
   bytes: Uint8Array
@@ -12,25 +13,25 @@ type Step = 'options' | 'loading' | 'result'
 
 interface LevelMeta {
   id: CompressionLevel
-  label: string
-  description: string
+  labelKey: 'smLevelLessLabel' | 'smLevelRecommendedLabel' | 'smLevelExtremeLabel'
+  descKey: 'smLevelLessDesc' | 'smLevelRecommendedDesc' | 'smLevelExtremeDesc'
 }
 
 const LEVELS: LevelMeta[] = [
   {
     id: 'less',
-    label: 'Less compression',
-    description: 'High quality, small size reduction — best for print-ready documents.',
+    labelKey: 'smLevelLessLabel',
+    descKey: 'smLevelLessDesc',
   },
   {
     id: 'recommended',
-    label: 'Recommended',
-    description: 'Good quality and good reduction — best for most use cases.',
+    labelKey: 'smLevelRecommendedLabel',
+    descKey: 'smLevelRecommendedDesc',
   },
   {
     id: 'extreme',
-    label: 'Extreme compression',
-    description: 'Smallest file, lower image quality — best for email and uploads.',
+    labelKey: 'smLevelExtremeLabel',
+    descKey: 'smLevelExtremeDesc',
   },
 ]
 
@@ -41,6 +42,7 @@ function formatBytes(n: number): string {
 }
 
 export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProps) {
+  const { t } = useI18n()
   const [step, setStep] = useState<Step>('options')
   const [level, setLevel] = useState<CompressionLevel>('recommended')
   const [resultBytes, setResultBytes] = useState<Uint8Array | null>(null)
@@ -138,9 +140,9 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
           {/* ── OPTIONS STEP ─────────────────────────────────────── */}
           {step === 'options' && (
             <>
-              <h2 className="modal-title">Compress PDF</h2>
+              <h2 className="modal-title">{t.smTitle}</h2>
               <p style={{ fontSize: 12.5, color: chromeMuted, marginTop: 0, marginBottom: 16 }}>
-                Choose a compression level. You can review the result before applying.
+                {t.smSubtitle}
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
@@ -167,10 +169,10 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
                       aria-pressed={selected}
                     >
                       <span style={{ fontSize: 13, fontWeight: 600, color: selected ? accent : chrome }}>
-                        {lv.label}
+                        {t[lv.labelKey]}
                       </span>
                       <span style={{ fontSize: 11.5, color: chromeMuted, marginTop: 2 }}>
-                        {lv.description}
+                        {t[lv.descKey]}
                       </span>
                     </button>
                   )
@@ -178,8 +180,8 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
               </div>
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button style={secondaryBtnStyle} onClick={onClose}>Cancel</button>
-                <button style={primaryBtnStyle} onClick={handleCompress}>Compress</button>
+                <button style={secondaryBtnStyle} onClick={onClose}>{t.smCancel}</button>
+                <button style={primaryBtnStyle} onClick={handleCompress}>{t.smCompress}</button>
               </div>
             </>
           )}
@@ -187,7 +189,7 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
           {/* ── LOADING STEP ─────────────────────────────────────── */}
           {step === 'loading' && (
             <>
-              <h2 className="modal-title">Compressing…</h2>
+              <h2 className="modal-title">{t.smCompressing}</h2>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0' }}>
                 {/* CSS spinner — no external deps */}
                 <div
@@ -212,7 +214,7 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
           {/* ── RESULT STEP ──────────────────────────────────────── */}
           {step === 'result' && resultBytes && (
             <>
-              <h2 className="modal-title">Compression result</h2>
+              <h2 className="modal-title">{t.smResultTitle}</h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                 {/* Row: Original */}
@@ -221,7 +223,7 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
                   padding: '9px 12px', background: surfaceBase, borderRadius: 8,
                   border: `1px solid ${hairline}`,
                 }}>
-                  <span style={{ fontSize: 12.5, color: chromeMuted, fontWeight: 500 }}>Original</span>
+                  <span style={{ fontSize: 12.5, color: chromeMuted, fontWeight: 500 }}>{t.smOriginal}</span>
                   <span style={{ fontSize: 13, color: chrome, fontWeight: 600 }}>
                     {formatBytes(originalSize)}
                   </span>
@@ -232,7 +234,7 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
                   padding: '9px 12px', background: surfaceBase, borderRadius: 8,
                   border: `1px solid ${hairline}`,
                 }}>
-                  <span style={{ fontSize: 12.5, color: chromeMuted, fontWeight: 500 }}>New size</span>
+                  <span style={{ fontSize: 12.5, color: chromeMuted, fontWeight: 500 }}>{t.smNewSize}</span>
                   <span style={{ fontSize: 13, color: chrome, fontWeight: 600 }}>
                     {formatBytes(newSize)}
                   </span>
@@ -246,23 +248,23 @@ export default function ShrinkModal({ bytes, onApply, onClose }: ShrinkModalProp
                   border: `1px solid ${isSmaller ? 'rgba(22,163,74,0.2)' : hairline}`,
                 }}>
                   <span style={{ fontSize: 12.5, color: chromeMuted, fontWeight: 500 }}>
-                    {isSmaller ? 'Reduced by' : 'Result'}
+                    {isSmaller ? t.smReducedBy : t.smResult}
                   </span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: isSmaller ? '#16a34a' : chromeMuted }}>
                     {isSmaller
                       ? `${reduced}%`
-                      : 'Already optimized — no reduction'}
+                      : t.smAlreadyOptimized}
                   </span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button style={secondaryBtnStyle} onClick={handleBack}>Back</button>
+                <button style={secondaryBtnStyle} onClick={handleBack}>{t.smBack}</button>
                 {isSmaller && (
-                  <button style={applyBtnStyle} onClick={handleApply}>Apply</button>
+                  <button style={applyBtnStyle} onClick={handleApply}>{t.smApply}</button>
                 )}
                 {!isSmaller && (
-                  <button style={secondaryBtnStyle} onClick={onClose}>Close</button>
+                  <button style={secondaryBtnStyle} onClick={onClose}>{t.smClose}</button>
                 )}
               </div>
             </>

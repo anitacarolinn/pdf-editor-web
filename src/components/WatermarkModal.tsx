@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import type { WatermarkOpts } from '../services/page-ops'
+import { useI18n } from '../services/i18n'
 
 interface WatermarkModalProps {
   onApply: (opts: WatermarkOpts) => void
@@ -7,6 +8,7 @@ interface WatermarkModalProps {
 }
 
 export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps) {
+  const { t } = useI18n()
   const [mode, setMode] = useState<'text' | 'image'>('text')
   const [text, setText] = useState('DRAFT')
   const [opacity, setOpacity] = useState(0.25)
@@ -65,7 +67,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ minWidth: 400 }}>
         <div className="modal-inner" style={{ minWidth: 'unset', maxWidth: 'unset', width: 420 }}>
-          <h2 className="modal-title">Add Watermark</h2>
+          <h2 className="modal-title">{t.wmTitle}</h2>
 
           {/* Mode toggle */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: surfaceBase, borderRadius: 10, padding: 3, border: `1px solid ${hairline}` }}>
@@ -83,7 +85,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
                 }}
                 aria-pressed={mode === m}
               >
-                {m === 'text' ? 'Text' : 'Image'}
+                {m === 'text' ? t.wmText : t.wmImage}
               </button>
             ))}
           </div>
@@ -93,7 +95,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: chrome, marginBottom: 5 }}>
-                  Watermark text
+                  {t.wmWatermarkText}
                 </label>
                 <input
                   type="text"
@@ -112,7 +114,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
               </div>
               <div>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: chrome, marginBottom: 5 }}>
-                  <span>Opacity</span>
+                  <span>{t.wmOpacity}</span>
                   <span style={{ color: accent }}>{Math.round(opacity * 100)}%</span>
                 </label>
                 <input
@@ -131,7 +133,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: chrome, marginBottom: 5 }}>
-                  Image (PNG or JPG)
+                  {t.wmImageLabel}
                 </label>
                 <div
                   onClick={() => fileRef.current?.click()}
@@ -160,7 +162,7 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
               </div>
               <div>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: chrome, marginBottom: 5 }}>
-                  <span>Opacity</span>
+                  <span>{t.wmOpacity}</span>
                   <span style={{ color: accent }}>{Math.round(opacity * 100)}%</span>
                 </label>
                 <input
@@ -178,13 +180,13 @@ export default function WatermarkModal({ onApply, onClose }: WatermarkModalProps
           )}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button style={secondaryBtnStyle} onClick={onClose}>Cancel</button>
+            <button style={secondaryBtnStyle} onClick={onClose}>{t.wmCancel}</button>
             <button
               style={{ ...primaryBtnStyle, opacity: canApply ? 1 : 0.5, cursor: canApply ? 'pointer' : 'not-allowed' }}
               onClick={handleApply}
               disabled={!canApply}
             >
-              Apply
+              {t.wmApply}
             </button>
           </div>
         </div>

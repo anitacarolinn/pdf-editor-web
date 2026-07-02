@@ -54,17 +54,14 @@ it('Page # adds numbers without changing page count', async () => {
   })
 })
 
-it('Watermark stamps text (page count preserved)', async () => {
-  vi.spyOn(window, 'prompt').mockReturnValue('DRAFT')
+it('Watermark opens the WatermarkModal', async () => {
   render(<App />)
-  const before = useDocumentStore.getState().bytes!
-  const beforeCount = await getPageCount(before)
   await userEvent.click(await screen.findByRole('button', { name: 'Watermark' }))
-  await waitFor(async () => {
-    const after = useDocumentStore.getState().bytes!
-    expect(after).not.toBe(before)
-    expect(await getPageCount(after)).toBe(beforeCount)
-  })
+  // Modal should open with the "Add Watermark" heading
+  expect(await screen.findByText('Add Watermark')).toBeInTheDocument()
+  // Both mode buttons should be visible
+  expect(screen.getByRole('button', { name: 'Text' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Image' })).toBeInTheDocument()
 })
 
 it('Shrink file size opens the ShrinkModal', async () => {

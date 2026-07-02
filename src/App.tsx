@@ -34,6 +34,8 @@ import ShrinkModal from './components/ShrinkModal'
 import SignatureModal from './components/SignatureModal'
 import LockModal from './components/LockModal'
 import UnlockModal from './components/UnlockModal'
+import WatermarkModal from './components/WatermarkModal'
+import type { WatermarkOpts } from './services/page-ops'
 
 export default function App() {
   const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
@@ -53,6 +55,7 @@ export default function App() {
   const [lastSignatureBytes, setLastSignatureBytes] = useState<Uint8Array | null>(null)
   const [signedThisSession, setSignedThisSession] = useState(false)
   const [showSavePngDialog, setShowSavePngDialog] = useState(false)
+  const [watermarkOpen, setWatermarkOpen] = useState(false)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -185,7 +188,7 @@ export default function App() {
     if (bytes) setInfo(await readInfo(bytes))
   }
   const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
-  const onWatermark = () => { const t = window.prompt('Watermark text', 'DRAFT'); if (t) run(apply((b) => addWatermark(b, t))) }
+  const onWatermark = () => setWatermarkOpen(true)
   const onShrink = () => setShrinkOpen(true)
   const onLock = () => setLockOpen(true)
   const onUnlock = () => setUnlockOpen(true)
@@ -375,6 +378,15 @@ export default function App() {
         <SignatureModal
           onAdd={handleSignatureAdd}
           onClose={() => setSignOpen(false)}
+        />
+      )}
+      {watermarkOpen && bytes && (
+        <WatermarkModal
+          onApply={(opts: WatermarkOpts) => {
+            run(apply((b) => addWatermark(b, opts)))
+            setWatermarkOpen(false)
+          }}
+          onClose={() => setWatermarkOpen(false)}
         />
       )}
       {showSavePngDialog && (

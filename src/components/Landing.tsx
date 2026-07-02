@@ -199,10 +199,11 @@ export default function Landing({ onFiles }: LandingProps) {
 }
 
 function FeatureCard({ icon, name, desc }: { icon: React.ReactNode; name: string; desc: string }) {
+  // Double-Bezel: outer shell + inner core, vertical (icon → title → desc)
   return (
     <div className="feature-card">
-      <span className="feature-card-icon">{icon}</span>
-      <div className="feature-card-body">
+      <div className="feature-card-inner">
+        <span className="feature-card-icon">{icon}</span>
         <span className="feature-card-name">{name}</span>
         <span className="feature-card-desc">{desc}</span>
       </div>

@@ -857,11 +857,11 @@ body {
 
 /* ── Two-column layout ───────────────────────────────────────── */
 .landing-hero--two-col {
+  position: relative;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 64px;
-  padding: 32px 40px 48px;
+  justify-content: center;   /* main (brand + drop) sits dead-center */
+  padding: 48px 40px;
   min-height: 0;
   overflow: hidden;
 }
@@ -928,21 +928,28 @@ body {
 }
 
 /* ── LEFT column: feature loop pill container ────────────────── */
+/* Loop pinned to the LEFT edge, vertically centered — independent of the
+   centered main so it never pushes the brand/drop off-center. Decorative. */
 .landing-loop-col {
-  flex: 0 0 340px;
-  height: 520px;
+  position: absolute;
+  left: clamp(24px, 5vw, 96px);
+  top: 0;
+  bottom: 0;
+  width: 300px;
   display: flex;
   flex-direction: column;
-  align-self: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .landing-loop-container {
   /* Clips the scrolling stream and fades top/bottom edges — no oval frame. */
-  flex: 1;
+  height: min(72vh, 600px);
   overflow: hidden;
   position: relative;
-  mask-image: linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 9%, black 91%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
 }
 
 /* Animated track — driven by motion */
@@ -950,69 +957,79 @@ body {
 .landing-loop-static {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
   padding: 8px 4px;
   will-change: transform;
 }
 
-/* ── Feature card — a distinct container per function ────────── */
+/* ── Feature card — square Double-Bezel, vertical (icon → title → desc) ─ */
 .feature-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  padding: 14px 16px;
+  /* Outer shell */
+  width: 244px;
   flex-shrink: 0;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 0 0 1px rgba(24, 24, 27, 0.05);
+}
+
+.feature-card-inner {
+  /* Inner core — concentric radius, soft ambient shadow + inner highlight */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 24px 18px 22px;
+  min-height: 168px;
+  justify-content: center;
   background: var(--color-surface-card);
-  border: 1px solid var(--color-chrome-hairline);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  border-radius: calc(var(--radius-xl) - 6px);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    0 12px 32px -10px rgba(24, 24, 27, 0.14);
 }
 
 .feature-card-icon {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--color-accent-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   color: var(--color-accent);
 }
 
 .feature-card-icon > svg {
-  width: 17px;
-  height: 17px;
-}
-
-.feature-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  width: 27px;
+  height: 27px;
 }
 
 .feature-card-name {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-chrome);
-  letter-spacing: -0.015em;
-  line-height: 1.3;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
 
 .feature-card-desc {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 400;
   color: var(--color-chrome-muted);
   letter-spacing: -0.005em;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* ── RIGHT column: identity + dropzone ──────────────────────── */
+/* ── Centered main: identity + dropzone (sits above the loop) ── */
 .landing-right-col {
-  flex: 1;
-  min-width: 0;
-  max-width: 440px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1125,6 +1142,13 @@ body {
   letter-spacing: -0.005em;
   margin: 0;
   opacity: 0.7;
+}
+
+/* Hide the left loop once there isn't room beside the centered main. */
+@media (max-width: 1120px) {
+  .landing-loop-col {
+    display: none;
+  }
 }
 
 /* ── Responsive: narrow screens ──────────────────────────────── */

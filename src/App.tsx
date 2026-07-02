@@ -438,6 +438,7 @@ export default function App() {
         <ExportModal
           defaultName={fileName ?? 'edited.pdf'}
           busy={busy}
+          shrink={shrinkInfo}
           onExport={doExport}
           onClose={() => setExportOpen(false)}
         />

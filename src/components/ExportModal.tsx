@@ -4,8 +4,15 @@ import { useI18n } from '../services/i18n'
 interface ExportModalProps {
   defaultName: string
   busy: boolean
+  shrink?: { original: number; shrunk: number } | null
   onExport: (name: string) => void
   onClose: () => void
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
+  return `${(n / 1024 / 1024).toFixed(1)} MB`
 }
 
 const accent = '#d97706'
@@ -14,8 +21,9 @@ const chromeSecondary = '#3f3f46'
 const surfaceBase = '#f4f4f5'
 const hairline = 'rgba(24,24,27,0.09)'
 
-export default function ExportModal({ defaultName, busy, onExport, onClose }: ExportModalProps) {
+export default function ExportModal({ defaultName, busy, shrink, onExport, onClose }: ExportModalProps) {
   const { t } = useI18n()
+  const shrinkPct = shrink && shrink.original > 0 ? Math.max(0, Math.round((1 - shrink.shrunk / shrink.original) * 100)) : 0
   // Edit the base name; ".pdf" is shown as a fixed suffix.
   const [name, setName] = useState(() => defaultName.replace(/\.pdf$/i, ''))
   const inputRef = useRef<HTMLInputElement>(null)
@@ -60,6 +68,19 @@ export default function ExportModal({ defaultName, busy, onExport, onClose }: Ex
             />
             <span style={{ fontFamily: '"Geist Mono Variable", ui-monospace, monospace', fontSize: 13, color: chromeMuted, flexShrink: 0 }}>.pdf</span>
           </div>
+
+          {shrink && shrink.original > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+              padding: '10px 12px', marginBottom: 18,
+              background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.22)', borderRadius: 10,
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#b45309' }}>{t.infoCompressed}</span>
+              <span style={{ fontSize: 12.5, color: chromeSecondary }}>
+                {formatBytes(shrink.original)} → {formatBytes(shrink.shrunk)} (−{shrinkPct}%)
+              </span>
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button

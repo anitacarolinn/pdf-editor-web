@@ -1270,6 +1270,39 @@ body {
   position: relative;
 }
 
+/* Decorative ambient orb — faded amber glow, bottom-right, gentle float */
+.lp-orb {
+  position: absolute;
+  right: -150px;
+  bottom: -170px;
+  width: 540px;
+  height: 540px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.30) 0%, rgba(217, 119, 6, 0.12) 44%, rgba(217, 119, 6, 0) 72%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  animation: lp-orb-float 9s ease-in-out infinite;
+}
+
+@keyframes lp-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-24px, -18px) scale(1.05); }
+  66%      { transform: translate(-8px, 12px) scale(0.98); }
+}
+
+/* Keep content above the orb */
+.lp-filmstrip,
+.lp-hero {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-orb { animation: none; }
+}
+
 /* ── LEFT: Feature filmstrip ──────────────────────────────────── */
 .lp-filmstrip {
   width: 392px;

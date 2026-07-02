@@ -90,6 +90,9 @@ export default function Landing({ onFiles }: LandingProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Decorative blurred orb — bottom-right ambient glow with gentle float */}
+      <div className="lp-orb" aria-hidden="true" />
+
       {/* LEFT — Feature filmstrip */}
       <div className="lp-filmstrip" aria-label="Feature overview" aria-hidden="true">
         <div className="lp-filmstrip-mask">

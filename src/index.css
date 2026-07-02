@@ -1273,17 +1273,23 @@ body {
 /* Decorative ambient orb — faded amber glow, bottom-right, gentle float */
 .lp-orb {
   position: absolute;
-  right: -340px;
-  bottom: -360px;
+  right: -240px;
+  bottom: -250px;
   width: 560px;
   height: 560px;
-  border-radius: 9999px;
-  background: radial-gradient(circle, rgba(217, 119, 6, 0.30) 0%, rgba(217, 119, 6, 0.12) 44%, rgba(217, 119, 6, 0) 72%);
-  filter: blur(40px);
   pointer-events: none;
   z-index: 0;
   will-change: transform;
   animation: lp-orb-float 9s ease-in-out infinite;
+}
+
+.lp-orb-glow {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.32) 0%, rgba(217, 119, 6, 0.13) 44%, rgba(217, 119, 6, 0) 72%);
+  filter: blur(40px);
+  will-change: transform;
 }
 
 @keyframes lp-orb-float {

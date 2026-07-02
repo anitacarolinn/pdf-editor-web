@@ -40,6 +40,7 @@ import UnlockModal from './components/UnlockModal'
 import WatermarkModal from './components/WatermarkModal'
 import PageNumbersModal from './components/PageNumbersModal'
 import PasswordPrompt from './components/PasswordPrompt'
+import ConfirmSkipLocked from './components/ConfirmSkipLocked'
 import type { WatermarkOpts, PageNumberOpts } from './services/page-ops'
 import { imagesToPdf } from './services/image-to-pdf'
 
@@ -77,6 +78,13 @@ export default function App() {
   // prompt callbacks fulfil with the decrypted bytes (or null when skipped).
   const pwQueueRef = useRef<{ name: string; bytes: Uint8Array }[]>([])
   const pwResolveRef = useRef<((decrypted: Uint8Array | null) => void) | null>(null)
+
+  // When one or more locked files are cancelled during a multi-file open, ask
+  // the user whether to open the remaining (unlocked) files without them, or
+  // cancel the whole open. `skipConfirm` holds what to show (null = no dialog);
+  // `skipConfirmResolveRef` fulfils the promise with the user's choice.
+  const [skipConfirm, setSkipConfirm] = useState<{ names: string[]; otherCount: number } | null>(null)
+  const skipConfirmResolveRef = useRef<((proceed: boolean) => void) | null>(null)
 
   const run = async (p: Promise<void>) => {
     setBusy(true)
@@ -166,6 +174,22 @@ export default function App() {
     resolve?.(null)
   }
 
+  // Ask whether to open the remaining files without the cancelled locked one(s).
+  // Resolves true (open the rest) or false (cancel the whole open).
+  const confirmOpenWithoutLocked = (names: string[], otherCount: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      skipConfirmResolveRef.current = resolve
+      setSkipConfirm({ names, otherCount })
+    })
+  }
+
+  const settleSkipConfirm = (proceed: boolean) => {
+    const resolve = skipConfirmResolveRef.current
+    skipConfirmResolveRef.current = null
+    setSkipConfirm(null)
+    resolve?.(proceed)
+  }
+
   async function onOpen(files: File[]) {
     const pdfFiles: File[] = []
     const imageFiles: File[] = []
@@ -202,6 +226,7 @@ export default function App() {
       pdfFiles.map(async (f) => ({ name: f.name, bytes: await readFileAsBytes(f) })),
     )
     const pdfBytes: Uint8Array[] = []
+    const skippedLocked: string[] = []
     for (const item of rawPdfs) {
       let locked = false
       try {
@@ -217,10 +242,19 @@ export default function App() {
       }
       const decrypted = await resolveLockedPdf(item.name, item.bytes)
       if (decrypted) pdfBytes.push(decrypted)
-      // Cancelled / failed unlock → skip this file (don't add it).
+      // Cancelled / failed unlock → remember it so we can tell the user.
+      else skippedLocked.push(item.name)
     }
 
-    if (imageFiles.length === 0 && pdfBytes.length === 0) return
+    const openableCount = imageFiles.length + pdfBytes.length
+    if (openableCount === 0) return // everything was locked and cancelled
+
+    // Some files were locked and the password was cancelled, but there ARE other
+    // files to open. Don't silently drop the locked ones — confirm first.
+    if (skippedLocked.length > 0) {
+      const proceed = await confirmOpenWithoutLocked(skippedLocked, openableCount)
+      if (!proceed) return // "Cancel all" → open nothing
+    }
 
     let result: Uint8Array
 
@@ -581,6 +615,14 @@ export default function App() {
           busy={pwBusy}
           onSubmit={handlePasswordSubmit}
           onCancel={handlePasswordCancel}
+        />
+      )}
+      {skipConfirm !== null && (
+        <ConfirmSkipLocked
+          skipped={skipConfirm.names}
+          otherCount={skipConfirm.otherCount}
+          onOpenRest={() => settleSkipConfirm(true)}
+          onCancelAll={() => settleSkipConfirm(false)}
         />
       )}
       {signOpen && (

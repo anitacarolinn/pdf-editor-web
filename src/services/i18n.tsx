@@ -155,6 +155,13 @@ const en = {
   ppCancel: 'Cancel',
   ppErrWrongPassword: 'Incorrect password',
 
+  // Skip-locked confirmation (password cancelled while opening several files)
+  slcTitle: 'Open without the locked PDF?',
+  slcExplain: 'No password was entered, so this file will be skipped:',
+  slcQuestion: (n: number) => `Open the other ${n} PDF${n === 1 ? '' : 's'} without it?`,
+  slcCancelAll: 'Cancel all',
+  slcOpenRest: 'Open the rest',
+
   // WatermarkModal
   wmTitle: 'Add Watermark',
   wmText: 'Text',
@@ -370,6 +377,13 @@ const zh = {
   ppCancel: '取消',
   ppErrWrongPassword: '密碼錯誤',
 
+  // Skip-locked confirmation
+  slcTitle: '在不含鎖定 PDF 的情況下開啟？',
+  slcExplain: '未輸入密碼，將略過此檔案：',
+  slcQuestion: (n: number) => `是否在不含此檔的情況下開啟其他 ${n} 個 PDF？`,
+  slcCancelAll: '全部取消',
+  slcOpenRest: '開啟其餘檔案',
+
   // WatermarkModal
   wmTitle: '加入浮水印',
   wmText: '文字',
@@ -562,6 +576,12 @@ interface Dict {
   ppUnlocking: string
   ppCancel: string
   ppErrWrongPassword: string
+
+  slcTitle: string
+  slcExplain: string
+  slcQuestion: (n: number) => string
+  slcCancelAll: string
+  slcOpenRest: string
 
   wmTitle: string
   wmText: string

@@ -97,4 +97,48 @@ describe('opening a locked PDF', () => {
     expect(useDocumentStore.getState().bytes).toBeNull()
     expect(unlockPdf).not.toHaveBeenCalled()
   })
+
+  it('confirms before opening the rest when a locked file is cancelled among several', async () => {
+    // First file locked, second not.
+    isPdfEncrypted.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    render(<App />)
+    const input = document.querySelector('input[type=file]') as HTMLInputElement
+    await userEvent.upload(input, [
+      await encryptedFile('locked-doc.pdf'),
+      await encryptedFile('open-doc.pdf'),
+    ])
+
+    // Password prompt for the locked file → cancel it.
+    await screen.findByLabelText('Password')
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    // A confirmation must appear, naming the skipped file — nothing opened yet.
+    await screen.findByRole('button', { name: 'Open the rest' })
+    expect(screen.getByText(/locked-doc\.pdf/)).toBeInTheDocument()
+    expect(useDocumentStore.getState().bytes).toBeNull()
+
+    // Choosing to open the rest loads the other PDF.
+    await userEvent.click(screen.getByRole('button', { name: 'Open the rest' }))
+    await waitFor(() => expect(useDocumentStore.getState().bytes).not.toBeNull())
+  })
+
+  it('opens nothing when "Cancel all" is chosen at the confirmation', async () => {
+    isPdfEncrypted.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    render(<App />)
+    const input = document.querySelector('input[type=file]') as HTMLInputElement
+    await userEvent.upload(input, [
+      await encryptedFile('locked-doc.pdf'),
+      await encryptedFile('open-doc.pdf'),
+    ])
+
+    await screen.findByLabelText('Password')
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Cancel all' }))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Cancel all' })).not.toBeInTheDocument(),
+    )
+    expect(useDocumentStore.getState().bytes).toBeNull()
+  })
 })

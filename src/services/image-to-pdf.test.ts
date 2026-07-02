@@ -1,0 +1,48 @@
+import { describe, it, expect } from 'vitest'
+import { imagesToPdf } from './image-to-pdf'
+import { PDFDocument } from 'pdf-lib'
+
+// Minimal valid 1×1 white PNG (uses correct IDAT for 1x1 white RGB)
+const PNG_1X1 = new Uint8Array([
+  0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a,
+  0x00,0x00,0x00,0x0d,
+  0x49,0x48,0x44,0x52,
+  0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,
+  0x08,0x02,
+  0x00,0x00,0x00,
+  0x90,0x77,0x53,0xde,
+  0x00,0x00,0x00,0x0c,
+  0x49,0x44,0x41,0x54,
+  0x08,0xd7,0x63,0xf8,0xcf,0xc0,0x00,0x00,
+  0x00,0x02,0x00,0x01,
+  0xe2,0x21,0xbc,0x33,
+  0x00,0x00,0x00,0x00,
+  0x49,0x45,0x4e,0x44,
+  0xae,0x42,0x60,0x82,
+])
+
+describe('imagesToPdf', () => {
+  it('converts a single PNG into a 1-page PDF', async () => {
+    const out = await imagesToPdf([{ bytes: PNG_1X1, type: 'png' }])
+    const doc = await PDFDocument.load(out)
+    expect(doc.getPageCount()).toBe(1)
+  })
+
+  it('converts two images into a 2-page PDF', async () => {
+    const out = await imagesToPdf([
+      { bytes: PNG_1X1, type: 'png' },
+      { bytes: PNG_1X1, type: 'png' },
+    ])
+    const doc = await PDFDocument.load(out)
+    expect(doc.getPageCount()).toBe(2)
+  })
+
+  it('returns a valid PDF with non-zero bytes', async () => {
+    const out = await imagesToPdf([{ bytes: PNG_1X1, type: 'png' }])
+    // PDF magic bytes
+    expect(out[0]).toBe(0x25) // '%'
+    expect(out[1]).toBe(0x50) // 'P'
+    expect(out[2]).toBe(0x44) // 'D'
+    expect(out[3]).toBe(0x46) // 'F'
+  })
+})

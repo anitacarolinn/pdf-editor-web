@@ -109,6 +109,7 @@ export default function Landing({ onFiles }: LandingProps) {
           (wrapper) + cursor-follow drift (inner glow). */}
       <div className="lp-orb" aria-hidden="true">
         <motion.div className="lp-orb-glow" style={{ x: orbX, y: orbY }} />
+        <motion.div className="lp-orb-grain" style={{ x: orbX, y: orbY }} />
       </div>
 
       {/* LEFT — Feature filmstrip */}

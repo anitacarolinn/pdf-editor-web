@@ -1045,30 +1045,30 @@ body {
 }
 
 .landing-logo {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 6px;
 }
 
 .landing-title {
-  font-size: 28px;
+  font-size: clamp(44px, 6vw, 80px);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
   color: var(--color-chrome);
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.0;
   text-wrap: balance;
 }
 
 .landing-tagline {
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 400;
-  color: var(--color-chrome-muted);
+  color: var(--color-chrome-secondary);
   letter-spacing: -0.01em;
   margin: 0;
-  max-width: 340px;
-  line-height: 1.6;
+  max-width: 400px;
+  line-height: 1.55;
   text-wrap: balance;
 }
 
@@ -1084,30 +1084,51 @@ body {
   opacity: 0.75;
 }
 
-/* ── Drop zone ───────────────────────────────────────────────── */
+/* ── Drop zone — refined solid surface, soft ambient depth ──── */
 .landing-dropzone {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   width: 100%;
-  max-width: 440px;
-  padding: 40px 28px;
+  max-width: 480px;
+  padding: 48px 36px;
   background: var(--color-surface-card);
-  border: 2px dashed rgba(24, 24, 27, 0.12);
+  border: 1px solid var(--color-chrome-hairline);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    0 2px 6px -2px rgba(24, 24, 27, 0.08),
+    0 30px 60px -28px rgba(24, 24, 27, 0.22);
   transition:
     border-color var(--duration-base) var(--ease-out-quart),
     background var(--duration-base) var(--ease-out-quart),
-    box-shadow var(--duration-base) var(--ease-out-quart);
+    box-shadow var(--duration-base) var(--ease-out-quart),
+    transform var(--duration-base) var(--ease-out-quart);
   cursor: default;
 }
 
 .landing-dropzone--active {
   border-color: var(--color-accent);
   background: var(--color-accent-surface);
-  box-shadow: 0 0 0 4px var(--color-accent-ring), var(--shadow-card);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 4px var(--color-accent-ring),
+    0 30px 60px -28px rgba(217, 119, 6, 0.28);
+}
+
+/* Soft ambient glow behind the hero — faint amber light source, not a gradient slab */
+.landing-hero--two-col::before {
+  content: '';
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: min(760px, 80vw);
+  height: min(760px, 80vw);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.07) 0%, rgba(217, 119, 6, 0) 62%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .landing-dropzone-icon {
@@ -1131,8 +1152,32 @@ body {
 }
 
 .landing-choose-btn {
-  font-size: 13px;
-  padding: 8px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 9px 9px 22px;
+  border-radius: var(--radius-pill);
+}
+
+.landing-choose-btn .choose-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  transition: transform var(--duration-base) var(--ease-spring);
+}
+
+.landing-choose-btn:hover:not(:disabled) .choose-arrow {
+  transform: translate(2px, -2px) scale(1.05);
+}
+
+.landing-choose-btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .landing-dropzone-hint {

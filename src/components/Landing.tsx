@@ -137,19 +137,27 @@ export default function Landing({ onFiles }: LandingProps) {
         </div>
       </div>
 
-      {/* RIGHT — Identity + Dropzone */}
+      {/* RIGHT — Identity + Dropzone (orchestrated entry) */}
       <div className="landing-right-col">
         {/* Product identity */}
-        <div className="landing-identity">
+        <motion.div
+          className="landing-identity"
+          initial={prefersReduced ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.05 }}
+        >
           <img className="landing-logo" src="/favicon.svg" alt="" />
           <h1 className="landing-title">PDF Editor</h1>
           <p className="landing-tagline">{t.tagline}</p>
           <p className="landing-privacy-note">{t.privacyNote}</p>
-        </div>
+        </motion.div>
 
         {/* Drop zone */}
-        <div
+        <motion.div
           className={`landing-dropzone${dragOver ? ' landing-dropzone--active' : ''}`}
+          initial={prefersReduced ? false : { opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, ease: [0.32, 0.72, 0, 1], delay: 0.16 }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -177,7 +185,13 @@ export default function Landing({ onFiles }: LandingProps) {
             className="btn-primary landing-choose-btn"
             onClick={() => inputRef.current?.click()}
           >
-            {t.chooseFile}
+            <span>{t.chooseFile}</span>
+            <span className="choose-arrow" aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12L12 4" />
+                <path d="M6 4h6v6" />
+              </svg>
+            </span>
           </button>
 
           {/* Exact text preserved for App.test empty-state assertion (en default) */}
@@ -192,7 +206,7 @@ export default function Landing({ onFiles }: LandingProps) {
             style={{ display: 'none' }}
             onChange={handleChange}
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   )

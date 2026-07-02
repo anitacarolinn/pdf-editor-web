@@ -156,6 +156,18 @@ const en = {
   wmCancel: 'Cancel',
   wmApply: 'Apply',
 
+  pnTitle: 'Page numbers',
+  pnFormat: 'Format',
+  pnPosition: 'Position',
+  pnPosLeft: 'Left',
+  pnPosCenter: 'Center',
+  pnPosRight: 'Right',
+  pnSkipFirst: 'Skip first page',
+  pnSkipFirstHint: 'Leave the cover page unnumbered',
+  pnStartAt: 'Start at',
+  pnCancel: 'Cancel',
+  pnApply: 'Add numbers',
+
   // InfoModal
   infoTitle: 'Document Info',
   infoClose: 'Close',
@@ -347,6 +359,18 @@ const zh = {
   wmCancel: '取消',
   wmApply: '套用',
 
+  pnTitle: '頁碼',
+  pnFormat: '格式',
+  pnPosition: '位置',
+  pnPosLeft: '靠左',
+  pnPosCenter: '置中',
+  pnPosRight: '靠右',
+  pnSkipFirst: '跳過第一頁',
+  pnSkipFirstHint: '封面頁不加頁碼',
+  pnStartAt: '起始頁碼',
+  pnCancel: '取消',
+  pnApply: '加入頁碼',
+
   // InfoModal
   infoTitle: '文件資訊',
   infoClose: '關閉',
@@ -515,6 +539,18 @@ interface Dict {
   wmImageLabel: string
   wmCancel: string
   wmApply: string
+
+  pnTitle: string
+  pnFormat: string
+  pnPosition: string
+  pnPosLeft: string
+  pnPosCenter: string
+  pnPosRight: string
+  pnSkipFirst: string
+  pnSkipFirstHint: string
+  pnStartAt: string
+  pnCancel: string
+  pnApply: string
 
   infoTitle: string
   infoClose: string

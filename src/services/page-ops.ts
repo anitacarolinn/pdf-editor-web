@@ -131,26 +131,88 @@ export async function replacePage(
   return doc.save()
 }
 
+export type PageNumberFormat = 'n' | 'n/total' | 'zh' | 'dash'
+export type PageNumberPosition = 'left' | 'center' | 'right'
+
+export interface PageNumberOpts {
+  format?: PageNumberFormat
+  position?: PageNumberPosition
+  /** Number shown on the first numbered page. */
+  startAt?: number
+  /** Leave the first page unnumbered (cover pages); counting begins on page 2. */
+  skipFirst?: boolean
+  fontSize?: number
+}
+
+export function pageNumberLabel(format: PageNumberFormat, n: number, total: number): string {
+  switch (format) {
+    case 'n/total': return `${n} / ${total}`
+    case 'zh': return `第 ${n} 頁`
+    case 'dash': return `— ${n} —`
+    default: return `${n}`
+  }
+}
+
+// The standard PDF fonts (WinAnsi) can't encode CJK glyphs, so the Chinese
+// "第 n 頁" format is rasterized: render the label to a canvas and embed it as
+// a PNG. Browser-only — the latin formats stay as crisp vector text.
+const LABEL_SCALE = 4
+function renderLabelToPng(text: string, fontSizePt: number): { bytes: Uint8Array; width: number; height: number } {
+  const px = fontSizePt * LABEL_SCALE
+  const fontStack = `500 ${px}px "Geist Variable", "Microsoft JhengHei", "PingFang TC", "Noto Sans CJK TC", sans-serif`
+  const measureCtx = document.createElement('canvas').getContext('2d')!
+  measureCtx.font = fontStack
+  const w = Math.max(1, Math.ceil(measureCtx.measureText(text).width))
+  const h = Math.ceil(px * 1.35)
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')!
+  ctx.font = fontStack
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = 'rgb(77,77,77)'
+  ctx.fillText(text, 0, px)
+  const b64 = canvas.toDataURL('image/png').split(',')[1]
+  const bin = atob(b64)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return { bytes, width: w, height: h }
+}
+
 export async function addPageNumbers(
   bytes: Uint8Array,
-  opts: { startAt?: number; format?: 'n' | 'n/total'; fontSize?: number } = {},
+  opts: PageNumberOpts = {},
 ): Promise<Uint8Array> {
-  const { startAt = 1, format = 'n', fontSize = 10 } = opts
+  const { format = 'n', position = 'center', startAt = 1, skipFirst = false, fontSize = 10 } = opts
   const doc = await PDFDocument.load(bytes)
-  const font = await doc.embedFont(StandardFonts.Helvetica)
   const pages = doc.getPages()
-  pages.forEach((page, i) => {
-    const label = format === 'n/total' ? `${startAt + i} / ${pages.length}` : `${startAt + i}`
-    const width = font.widthOfTextAtSize(label, fontSize)
+  const firstIdx = skipFirst && pages.length > 1 ? 1 : 0
+  const total = pages.length - firstIdx
+  const color = rgb(0.3, 0.3, 0.3)
+  const margin = 40
+  const y = 24
+
+  const font = format === 'zh' ? null : await doc.embedFont(StandardFonts.Helvetica)
+
+  for (let i = firstIdx; i < pages.length; i++) {
+    const page = pages[i]
+    const n = startAt + (i - firstIdx)
+    const label = pageNumberLabel(format, n, total)
     const { width: pw } = page.getSize()
-    page.drawText(label, {
-      x: pw / 2 - width / 2,
-      y: 24,
-      size: fontSize,
-      font,
-      color: rgb(0.3, 0.3, 0.3),
-    })
-  })
+
+    if (format === 'zh') {
+      const png = renderLabelToPng(label, fontSize)
+      const img = await doc.embedPng(png.bytes)
+      const drawW = png.width / LABEL_SCALE
+      const drawH = png.height / LABEL_SCALE
+      const x = position === 'left' ? margin : position === 'right' ? pw - margin - drawW : pw / 2 - drawW / 2
+      page.drawImage(img, { x, y: y - drawH * 0.25, width: drawW, height: drawH })
+    } else {
+      const w = font!.widthOfTextAtSize(label, fontSize)
+      const x = position === 'left' ? margin : position === 'right' ? pw - margin - w : pw / 2 - w / 2
+      page.drawText(label, { x, y, size: fontSize, font: font!, color })
+    }
+  }
   return doc.save()
 }
 

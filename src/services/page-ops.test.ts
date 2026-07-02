@@ -144,6 +144,36 @@ describe('addPageNumbers', () => {
     await addPageNumbers(bytes)
     expect(bytes).toEqual(copy)
   })
+
+  it('supports the dash format (em dash encodes in the standard font)', async () => {
+    const bytes = await makeSamplePdf(2)
+    const out = await addPageNumbers(bytes, { format: 'dash' })
+    expect(await getPageCount(out)).toBe(2)
+    expect(out.length).not.toBe(bytes.length)
+  })
+
+  it('honours position + startAt without changing the page count', async () => {
+    const bytes = await makeSamplePdf(3)
+    const out = await addPageNumbers(bytes, { format: 'n', position: 'right', startAt: 5 })
+    expect(await getPageCount(out)).toBe(3)
+    expect(out.length).not.toBe(bytes.length)
+  })
+
+  it('skipFirst keeps the page count intact', async () => {
+    const bytes = await makeSamplePdf(3)
+    const out = await addPageNumbers(bytes, { format: 'n/total', skipFirst: true })
+    expect(await getPageCount(out)).toBe(3)
+  })
+})
+
+describe('pageNumberLabel', () => {
+  it('formats each style correctly', async () => {
+    const { pageNumberLabel } = await import('./page-ops')
+    expect(pageNumberLabel('n', 3, 12)).toBe('3')
+    expect(pageNumberLabel('n/total', 3, 12)).toBe('3 / 12')
+    expect(pageNumberLabel('zh', 3, 12)).toBe('第 3 頁')
+    expect(pageNumberLabel('dash', 3, 12)).toBe('— 3 —')
+  })
 })
 
 describe('addWatermark', () => {

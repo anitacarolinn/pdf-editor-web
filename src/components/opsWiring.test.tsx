@@ -42,11 +42,15 @@ it('Rotate (per-card hover) rotates the page', async () => {
   }, { timeout: 5000 })
 })
 
-it('Page # adds numbers without changing page count', async () => {
+it('Numbers opens the modal, then adds numbers without changing page count', async () => {
   render(<App />)
   const before = useDocumentStore.getState().bytes!
   const beforeCount = await getPageCount(before)
   await userEvent.click(await screen.findByRole('button', { name: 'Numbers' }))
+  // Modal opens with the "Page numbers" heading
+  expect(await screen.findByText('Page numbers')).toBeInTheDocument()
+  // Apply with the default format/position
+  await userEvent.click(screen.getByRole('button', { name: 'Add numbers' }))
   await waitFor(async () => {
     const after = useDocumentStore.getState().bytes!
     expect(after).not.toBe(before)

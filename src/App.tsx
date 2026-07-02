@@ -37,7 +37,8 @@ import SignatureModal from './components/SignatureModal'
 import LockModal from './components/LockModal'
 import UnlockModal from './components/UnlockModal'
 import WatermarkModal from './components/WatermarkModal'
-import type { WatermarkOpts } from './services/page-ops'
+import PageNumbersModal from './components/PageNumbersModal'
+import type { WatermarkOpts, PageNumberOpts } from './services/page-ops'
 import { imagesToPdf } from './services/image-to-pdf'
 
 export default function App() {
@@ -63,6 +64,7 @@ export default function App() {
   const [signedThisSession, setSignedThisSession] = useState(false)
   const [showSavePngDialog, setShowSavePngDialog] = useState(false)
   const [watermarkOpen, setWatermarkOpen] = useState(false)
+  const [pageNumOpen, setPageNumOpen] = useState(false)
   const [officeToast, setOfficeToast] = useState(false)
 
   const run = async (p: Promise<void>) => {
@@ -243,6 +245,7 @@ export default function App() {
     setUnlockOpen(false)
     setSignOpen(false)
     setWatermarkOpen(false)
+    setPageNumOpen(false)
   }
 
   // Export opens a rename dialog; doExport does the actual flatten + download.
@@ -264,7 +267,7 @@ export default function App() {
   const onInfo = async () => {
     if (bytes) setInfo(await readInfo(bytes))
   }
-  const onPageNumbers = () => run(apply((b) => addPageNumbers(b, { format: 'n/total' })))
+  const onPageNumbers = () => setPageNumOpen(true)
   const onWatermark = () => setWatermarkOpen(true)
   const onShrink = () => setShrinkOpen(true)
   const onLock = () => setLockOpen(true)
@@ -497,6 +500,16 @@ export default function App() {
             setWatermarkOpen(false)
           }}
           onClose={() => setWatermarkOpen(false)}
+        />
+      )}
+      {pageNumOpen && bytes && (
+        <PageNumbersModal
+          pageCount={pageCount}
+          onApply={(opts: PageNumberOpts) => {
+            run(apply((b) => addPageNumbers(b, opts)))
+            setPageNumOpen(false)
+          }}
+          onClose={() => setPageNumOpen(false)}
         />
       )}
       {showSavePngDialog && (

@@ -852,6 +852,195 @@ body {
   justify-content: center;
   padding: 48px 24px 64px;
   gap: 48px;
+  position: relative;
+}
+
+/* ── Two-column layout ───────────────────────────────────────── */
+.landing-hero--two-col {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 32px 40px 48px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Language toggle — positioned top-right of landing area */
+.landing-lang-toggle {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+}
+
+.lang-sep {
+  font-size: 11px;
+  color: var(--color-chrome-hairline);
+  user-select: none;
+}
+
+.lang-btn {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-chrome-muted);
+  background: transparent;
+  border: none;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-fast) var(--ease-out-quart),
+    background var(--duration-fast) var(--ease-out-quart);
+  position: relative;
+}
+
+.lang-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 6px;
+  right: 6px;
+  height: 1.5px;
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out-quart);
+}
+
+.lang-btn--active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.lang-btn--active::after {
+  opacity: 1;
+}
+
+.lang-btn:hover:not(.lang-btn--active) {
+  color: var(--color-chrome-secondary);
+  background: var(--color-surface-rail);
+}
+
+/* ── LEFT column: feature loop pill container ────────────────── */
+.landing-loop-col {
+  flex: 0 0 280px;
+  height: 440px;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+
+.landing-loop-container {
+  /* The "sealed pill" — clips content, fades edges */
+  flex: 1;
+  border-radius: 140px; /* very large pill radius */
+  background: var(--color-surface-card);
+  box-shadow:
+    inset 0 2px 8px rgba(24, 24, 27, 0.06),
+    0 0 0 1px rgba(24, 24, 27, 0.07),
+    0 8px 24px rgba(24, 24, 27, 0.07);
+  overflow: hidden;
+  position: relative;
+  /* Soft fade at top and bottom edges */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+/* Animated track — will be driven by motion */
+.landing-loop-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 0;
+  will-change: transform;
+}
+
+/* Static fallback for prefers-reduced-motion */
+.landing-loop-static {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 12px 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ── Feature card ────────────────────────────────────────────── */
+.feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 11px 20px;
+  flex-shrink: 0;
+}
+
+.feature-card-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-surface);
+  border-radius: var(--radius-md);
+  color: var(--color-accent);
+}
+
+.feature-card-icon > svg {
+  width: 14px;
+  height: 14px;
+}
+
+.feature-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.feature-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-chrome);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.feature-card-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-chrome-muted);
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+}
+
+/* ── RIGHT column: identity + dropzone ──────────────────────── */
+.landing-right-col {
+  flex: 1;
+  min-width: 0;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
 }
 
 .landing-identity {
@@ -863,10 +1052,10 @@ body {
 }
 
 .landing-logo {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .landing-title {
@@ -876,16 +1065,30 @@ body {
   color: var(--color-chrome);
   margin: 0;
   line-height: 1.1;
+  text-wrap: balance;
 }
 
 .landing-tagline {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 400;
   color: var(--color-chrome-muted);
   letter-spacing: -0.01em;
   margin: 0;
-  max-width: 360px;
+  max-width: 340px;
   line-height: 1.6;
+  text-wrap: balance;
+}
+
+.landing-privacy-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-chrome-muted);
+  letter-spacing: 0.005em;
+  margin: 0;
+  opacity: 0.75;
 }
 
 /* ── Drop zone ───────────────────────────────────────────────── */
@@ -896,9 +1099,9 @@ body {
   gap: 16px;
   width: 100%;
   max-width: 440px;
-  padding: 48px 32px;
+  padding: 40px 28px;
   background: var(--color-surface-card);
-  border: 2px dashed var(--color-chrome-hairline);
+  border: 2px dashed rgba(24, 24, 27, 0.12);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   transition:
@@ -915,8 +1118,8 @@ body {
 }
 
 .landing-dropzone-icon {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   color: var(--color-accent);
   opacity: 0.7;
   flex-shrink: 0;
@@ -927,7 +1130,7 @@ body {
 }
 
 .landing-dropzone-headline {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--color-chrome-secondary);
   letter-spacing: -0.01em;
@@ -946,4 +1149,35 @@ body {
   letter-spacing: -0.005em;
   margin: 0;
   opacity: 0.7;
+}
+
+/* ── Responsive: narrow screens ──────────────────────────────── */
+@media (max-width: 680px) {
+  .landing-hero--two-col {
+    flex-direction: column;
+    padding: 48px 20px 56px;
+    gap: 32px;
+  }
+
+  /* Hide the loop on mobile — dropzone is the primary action */
+  .landing-loop-col {
+    display: none;
+  }
+
+  .landing-right-col {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .landing-lang-toggle {
+    top: 14px;
+    right: 16px;
+  }
+}
+
+/* ── Reduced motion: pause animation globally ────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .landing-loop-track {
+    animation: none !important;
+  }
 }

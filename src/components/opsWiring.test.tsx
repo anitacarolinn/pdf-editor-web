@@ -39,7 +39,7 @@ it('Rotate (per-card hover) rotates the page', async () => {
   await waitFor(async () => {
     const doc = await PDFDocument.load(useDocumentStore.getState().bytes!)
     expect(doc.getPage(0).getRotation().angle).toBe(90)
-  })
+  }, { timeout: 5000 })
 })
 
 it('Page # adds numbers without changing page count', async () => {

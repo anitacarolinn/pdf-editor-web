@@ -85,7 +85,7 @@ describe('Landing', () => {
     const zhBtn = screen.getByRole('button', { name: '中文' })
     await userEvent.click(zhBtn)
     expect(zhBtn).toHaveAttribute('aria-pressed', 'true')
-    // Tagline should now be Chinese
-    expect(screen.getByText(/私密、離線/)).toBeInTheDocument()
+    // Headline should now be Chinese
+    expect(screen.getByText(/編輯、簽署、加密/)).toBeInTheDocument()
   })
 })

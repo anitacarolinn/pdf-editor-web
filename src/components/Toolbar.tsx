@@ -40,6 +40,7 @@ export interface ToolbarProps {
   onShrink: () => void
   onLock: () => void
   onUnlock: () => void
+  onHome: () => void
   canUndo: boolean
   canRedo: boolean
   hasDoc: boolean
@@ -56,11 +57,11 @@ export default function Toolbar(p: ToolbarProps) {
 
   return (
     <header aria-busy={p.busy} className="toolbar-chrome">
-      {/* Brand */}
-      <div className="toolbar-brand-group">
+      {/* Brand — click to return to the landing */}
+      <button type="button" className="toolbar-brand-group" onClick={p.onHome} title="Back to start" aria-label="Back to start">
         <img className="toolbar-logo" src="/favicon.svg" alt="PDF Editor logo" />
         <span className="toolbar-brand">PDF Editor</span>
-      </div>
+      </button>
 
       {/* Actions — flat chips grouped by whitespace, like the reference */}
       <div className="toolbar-actions">

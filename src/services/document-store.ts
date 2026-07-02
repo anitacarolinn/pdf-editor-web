@@ -6,6 +6,7 @@ interface DocState {
   past: Uint8Array[]
   future: Uint8Array[]
   load: (bytes: Uint8Array, fileName: string) => void
+  reset: () => void
   apply: (op: (b: Uint8Array) => Promise<Uint8Array>) => Promise<void>
   undo: () => void
   redo: () => void
@@ -19,6 +20,7 @@ export const useDocumentStore = create<DocState>((set, get) => ({
   past: [],
   future: [],
   load: (bytes, fileName) => set({ bytes, fileName, past: [], future: [] }),
+  reset: () => set({ bytes: null, fileName: null, past: [], future: [] }),
   apply: async (op) => {
     const current = get().bytes
     if (!current) return

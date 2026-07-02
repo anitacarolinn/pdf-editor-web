@@ -42,7 +42,7 @@ import { imagesToPdf } from './services/image-to-pdf'
 
 export default function App() {
   const { t } = useI18n()
-  const { bytes, fileName, load, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
+  const { bytes, fileName, load, reset, apply, undo, redo, canUndo, canRedo } = useDocumentStore()
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
   const [pageCount, setPageCount] = useState(0)
   const [selected, setSelected] = useState(1)
@@ -228,6 +228,21 @@ export default function App() {
       setPreviewPage(null)
       setSignedThisSession(false)
     }
+  }
+
+  // Clicking the brand/logo returns to the landing (closes the document).
+  const onHome = () => {
+    reset()
+    useOverlayStore.getState().clear()
+    setPreviewPage(null)
+    setShrinkInfo(null)
+    setInfo(null)
+    setShrinkOpen(false)
+    setExportOpen(false)
+    setLockOpen(false)
+    setUnlockOpen(false)
+    setSignOpen(false)
+    setWatermarkOpen(false)
   }
 
   // Export opens a rename dialog; doExport does the actual flatten + download.
@@ -586,6 +601,7 @@ export default function App() {
           onShrink={onShrink}
           onLock={onLock}
           onUnlock={onUnlock}
+          onHome={onHome}
         />
       )}
       {/* Status line */}

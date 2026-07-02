@@ -1280,7 +1280,7 @@ body {
   pointer-events: none;
   z-index: 0;
   will-change: transform;
-  animation: lp-orb-float 9s ease-in-out infinite;
+  animation: lp-orb-float 22s ease-in-out infinite;
 }
 
 .lp-orb-glow {
@@ -1289,7 +1289,8 @@ body {
   border-radius: 9999px;
   background: radial-gradient(circle, rgba(217, 119, 6, 0.32) 0%, rgba(217, 119, 6, 0.13) 44%, rgba(217, 119, 6, 0) 72%);
   filter: blur(40px);
-  will-change: transform;
+  will-change: transform, opacity;
+  animation: lp-orb-breathe 13s ease-in-out infinite;
 }
 
 /* Second orb — softer warm-rose glow, offset + slower for a mesh feel */
@@ -1298,13 +1299,15 @@ body {
   bottom: -215px;
   width: 440px;
   height: 440px;
-  animation-duration: 13s;
-  animation-delay: -4s;
+  animation-duration: 29s;
+  animation-delay: -6s;
 }
 
 .lp-orb-glow--rose {
   background: radial-gradient(circle, rgba(244, 114, 94, 0.22) 0%, rgba(244, 114, 94, 0.09) 46%, rgba(244, 114, 94, 0) 72%);
   filter: blur(52px);
+  animation-duration: 17s;
+  animation-delay: -7s;
 }
 
 /* Grain over the glow — texture, faded to the circle so no hard edge */
@@ -1321,9 +1324,15 @@ body {
 }
 
 @keyframes lp-orb-float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(-24px, -18px) scale(1.05); }
-  66%      { transform: translate(-8px, 12px) scale(0.98); }
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(-30px, -22px); }
+  50%      { transform: translate(-12px, 16px); }
+  75%      { transform: translate(-34px, 2px); }
+}
+
+@keyframes lp-orb-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.88; }
+  50%      { transform: scale(1.09); opacity: 1; }
 }
 
 /* Keep content above the orb */
@@ -1334,7 +1343,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-orb { animation: none; }
+  .lp-orb,
+  .lp-orb-glow { animation: none; }
 }
 
 /* ── LEFT: Feature filmstrip ──────────────────────────────────── */

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { motion, useReducedMotion, useSpring } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { useI18n } from '../services/i18n'
 import {
   IconMerge,
@@ -48,23 +48,6 @@ export default function Landing({ onFiles }: LandingProps) {
 
   // Cursor-follow for the ambient orb: it drifts out of the corner toward the
   // cursor. The farther the cursor from the bottom-right, the more it emerges.
-  const orbX = useSpring(0, { stiffness: 45, damping: 18, mass: 0.7 })
-  const orbY = useSpring(0, { stiffness: 45, damping: 18, mass: 0.7 })
-  // Second orb drifts less (parallax depth) and softer
-  const orbX2 = useSpring(0, { stiffness: 32, damping: 20, mass: 0.9 })
-  const orbY2 = useSpring(0, { stiffness: 32, damping: 20, mass: 0.9 })
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (prefersReduced) return
-    // Distance from the bottom-right corner (always <= 0)
-    const dx = e.clientX - window.innerWidth
-    const dy = e.clientY - window.innerHeight
-    orbX.set(Math.max(-110, dx * 0.07))
-    orbY.set(Math.max(-90, dy * 0.07))
-    orbX2.set(Math.max(-64, dx * 0.038))
-    orbY2.set(Math.max(-54, dy * 0.038))
-  }
-
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault()
     setDragOver(true)
@@ -108,16 +91,15 @@ export default function Landing({ onFiles }: LandingProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onMouseMove={handleMouseMove}
     >
       {/* Decorative blurred orb — bottom-right ambient glow: gentle idle float
           (wrapper) + cursor-follow drift (inner glow). */}
       <div className="lp-orb" aria-hidden="true">
-        <motion.div className="lp-orb-glow" style={{ x: orbX, y: orbY }} />
-        <motion.div className="lp-orb-grain" style={{ x: orbX, y: orbY }} />
+        <div className="lp-orb-glow" />
+        <div className="lp-orb-grain" />
       </div>
       <div className="lp-orb lp-orb--2" aria-hidden="true">
-        <motion.div className="lp-orb-glow lp-orb-glow--rose" style={{ x: orbX2, y: orbY2 }} />
+        <div className="lp-orb-glow lp-orb-glow--rose" />
       </div>
 
       {/* LEFT — Feature filmstrip */}

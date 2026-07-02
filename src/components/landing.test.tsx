@@ -18,9 +18,9 @@ describe('Landing', () => {
     expect(screen.getByRole('button', { name: /choose file/i })).toBeInTheDocument()
   })
 
-  it('renders the empty-state text "Open a PDF to get started"', () => {
+  it('renders the file-type hint text "PDF · PNG · JPG"', () => {
     render(<Wrapped onFiles={vi.fn()} />)
-    expect(screen.getByText('Open a PDF to get started')).toBeInTheDocument()
+    expect(screen.getByText('PDF · PNG · JPG')).toBeInTheDocument()
   })
 
   it('calls onFiles with the file when a PDF is dropped', () => {
@@ -74,10 +74,10 @@ describe('Landing', () => {
     const dropzone = screen.getByRole('region', { name: /pdf drop zone/i })
 
     fireEvent.dragOver(dropzone, { dataTransfer: {} })
-    expect(dropzone.className).toContain('landing-dropzone--active')
+    expect(dropzone.className).toContain('lp-dropzone--active')
 
     fireEvent.dragLeave(dropzone)
-    expect(dropzone.className).not.toContain('landing-dropzone--active')
+    expect(dropzone.className).not.toContain('lp-dropzone--active')
   })
 
   it('switches to Chinese when 中文 toggle is clicked', async () => {

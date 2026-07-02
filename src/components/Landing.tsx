@@ -60,7 +60,12 @@ export default function Landing({ onFiles }: LandingProps) {
     setDragOver(false)
     const ACCEPTED_TYPES = ['application/pdf', 'image/png', 'image/jpeg']
     const files = Array.from(e.dataTransfer.files).filter(
-      (f) => ACCEPTED_TYPES.includes(f.type) || f.name.endsWith('.pdf') || f.name.endsWith('.png') || f.name.endsWith('.jpg') || f.name.endsWith('.jpeg'),
+      (f) =>
+        ACCEPTED_TYPES.includes(f.type) ||
+        f.name.endsWith('.pdf') ||
+        f.name.endsWith('.png') ||
+        f.name.endsWith('.jpg') ||
+        f.name.endsWith('.jpeg'),
     )
     if (files.length) onFiles(files)
   }
@@ -75,50 +80,28 @@ export default function Landing({ onFiles }: LandingProps) {
   const features = t.features
   const loopItems = [...features, ...features]
 
-  // Animation: y from 0 → -50% (half of total height = one full list)
-  // Duration scales with list length so speed is consistent
-  const duration = features.length * 3.5 // ~49s for 14 items
+  // Slower: 6s per feature instead of 3.5s
+  const duration = features.length * 6
 
   return (
-    <div className="landing-hero landing-hero--two-col">
-      {/* Subtle film-grain overlay for tactile depth */}
-      <div className="landing-grain" aria-hidden="true" />
-
-      {/* Language toggle — top-right */}
-      <div className="landing-lang-toggle" role="group" aria-label="Language">
-        <button
-          type="button"
-          className={`lang-btn${lang === 'en' ? ' lang-btn--active' : ''}`}
-          aria-pressed={lang === 'en'}
-          onClick={() => setLang('en')}
-        >
-          {t.langEn}
-        </button>
-        <span className="lang-sep" aria-hidden="true">/</span>
-        <button
-          type="button"
-          className={`lang-btn${lang === 'zh' ? ' lang-btn--active' : ''}`}
-          aria-pressed={lang === 'zh'}
-          onClick={() => setLang('zh')}
-        >
-          {t.langZh}
-        </button>
-      </div>
-
-      {/* LEFT — Feature loop showcase */}
-      <div className="landing-loop-col" aria-label="Feature overview" aria-hidden="true">
-        {/* Fade masks via CSS mask-image */}
-        <div className="landing-loop-container">
+    <div
+      className="lp-root"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* LEFT — Feature filmstrip */}
+      <div className="lp-filmstrip" aria-label="Feature overview" aria-hidden="true">
+        <div className="lp-filmstrip-mask">
           {prefersReduced ? (
-            // Static list under reduced-motion — show first 6 items
-            <div className="landing-loop-static">
-              {features.slice(0, 6).map((f, i) => (
+            <div className="lp-loop-static">
+              {features.slice(0, 4).map((f, i) => (
                 <FeatureCard key={i} icon={FEATURE_ICONS[i % FEATURE_ICONS.length]} name={f.name} desc={f.desc} />
               ))}
             </div>
           ) : (
             <motion.div
-              className="landing-loop-track"
+              className="lp-loop-track"
               animate={{ y: ['0%', '-50%'] }}
               transition={{
                 duration,
@@ -140,68 +123,79 @@ export default function Landing({ onFiles }: LandingProps) {
         </div>
       </div>
 
-      {/* RIGHT — Identity + Dropzone (orchestrated entry) */}
-      <div className="landing-right-col">
-        {/* Product identity */}
-        <motion.div
-          className="landing-identity"
-          initial={prefersReduced ? false : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.05 }}
-        >
-          <div className="landing-wordmark">
-            <img className="landing-logo" src="/favicon.svg" alt="" />
-            <span>PDF Editor</span>
-          </div>
-          <h1 className="landing-title">{t.headline}</h1>
-          <p className="landing-tagline">{t.tagline}</p>
-          <p className="landing-privacy-note">{t.privacyNote}</p>
-        </motion.div>
+      {/* RIGHT — Hero */}
+      <div className="lp-hero">
+        {/* Language toggle — top-right absolute within hero */}
+        <div className="lp-lang-toggle" role="group" aria-label="Language">
+          <button
+            type="button"
+            className={`lp-lang-btn${lang === 'en' ? ' lp-lang-btn--active' : ''}`}
+            aria-pressed={lang === 'en'}
+            onClick={() => setLang('en')}
+          >
+            {t.langEn}
+          </button>
+          <span className="lp-lang-sep" aria-hidden="true" />
+          <button
+            type="button"
+            className={`lp-lang-btn${lang === 'zh' ? ' lp-lang-btn--active' : ''}`}
+            aria-pressed={lang === 'zh'}
+            onClick={() => setLang('zh')}
+          >
+            {t.langZh}
+          </button>
+        </div>
 
-        {/* Drop zone */}
+        {/* Meta label row */}
+        <div className="lp-meta-label">
+          <span className="lp-meta-dot" aria-hidden="true" />
+          <span className="lp-meta-product">PDF EDITOR</span>
+          <span className="lp-meta-divider" aria-hidden="true" />
+          <span className="lp-meta-tag">{t.metaTag}</span>
+        </div>
+
+        {/* Headline */}
+        <h1 className="lp-headline">{t.headline}</h1>
+
+        {/* Subline */}
+        <p className="lp-subline">{t.tagline}</p>
+
+        {/* Dropzone card */}
         <motion.div
-          className={`landing-dropzone${dragOver ? ' landing-dropzone--active' : ''}`}
-          initial={prefersReduced ? false : { opacity: 0, y: 22 }}
+          className={`lp-dropzone${dragOver ? ' lp-dropzone--active' : ''}`}
+          initial={prefersReduced ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, ease: [0.32, 0.72, 0, 1], delay: 0.16 }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.12 }}
           role="region"
           aria-label="PDF drop zone"
         >
-          {/* PDF icon */}
-          <svg
-            className="landing-dropzone-icon"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <rect x="8" y="4" width="28" height="36" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
-            <path d="M28 4v10h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" />
-            <path d="M16 22h16M16 28h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M24 36v-8M20 32l4-4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          {/* Upload icon tile */}
+          <div className="lp-dropzone-icon-tile" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 16V4" />
+              <path d="M8 8l4-4 4 4" />
+              <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+            </svg>
+          </div>
 
-          <p className="landing-dropzone-headline">{t.dropHeadline}</p>
+          <p className="lp-dropzone-headline">{t.dropHeadline}</p>
 
+          {/* CTA amber pill */}
           <button
             type="button"
-            className="btn-primary landing-choose-btn"
+            className="lp-choose-btn"
             onClick={() => inputRef.current?.click()}
           >
             <span>{t.chooseFile}</span>
-            <span className="choose-arrow" aria-hidden="true">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <span className="lp-choose-arrow" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 12L12 4" />
                 <path d="M6 4h6v6" />
               </svg>
             </span>
           </button>
 
-          {/* Exact text preserved for App.test empty-state assertion (en default) */}
-          <p className="landing-dropzone-hint">{t.openHint}</p>
+          <p className="lp-dropzone-hint">{t.openHint}</p>
 
           <input
             ref={inputRef}
@@ -219,14 +213,11 @@ export default function Landing({ onFiles }: LandingProps) {
 }
 
 function FeatureCard({ icon, name, desc }: { icon: React.ReactNode; name: string; desc: string }) {
-  // Double-Bezel: outer shell + inner core, vertical (icon → title → desc)
   return (
-    <div className="feature-card">
-      <div className="feature-card-inner">
-        <span className="feature-card-icon">{icon}</span>
-        <span className="feature-card-name">{name}</span>
-        <span className="feature-card-desc">{desc}</span>
-      </div>
+    <div className="lp-feature-card">
+      <span className="lp-feature-icon">{icon}</span>
+      <span className="lp-feature-name">{name}</span>
+      <span className="lp-feature-desc">{desc}</span>
     </div>
   )
 }

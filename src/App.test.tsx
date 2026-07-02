@@ -18,7 +18,7 @@ beforeEach(() => {
 describe('App shell', () => {
   it('shows an empty state when no document is loaded', () => {
     render(<App />)
-    expect(screen.getByText('Open a PDF to get started')).toBeInTheDocument()
+    expect(screen.getByText('PDF · PNG · JPG')).toBeInTheDocument()
   })
 })
 

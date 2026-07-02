@@ -9,9 +9,10 @@ const en = {
   headline: 'Edit, sign & lock PDFs — right in your browser.',
   tagline: 'Merge, split, rotate, watermark, e-sign, compress, and password-protect — no upload, no account.',
   privacyNote: '100% on-device. Your files never leave your browser.',
-  dropHeadline: 'Drag & drop a PDF or image here, or',
+  metaTag: 'RUNS IN YOUR BROWSER',
+  dropHeadline: 'Drag & drop a PDF or image here',
   chooseFile: 'Choose file',
-  openHint: 'Open a PDF to get started',
+  openHint: 'PDF · PNG · JPG',
   langEn: 'EN',
   langZh: '中文',
 
@@ -38,9 +39,10 @@ const zh = {
   headline: '編輯、簽署、加密 PDF — 就在您的瀏覽器中。',
   tagline: '合併、分割、旋轉、浮水印、電子簽名、壓縮、密碼保護 — 無需上傳，無需帳號。',
   privacyNote: '100% 在本機執行，您的檔案絕不離開瀏覽器。',
-  dropHeadline: '將 PDF 或圖片拖曳至此，或',
+  metaTag: '在您的瀏覽器中執行',
+  dropHeadline: '將 PDF 或圖片拖曳至此',
   chooseFile: '選擇檔案',
-  openHint: 'Open a PDF to get started',
+  openHint: 'PDF · PNG · JPG',
   langEn: 'EN',
   langZh: '中文',
 
@@ -68,6 +70,7 @@ interface Dict {
   headline: string
   tagline: string
   privacyNote: string
+  metaTag: string
   dropHeadline: string
   chooseFile: string
   openHint: string

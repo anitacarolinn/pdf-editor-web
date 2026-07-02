@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist/index.css";
+@import "@fontsource-variable/geist-mono/index.css";
 
 @theme {
   /* Typography */
@@ -1248,5 +1249,364 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .landing-loop-track {
     animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NEW EDITORIAL LANDING — Paper redesign
+   Tokens: white #FFFFFF ground, ink #0A0A0A, amber #D97706,
+   muted #6B6B6B / #8A8A8A, hairline #ECECEC
+   Two-column: filmstrip left (392px) + hero right (flex:1)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Root: full-height two-column shell */
+.lp-root {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── LEFT: Feature filmstrip ──────────────────────────────────── */
+.lp-filmstrip {
+  width: 392px;
+  flex-shrink: 0;
+  padding: 48px 40px;
+  background: #fafafa;
+  border-right: 1px solid #ececec;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.lp-filmstrip-mask {
+  height: min(72vh, 620px);
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+
+.lp-loop-track,
+.lp-loop-static {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+  will-change: transform;
+}
+
+/* Feature card — left-aligned, vertical */
+.lp-feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 18px;
+  box-shadow: 0 10px 34px -14px rgba(10, 10, 10, 0.12);
+  flex-shrink: 0;
+}
+
+.lp-feature-icon {
+  width: 52px;
+  height: 52px;
+  background: #fcf1e3;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.lp-feature-icon > svg {
+  width: 26px;
+  height: 26px;
+}
+
+.lp-feature-name {
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #0a0a0a;
+  line-height: 1.25;
+}
+
+.lp-feature-desc {
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  color: #6b6b6b;
+}
+
+/* ── RIGHT: Hero ──────────────────────────────────────────────── */
+.lp-hero {
+  flex: 1;
+  padding: 88px 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 26px;
+  position: relative;
+  min-width: 0;
+}
+
+/* Language toggle — absolute top-right of hero */
+.lp-lang-toggle {
+  position: absolute;
+  top: 32px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-lang-sep {
+  width: 1px;
+  height: 12px;
+  background: #d0d0d0;
+  flex-shrink: 0;
+}
+
+.lp-lang-btn {
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #9a9a9a;
+  background: transparent;
+  border: none;
+  padding: 2px 0;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.lp-lang-btn--active {
+  color: #0a0a0a;
+  font-weight: 600;
+}
+
+.lp-lang-btn:hover:not(.lp-lang-btn--active) {
+  color: #5a5a5a;
+}
+
+/* Meta label row */
+.lp-meta-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.lp-meta-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #d97706;
+  flex-shrink: 0;
+}
+
+.lp-meta-product {
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: #0a0a0a;
+  text-transform: uppercase;
+}
+
+.lp-meta-divider {
+  width: 14px;
+  height: 1px;
+  background: #d0d0d0;
+  flex-shrink: 0;
+}
+
+.lp-meta-tag {
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: #8a8a8a;
+  text-transform: uppercase;
+}
+
+/* Display headline */
+.lp-headline {
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(44px, 5.4vw, 78px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.0;
+  color: #0a0a0a;
+  margin: 0;
+  max-width: 660px;
+  text-wrap: balance;
+}
+
+/* Subline */
+.lp-subline {
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 26px;
+  color: #5a5a5a;
+  max-width: 452px;
+  margin: 0;
+}
+
+/* ── Dropzone card ────────────────────────────────────────────── */
+.lp-dropzone {
+  width: 420px;
+  padding: 48px 40px;
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 24px;
+  box-shadow: 0 30px 62px -30px rgba(10, 10, 10, 0.24);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 12px;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+  cursor: default;
+}
+
+.lp-dropzone--active {
+  border-color: #d97706;
+  background: rgba(217, 119, 6, 0.04);
+  box-shadow:
+    0 0 0 3px rgba(217, 119, 6, 0.25),
+    0 30px 62px -30px rgba(217, 119, 6, 0.3);
+}
+
+/* Upload icon tile in dropzone */
+.lp-dropzone-icon-tile {
+  width: 56px;
+  height: 56px;
+  background: #fcf1e3;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lp-dropzone-headline {
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #3a3a3a;
+  margin: 0;
+  text-align: center;
+}
+
+/* CTA — amber pill */
+.lp-choose-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 11px 11px 24px;
+  background: #d97706;
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 14px 30px -14px rgba(217, 119, 6, 0.5);
+  cursor: pointer;
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 100ms ease;
+  white-space: nowrap;
+}
+
+.lp-choose-btn:hover {
+  background: #b45309;
+  box-shadow: 0 14px 30px -14px rgba(180, 83, 9, 0.55);
+}
+
+.lp-choose-btn:active {
+  transform: scale(0.98);
+}
+
+.lp-choose-arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.lp-choose-btn:hover .lp-choose-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* Format hint */
+.lp-dropzone-hint {
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: #a8a8a8;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+/* Hide filmstrip when there isn't room */
+@media (max-width: 1120px) {
+  .lp-filmstrip {
+    display: none;
+  }
+  .lp-hero {
+    padding: 72px 64px;
+  }
+}
+
+/* Narrow: single column, tighter padding, dropzone full-width */
+@media (max-width: 680px) {
+  .lp-root {
+    flex-direction: column;
+  }
+  .lp-filmstrip {
+    display: none;
+  }
+  .lp-hero {
+    padding: 64px 24px 56px;
+    gap: 20px;
+    align-items: stretch;
+  }
+  .lp-lang-toggle {
+    top: 20px;
+    right: 20px;
+  }
+  .lp-dropzone {
+    width: 100%;
+    padding: 36px 24px;
+  }
+  .lp-headline {
+    font-size: clamp(36px, 9vw, 54px);
   }
 }

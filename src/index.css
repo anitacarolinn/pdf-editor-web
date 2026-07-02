@@ -1273,10 +1273,10 @@ body {
 /* Decorative ambient orb — faded amber glow, bottom-right, gentle float */
 .lp-orb {
   position: absolute;
-  right: -150px;
-  bottom: -170px;
-  width: 540px;
-  height: 540px;
+  right: -340px;
+  bottom: -360px;
+  width: 560px;
+  height: 560px;
   border-radius: 9999px;
   background: radial-gradient(circle, rgba(217, 119, 6, 0.30) 0%, rgba(217, 119, 6, 0.12) 44%, rgba(217, 119, 6, 0) 72%);
   filter: blur(40px);

@@ -27,3 +27,8 @@ dist-ssr
 .superpowers/
 
 .impeccable/
+
+# Internal-only notes (contain org/deployment details — never publish)
+docs/superpowers/2026-07-02-architecture-decision.md
+qa-test*.js
+qa-test*.mjs

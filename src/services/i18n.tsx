@@ -186,6 +186,13 @@ const en = {
   saveSigBody: 'Save this signature as a PNG file for reuse?',
   saveSigNo: 'No thanks',
   saveSigSave: 'Save PNG',
+
+  // Export (rename) dialog
+  exTitle: 'Export PDF',
+  exSubtitle: 'Name your file, then download it.',
+  exNameLabel: 'File name',
+  exCancel: 'Cancel',
+  exDownload: 'Download',
 } as const
 
 const zh = {
@@ -368,6 +375,13 @@ const zh = {
   saveSigBody: '將此簽名儲存為 PNG 檔案以便重複使用？',
   saveSigNo: '不，謝謝',
   saveSigSave: '儲存 PNG',
+
+  // Export (rename) dialog
+  exTitle: '匯出 PDF',
+  exSubtitle: '為檔案命名，然後下載。',
+  exNameLabel: '檔案名稱',
+  exCancel: '取消',
+  exDownload: '下載',
 } as const
 
 // Use a structural type so both en and zh satisfy it without exact-literal constraint
@@ -524,6 +538,11 @@ interface Dict {
   saveSigBody: string
   saveSigNo: string
   saveSigSave: string
+  exTitle: string
+  exSubtitle: string
+  exNameLabel: string
+  exCancel: string
+  exDownload: string
 }
 
 const DICTS: Record<Lang, Dict> = { en, zh }

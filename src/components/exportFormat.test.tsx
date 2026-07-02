@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { useDocumentStore } from '../services/document-store'
@@ -24,6 +24,8 @@ it('Export downloads a PDF (no format options — PDF only)', async () => {
   // The format selector has been removed — export is always PDF.
   expect(screen.queryByTestId('export-format')).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Export' }))
-  expect(spy).toHaveBeenCalled()
+  // Export opens a rename dialog; confirm with Download.
+  await userEvent.click(await screen.findByRole('button', { name: 'Download' }))
+  await waitFor(() => expect(spy).toHaveBeenCalled())
   spy.mockRestore()
 })

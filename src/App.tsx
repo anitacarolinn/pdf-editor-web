@@ -32,6 +32,7 @@ import { readInfo } from './services/metadata'
 import type { PdfInfo } from './services/metadata'
 import InfoModal from './components/InfoModal'
 import ShrinkModal from './components/ShrinkModal'
+import ExportModal from './components/ExportModal'
 import SignatureModal from './components/SignatureModal'
 import LockModal from './components/LockModal'
 import UnlockModal from './components/UnlockModal'
@@ -52,6 +53,7 @@ export default function App() {
   const [previewPage, setPreviewPage] = useState<number | null>(null)
   const [modalZoom, setModalZoom] = useState(1)
   const [shrinkOpen, setShrinkOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
   const [lockOpen, setLockOpen] = useState(false)
   const [unlockOpen, setUnlockOpen] = useState(false)
   const [signOpen, setSignOpen] = useState(false)
@@ -225,14 +227,20 @@ export default function App() {
     }
   }
 
-  const onDownload = () => run(
+  // Export opens a rename dialog; doExport does the actual flatten + download.
+  const onDownload = () => setExportOpen(true)
+
+  const doExport = (name: string) => run(
     (async () => {
       if (!bytes) return
       // Export is always PDF: bake any overlay objects (text/image/signature)
-      // into the bytes, then download.
+      // into the bytes, then download with the user-chosen filename.
       const objs = useOverlayStore.getState().objects
       const outBytes = objs.length ? await flattenObjects(bytes, objs) : bytes
-      downloadBytes(outBytes, fileName ?? 'edited.pdf')
+      const trimmed = name.trim() || 'edited'
+      const finalName = /\.pdf$/i.test(trimmed) ? trimmed : `${trimmed}.pdf`
+      downloadBytes(outBytes, finalName)
+      setExportOpen(false)
     })(),
   )
   const onInfo = async () => {
@@ -419,6 +427,14 @@ export default function App() {
             setShrinkOpen(false)
           }}
           onClose={() => setShrinkOpen(false)}
+        />
+      )}
+      {exportOpen && bytes && (
+        <ExportModal
+          defaultName={fileName ?? 'edited.pdf'}
+          busy={busy}
+          onExport={doExport}
+          onClose={() => setExportOpen(false)}
         />
       )}
       {lockOpen && bytes && (

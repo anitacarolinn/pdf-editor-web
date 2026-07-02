@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import { useDocumentStore } from './services/document-store'
@@ -32,6 +32,8 @@ it('Download triggers export of the working bytes', async () => {
   useDocumentStore.setState({ bytes, fileName: 'a.pdf', past: [], future: [] })
   render(<App />)
   await userEvent.click(await screen.findByRole('button', { name: 'Export' }))
-  expect(spy).toHaveBeenCalledOnce()
+  // Export opens a rename dialog; confirm with Download.
+  await userEvent.click(await screen.findByRole('button', { name: 'Download' }))
+  await waitFor(() => expect(spy).toHaveBeenCalledOnce())
   spy.mockRestore()
 })

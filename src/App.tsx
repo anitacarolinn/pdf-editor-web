@@ -7,6 +7,7 @@ import type { CardOpenTool } from './components/PageGrid'
 import PageEditModal from './components/PageEditModal'
 import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
+import { useMarkupStore } from './services/markup-store'
 import { flattenObjects } from './services/flatten'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc, isPdfEncrypted } from './services/render-service'
@@ -378,7 +379,9 @@ export default function App() {
       // Export is always PDF: bake any overlay objects (text/image/signature)
       // into the bytes, then download with the user-chosen filename.
       const objs = useOverlayStore.getState().objects
-      const outBytes = objs.length ? await flattenObjects(bytes, objs) : bytes
+      const marks = useMarkupStore.getState().objects
+      const outBytes =
+        objs.length || marks.length ? await flattenObjects(bytes, objs, marks) : bytes
       const trimmed = name.trim() || 'edited'
       const finalName = /\.pdf$/i.test(trimmed) ? trimmed : `${trimmed}.pdf`
       downloadBytes(outBytes, finalName)

@@ -57,7 +57,7 @@ describe('flattenObjects', () => {
 })
 
 describe('flattenObjects — markup', () => {
-  it('draws highlight/underline/strikethrough without changing page count', async () => {
+  it('draws highlight/underline/strikethrough (markup adds content vs no markup)', async () => {
     const bytes = await blankPdf(1)
     const markup: MarkupObject[] = [
       { id: 'm1', page: 0, type: 'highlight', color: '#ffd54a',
@@ -67,10 +67,12 @@ describe('flattenObjects — markup', () => {
       { id: 'm3', page: 0, type: 'strikethrough', color: '#000000',
         rects: [{ xPct: 0.1, yPct: 0.4, wPct: 0.4, hPct: 0.03 }] },
     ]
-    const out = await flattenObjects(bytes, [], markup)
-    const doc = await PDFDocument.load(out)
+    const withMarkup = await flattenObjects(bytes, [], markup)
+    const withoutMarkup = await flattenObjects(bytes, [], [])
+    const doc = await PDFDocument.load(withMarkup)
     expect(doc.getPageCount()).toBe(1)
-    expect(out.length).toBeGreaterThan(bytes.length) // content was added
+    // Drawing 3 markup rects must add content beyond the bare re-serialization.
+    expect(withMarkup.length).toBeGreaterThan(withoutMarkup.length)
   })
 
   it('skips markup on out-of-range pages', async () => {

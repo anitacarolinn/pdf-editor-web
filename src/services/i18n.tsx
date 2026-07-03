@@ -226,6 +226,23 @@ const en = {
   exNameLabel: 'File name',
   exCancel: 'Cancel',
   exDownload: 'Download',
+
+  // Text layer / selection popup / search
+  tlCopy: 'Copy',
+  tlHighlight: 'Highlight',
+  tlUnderline: 'Underline',
+  tlStrikethrough: 'Strikethrough',
+  tlSearchThis: 'Search this text',
+  tlCopied: 'Copied',
+  tlSearch: 'Search',
+  tlSearchPlaceholder: 'Find in document',
+  tlNoMatches: 'No matches',
+  tlMatchOf: (cur: number, total: number) => `${cur} / ${total}`,
+  tlPrevMatch: 'Previous match',
+  tlNextMatch: 'Next match',
+  tlCloseSearch: 'Close search',
+  tlExtractText: 'Extract text',
+  tlDeleteMarkup: 'Delete markup',
 } as const
 
 const zh = {
@@ -448,6 +465,23 @@ const zh = {
   exNameLabel: '檔案名稱',
   exCancel: '取消',
   exDownload: '下載',
+
+  // Text layer / selection popup / search
+  tlCopy: '複製',
+  tlHighlight: '螢光標示',
+  tlUnderline: '底線',
+  tlStrikethrough: '刪除線',
+  tlSearchThis: '搜尋此文字',
+  tlCopied: '已複製',
+  tlSearch: '搜尋',
+  tlSearchPlaceholder: '在文件中尋找',
+  tlNoMatches: '沒有符合項目',
+  tlMatchOf: (cur: number, total: number) => `第 ${cur} / ${total} 筆`,
+  tlPrevMatch: '上一筆',
+  tlNextMatch: '下一筆',
+  tlCloseSearch: '關閉搜尋',
+  tlExtractText: '擷取文字',
+  tlDeleteMarkup: '刪除標記',
 } as const
 
 // Use a structural type so both en and zh satisfy it without exact-literal constraint
@@ -640,6 +674,22 @@ interface Dict {
   exNameLabel: string
   exCancel: string
   exDownload: string
+
+  tlCopy: string
+  tlHighlight: string
+  tlUnderline: string
+  tlStrikethrough: string
+  tlSearchThis: string
+  tlCopied: string
+  tlSearch: string
+  tlSearchPlaceholder: string
+  tlNoMatches: string
+  tlMatchOf: (cur: number, total: number) => string
+  tlPrevMatch: string
+  tlNextMatch: string
+  tlCloseSearch: string
+  tlExtractText: string
+  tlDeleteMarkup: string
 }
 
 const DICTS: Record<Lang, Dict> = { en, zh }

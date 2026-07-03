@@ -1,4 +1,5 @@
 import type { OverlayObject } from './overlay-store'
+import type { RectPct } from './markup-store'
 
 export function rectToPdf(o: OverlayObject, pageW: number, pageH: number) {
   const x = o.xPct * pageW
@@ -91,6 +92,45 @@ export function rectToPdfRotated(
     textX: textAnchor.x,
     textY: textAnchor.y,
   }
+}
+
+/**
+ * Rotation-aware placement of a visual-frame axis-aligned rectangle (percent)
+ * into UNROTATED PDF user space, for pdf-lib drawRectangle. Same V→U inversion
+ * as the image branch of rectToPdfRotated; anchor = visual bottom-left corner.
+ */
+export function rectPctToPdfRotated(
+  rect: RectPct,
+  pageW: number,
+  pageH: number,
+  rotationDeg: number,
+) {
+  const R = (((Math.round(rotationDeg) % 360) + 360) % 360) as 0 | 90 | 180 | 270
+  const swap = R === 90 || R === 270
+  const VW = swap ? pageH : pageW
+  const VH = swap ? pageW : pageH
+
+  const vx = rect.xPct * VW
+  const vy = rect.yPct * VH
+  const vw = rect.wPct * VW
+  const vh = rect.hPct * VH
+
+  const vToU = (x: number, y: number): { x: number; y: number } => {
+    switch (R) {
+      case 90:
+        return { x: y, y: x }
+      case 180:
+        return { x: pageW - x, y }
+      case 270:
+        return { x: pageW - y, y: pageH - x }
+      case 0:
+      default:
+        return { x, y: pageH - y }
+    }
+  }
+
+  const anchor = vToU(vx, vy + vh) // visual bottom-left
+  return { x: anchor.x, y: anchor.y, width: vw, height: vh, rotate: R }
 }
 
 export function hexToRgb01(hex: string): { r: number; g: number; b: number } {

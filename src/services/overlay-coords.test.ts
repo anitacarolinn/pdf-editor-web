@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { rectToPdf, rectToPdfRotated, fontSizeToPt, hexToRgb01 } from './overlay-coords'
+import { rectToPdf, rectToPdfRotated, fontSizeToPt, hexToRgb01, rectPctToPdfRotated } from './overlay-coords'
 import type { OverlayObject } from './overlay-store'
+import type { RectPct } from './markup-store'
 
 const base: OverlayObject = { id: 'o1', page: 0, type: 'text', xPct: 0.1, yPct: 0.1, wPct: 0.5, hPct: 0.2 }
 
@@ -78,5 +79,31 @@ describe('rectToPdfRotated', () => {
   it('normalizes negative / >360 rotation angles', () => {
     expect(rectToPdfRotated(base, 600, 800, -270).rotate).toBe(90)
     expect(rectToPdfRotated(base, 600, 800, 450).rotate).toBe(90)
+  })
+})
+
+describe('rectPctToPdfRotated', () => {
+  const W = 600, H = 800
+  const r: RectPct = { xPct: 0.1, yPct: 0.2, wPct: 0.4, hPct: 0.05 }
+
+  it('R=0 maps top-left visual rect to bottom-left PDF anchor', () => {
+    const out = rectPctToPdfRotated(r, W, H, 0)
+    // visual: x=60, y=160, w=240, h=40 → PDF bottom-left y = H - (160+40) = 600
+    expect(out).toMatchObject({ x: 60, width: 240, height: 40, rotate: 0 })
+    expect(out.y).toBeCloseTo(600, 6)
+  })
+
+  it('swaps width/height axes for 90/270 and reports rotate', () => {
+    const out90 = rectPctToPdfRotated(r, W, H, 90)
+    expect(out90.rotate).toBe(90)
+    // visual width uses VW=H=800 → width = 0.4*800 = 320
+    expect(out90.width).toBeCloseTo(320, 6)
+    expect(out90.height).toBeCloseTo(0.05 * 600, 6) // VH=W=600
+    expect(rectPctToPdfRotated(r, W, H, 270).rotate).toBe(270)
+  })
+
+  it('R=180 keeps axes but flips anchor', () => {
+    const out = rectPctToPdfRotated(r, W, H, 180)
+    expect(out).toMatchObject({ rotate: 180, width: 240, height: 40 })
   })
 })

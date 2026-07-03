@@ -1,0 +1,24 @@
+/* pdf.js text layer — transparent, glyph-aligned spans over the canvas.
+   Minimal rules distilled from pdfjs-dist/web/pdf_viewer.css. */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 1;
+}
+.textLayer span,
+.textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+/* "as usual" neutral grey selection while dragging (temporary, not persisted) */
+.textLayer ::selection {
+  background: rgba(120, 120, 120, 0.4);
+}

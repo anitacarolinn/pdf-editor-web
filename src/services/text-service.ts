@@ -76,3 +76,52 @@ export async function searchDocument(
   }
   return hits
 }
+
+import type { PDFPageProxy } from 'pdfjs-dist'
+
+let _pdfjs: Promise<typeof import('pdfjs-dist')> | null = null
+function pdfjsLib() {
+  return (_pdfjs ??= import('pdfjs-dist'))
+}
+
+/**
+ * Render pdf.js's transparent, positioned text spans into `container`, aligned
+ * to the page canvas. The canvas is displayed at CSS size `scale` (it renders
+ * internally at scale*dpr), so the text layer uses the viewport at `scale` and
+ * sets --scale-factor to match. Returns a cancellable handle like
+ * renderPageToCanvas.
+ */
+export function renderTextLayer(
+  page: PDFPageProxy,
+  scale: number,
+  container: HTMLElement,
+): { cancel(): void; done: Promise<void> } {
+  let layer: { render(): Promise<void>; cancel(): void } | null = null
+  let cancelled = false
+
+  const done = (async () => {
+    const pdfjs = await pdfjsLib()
+    const viewport = page.getViewport({ scale })
+    if (cancelled) return
+    container.textContent = ''
+    container.classList.add('textLayer')
+    container.style.setProperty('--scale-factor', String(scale))
+    container.style.width = `${viewport.width}px`
+    container.style.height = `${viewport.height}px`
+    const textContentSource = await page.getTextContent()
+    if (cancelled) return
+    layer = new pdfjs.TextLayer({ textContentSource, container, viewport }) as unknown as {
+      render(): Promise<void>
+      cancel(): void
+    }
+    await layer.render()
+  })()
+
+  return {
+    cancel() {
+      cancelled = true
+      layer?.cancel()
+    },
+    done,
+  }
+}

@@ -21,6 +21,15 @@ import {
   IconSign,
 } from './icons'
 import { useI18n } from '../services/i18n'
+import MarkupLayer from './MarkupLayer'
+import SelectionPopup from './SelectionPopup'
+import SearchBar from './SearchBar'
+import { renderTextLayer, searchDocument, extractDocumentText } from '../services/text-service'
+import type { SearchHit } from '../services/text-service'
+import { useMarkupStore } from '../services/markup-store'
+import type { MarkupObject, MarkupType } from '../services/markup-store'
+import { clientRectsToPct } from '../services/selection-util'
+import { downloadText } from '../services/file-io'
 
 export interface PageEditModalProps {
   /** 0-based page index currently being previewed */
@@ -154,18 +163,22 @@ export default function PageEditModal({
   // Cancel restores from snapshot; Restore restores but stays open.
   // Structural page ops (rotate, delete, etc.) remain undoable via undo history.
   const mountSnapshot = useRef<OverlayObject[]>([])
+  const markupSnapshot = useRef<MarkupObject[]>([])
   useEffect(() => {
     mountSnapshot.current = useOverlayStore.getState().objects
+    markupSnapshot.current = useMarkupStore.getState().objects
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // intentionally empty — run only on mount
 
   const handleCancel = useCallback(() => {
     useOverlayStore.setState({ objects: mountSnapshot.current })
+    useMarkupStore.setState({ objects: markupSnapshot.current })
     onClose()
   }, [onClose])
 
   const handleRestore = useCallback(() => {
     useOverlayStore.setState({ objects: mountSnapshot.current })
+    useMarkupStore.setState({ objects: markupSnapshot.current })
   }, [])
 
   // Measure the rendered canvas to size OverlayLayer correctly
@@ -270,6 +283,99 @@ export default function PageEditModal({
 
   const atFirst = currentPage <= 1
   const atLast = currentPage >= pageCount
+
+  // ── Text layer: build pdf.js selectable spans over the canvas ──────────────
+  const textLayerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = textLayerRef.current
+    if (!el) return
+    const pending = (doc as unknown as { getPage?: (n: number) => Promise<never> })?.getPage?.(currentPage)
+    if (!pending || typeof (pending as { then?: unknown }).then !== 'function') return
+    let handle: { cancel(): void } | null = null
+    ;(pending as Promise<never>).then((p) => {
+      handle = renderTextLayer(p, zoom, el)
+    }).catch(() => {})
+    return () => handle?.cancel()
+  }, [doc, currentPage, zoom])
+
+  // ── Selection popup ────────────────────────────────────────────────────────
+  const [popup, setPopup] = useState<{ x: number; y: number; text: string } | null>(null)
+  const handleSelection = useCallback(() => {
+    const sel = window.getSelection()
+    const text = sel?.toString() ?? ''
+    if (!sel || sel.isCollapsed || !text.trim() || !textLayerRef.current) {
+      setPopup(null)
+      return
+    }
+    // Only react to selections inside our text layer.
+    if (!textLayerRef.current.contains(sel.anchorNode)) return
+    const rect = sel.getRangeAt(0).getBoundingClientRect()
+    setPopup({ x: rect.left + rect.width / 2, y: rect.top - 6, text })
+  }, [])
+  useEffect(() => {
+    document.addEventListener('selectionchange', handleSelection)
+    return () => document.removeEventListener('selectionchange', handleSelection)
+  }, [handleSelection])
+
+  const addMarkupFromSelection = useCallback((type: MarkupType, color: string) => {
+    const sel = window.getSelection()
+    const wrap = canvasWrapRef.current
+    if (!sel || sel.isCollapsed || !wrap) return
+    const wrapBox = wrap.getBoundingClientRect()
+    const clientRects = Array.from(sel.getRangeAt(0).getClientRects())
+    const rects = clientRectsToPct(clientRects, wrapBox)
+    if (rects.length) useMarkupStore.getState().addMarkup(page, type, color, rects)
+    sel.removeAllRanges()
+    setPopup(null)
+  }, [page])
+
+  const copySelection = useCallback(() => {
+    const text = window.getSelection()?.toString() ?? ''
+    if (text) navigator.clipboard?.writeText(text).catch(() => {})
+    setPopup(null)
+  }, [])
+
+  // ── Search ─────────────────────────────────────────────────────────────────
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [hits, setHits] = useState<SearchHit[]>([])
+  const [hitIndex, setHitIndex] = useState(-1)
+  useEffect(() => {
+    if (!searchOpen || !query) { setHits([]); setHitIndex(-1); return }
+    let active = true
+    searchDocument(doc as never, query).then((h) => {
+      if (!active) return
+      setHits(h)
+      setHitIndex(h.length ? 0 : -1)
+      if (h.length) onGo(h[0].pageIndex + 1)
+    }).catch(() => {})
+    return () => { active = false }
+  }, [searchOpen, query, doc, onGo])
+
+  const gotoHit = useCallback((next: number) => {
+    if (!hits.length) return
+    const i = (next + hits.length) % hits.length
+    setHitIndex(i)
+    onGo(hits[i].pageIndex + 1)
+  }, [hits, onGo])
+
+  // Ctrl+F opens search
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  }, [])
+
+  // ── Extract text ─────────────────────────────────────────────────────────
+  const handleExtract = useCallback(async () => {
+    const text = await extractDocumentText(doc as never)
+    downloadText(text, 'extracted-text.txt')
+  }, [doc])
 
   return (
     <div
@@ -404,6 +510,8 @@ export default function PageEditModal({
           <ToolBtn label={t.emAddText} icon={<IconAddText />} onClick={onAddText} />
           <ToolBtn label={t.emAddPicture} icon={<IconAddPicture />} onClick={onAddPicture} />
           <ToolBtn label={t.emSign} icon={<IconSign />} onClick={onSign} />
+          <ToolBtn label={t.tlSearch} icon={<span style={{ fontSize: 16 }}>🔍</span>} onClick={() => setSearchOpen(true)} />
+          <ToolBtn label={t.tlExtractText} icon={<span style={{ fontSize: 16 }}>📄</span>} onClick={handleExtract} />
         </div>
       </div>
 
@@ -475,6 +583,8 @@ export default function PageEditModal({
               pageNumber={currentPage}
               scale={zoom}
             />
+            <div ref={textLayerRef} data-testid="text-layer" style={{ position: 'absolute', inset: 0 }} />
+            <MarkupLayer page={page} />
             {canvasSize.width > 0 && canvasSize.height > 0 && (
               <OverlayLayer
                 page={page}
@@ -509,6 +619,18 @@ export default function PageEditModal({
         >
           ▶
         </button>
+
+        {searchOpen && (
+          <SearchBar
+            query={query}
+            totalMatches={hits.length}
+            currentIndex={hitIndex}
+            onQueryChange={setQuery}
+            onPrev={() => gotoHit(hitIndex - 1)}
+            onNext={() => gotoHit(hitIndex + 1)}
+            onClose={() => { setSearchOpen(false); setQuery('') }}
+          />
+        )}
       </div>
 
       {/* ── Bottom bar: page indicator (left) + action footer (right) ─── */}
@@ -618,6 +740,15 @@ export default function PageEditModal({
           </button>
         </div>
       </div>
+
+      <SelectionPopup
+        pos={popup ? { x: popup.x, y: popup.y } : null}
+        selectedText={popup?.text ?? ''}
+        onCopy={copySelection}
+        onMark={addMarkupFromSelection}
+        onSearch={() => { if (popup) { setQuery(popup.text); setSearchOpen(true); setPopup(null) } }}
+        onDismiss={() => setPopup(null)}
+      />
     </div>
   )
 }

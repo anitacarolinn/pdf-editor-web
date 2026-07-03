@@ -11,6 +11,13 @@ vi.mock('../services/render-service', () => ({
   scaleForWidth: (v: number, t: number) => t / v,
 }))
 
+// Mock text-service so the mount-time text layer doesn't load pdf.js (DOMMatrix)
+vi.mock('../services/text-service', () => ({
+  renderTextLayer: vi.fn(() => ({ cancel: vi.fn(), done: Promise.resolve() })),
+  searchDocument: vi.fn().mockResolvedValue([]),
+  extractDocumentText: vi.fn().mockResolvedValue(''),
+}))
+
 // Minimal mock PDFDocumentProxy
 const mockDoc = {
   numPages: 3,

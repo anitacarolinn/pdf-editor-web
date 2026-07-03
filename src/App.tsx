@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist' // type-only: needed for state typing
 import Toolbar from './components/Toolbar'
 import PageGrid from './components/PageGrid'
@@ -534,10 +534,14 @@ export default function App() {
   }
 
   // Handle modal page navigation (1-based)
-  const handleModalGo = (p: number) => {
+  // Memoized so its identity is stable across App re-renders — PageEditModal's
+  // search effect lists onGo as a dependency, and an unstable identity would
+  // re-fire that effect (resetting hitIndex to 0) every time navigation causes
+  // App to re-render, snapping cross-page search back to the first match.
+  const handleModalGo = useCallback((p: number) => {
     const clamped = Math.min(Math.max(1, p), pageCount)
     setPreviewPage(clamped - 1)
-  }
+  }, [pageCount])
 
   return (
     <div className="app-shell">

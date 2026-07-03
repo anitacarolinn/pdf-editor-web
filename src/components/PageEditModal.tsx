@@ -313,8 +313,9 @@ export default function PageEditModal({
       setPopup(null)
       return
     }
-    // Only react to selections inside our text layer.
-    if (!textLayerRef.current.contains(sel.anchorNode)) return
+    // Only react to selections inside our text layer. A selection/click
+    // elsewhere should dismiss any stale popup left open from before.
+    if (!textLayerRef.current.contains(sel.anchorNode)) { setPopup(null); return }
     const rect = sel.getRangeAt(0).getBoundingClientRect()
     setPopup({ x: rect.left + rect.width / 2, y: rect.top - 6, text })
   }, [])

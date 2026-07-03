@@ -286,9 +286,16 @@ export default function PageEditModal({
 
   // ── Text layer: build pdf.js selectable spans over the canvas ──────────────
   const textLayerRef = useRef<HTMLDivElement>(null)
+  // null = not yet determined; true/false once the text layer has rendered.
+  // false means the page produced no selectable text (likely scanned/image).
+  const [pageHasText, setPageHasText] = useState<boolean | null>(null)
+  const [scannedInfo, setScannedInfo] = useState(false)
   useEffect(() => {
     const el = textLayerRef.current
     if (!el) return
+    // New page/zoom: reset detection and dismiss any stale scanned-info banner.
+    setPageHasText(null)
+    setScannedInfo(false)
     const pending = (doc as unknown as { getPage?: (n: number) => Promise<never> })?.getPage?.(currentPage)
     if (!pending || typeof (pending as { then?: unknown }).then !== 'function') return
     let cancelled = false
@@ -296,13 +303,28 @@ export default function PageEditModal({
     ;(pending as Promise<never>).then((p) => {
       if (cancelled) return
       handle = renderTextLayer(p, zoom, el)
-      handle.done.catch(() => {})
+      handle.done.then(
+        () => { if (!cancelled) setPageHasText(el.querySelectorAll('span').length > 0) },
+        () => {},
+      )
     }).catch(() => {})
     return () => {
       cancelled = true
       handle?.cancel()
     }
   }, [doc, currentPage, zoom])
+
+  // Auto-hide the scanned-PDF info banner a few seconds after it appears.
+  useEffect(() => {
+    if (!scannedInfo) return
+    const id = setTimeout(() => setScannedInfo(false), 4000)
+    return () => clearTimeout(id)
+  }, [scannedInfo])
+
+  // Show the info banner when the user tries to select on a text-less page.
+  const handlePageMouseDown = useCallback(() => {
+    if (pageHasText === false) setScannedInfo(true)
+  }, [pageHasText])
 
   // ── Selection popup ────────────────────────────────────────────────────────
   const [popup, setPopup] = useState<{ x: number; y: number; text: string } | null>(null)
@@ -382,6 +404,13 @@ export default function PageEditModal({
   const handleExtract = useCallback(async () => {
     const text = await extractDocumentText(doc as never)
     downloadText(text, 'extracted-text.txt')
+  }, [doc])
+
+  // ── Copy all text (whole document) to the clipboard ────────────────────────
+  const handleCopyAll = useCallback(async () => {
+    const text = await extractDocumentText(doc as never)
+    if (!text.trim()) return
+    try { await navigator.clipboard?.writeText(text) } catch { /* ignore */ }
   }, [doc])
 
   return (
@@ -519,8 +548,38 @@ export default function PageEditModal({
           <ToolBtn label={t.emSign} icon={<IconSign />} onClick={onSign} />
           <ToolBtn label={t.tlSearch} icon={<span style={{ fontSize: 16 }}>🔍</span>} onClick={() => setSearchOpen(true)} />
           <ToolBtn label={t.tlExtractText} icon={<span style={{ fontSize: 16 }}>📄</span>} onClick={handleExtract} />
+          <ToolBtn label={t.tlCopyAll} icon={<span style={{ fontSize: 16 }}>📋</span>} onClick={handleCopyAll} />
         </div>
       </div>
+
+      {/* ── Info banner at the bottom edge of the header (scanned/no-text) ─ */}
+      {scannedInfo && (
+        <div
+          role="status"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '8px 14px',
+            background: '#fef3c7',
+            color: '#92400e',
+            borderBottom: '1px solid #fde68a',
+            fontSize: '13px',
+            flexShrink: 0,
+          }}
+        >
+          <span>ℹ️ {t.tlNoTextInfo}</span>
+          <button
+            aria-label={t.infoClose}
+            onClick={() => setScannedInfo(false)}
+            style={{ background: 'transparent', border: 'none', color: '#92400e', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ── Page canvas area with prev/next arrows ─────────────────────── */}
       <div
@@ -576,6 +635,8 @@ export default function PageEditModal({
         >
           <div
             ref={canvasWrapRef}
+            data-testid="page-surface"
+            onMouseDown={handlePageMouseDown}
             style={{
               position: 'relative',
               display: 'inline-block',

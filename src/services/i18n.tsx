@@ -242,7 +242,9 @@ const en = {
   tlNextMatch: 'Next match',
   tlCloseSearch: 'Close search',
   tlExtractText: 'Extract text',
+  tlCopyAll: 'Copy all',
   tlDeleteMarkup: 'Delete markup',
+  tlNoTextInfo: 'No selectable text on this page — it may be scanned or image-based.',
 } as const
 
 const zh = {
@@ -481,7 +483,9 @@ const zh = {
   tlNextMatch: '下一筆',
   tlCloseSearch: '關閉搜尋',
   tlExtractText: '擷取文字',
+  tlCopyAll: '全部複製',
   tlDeleteMarkup: '刪除標記',
+  tlNoTextInfo: '此頁沒有可選取的文字 — 可能是掃描或影像檔。',
 } as const
 
 // Use a structural type so both en and zh satisfy it without exact-literal constraint
@@ -689,7 +693,9 @@ interface Dict {
   tlNextMatch: string
   tlCloseSearch: string
   tlExtractText: string
+  tlCopyAll: string
   tlDeleteMarkup: string
+  tlNoTextInfo: string
 }
 
 const DICTS: Record<Lang, Dict> = { en, zh }

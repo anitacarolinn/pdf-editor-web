@@ -291,11 +291,17 @@ export default function PageEditModal({
     if (!el) return
     const pending = (doc as unknown as { getPage?: (n: number) => Promise<never> })?.getPage?.(currentPage)
     if (!pending || typeof (pending as { then?: unknown }).then !== 'function') return
-    let handle: { cancel(): void } | null = null
+    let cancelled = false
+    let handle: { cancel(): void; done: Promise<void> } | null = null
     ;(pending as Promise<never>).then((p) => {
+      if (cancelled) return
       handle = renderTextLayer(p, zoom, el)
+      handle.done.catch(() => {})
     }).catch(() => {})
-    return () => handle?.cancel()
+    return () => {
+      cancelled = true
+      handle?.cancel()
+    }
   }, [doc, currentPage, zoom])
 
   // ── Selection popup ────────────────────────────────────────────────────────

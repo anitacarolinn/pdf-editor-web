@@ -1,12 +1,29 @@
 import { describe, it, expect } from 'vitest'
 import { makeSamplePdf, getPageWidths } from '../test/fixtures'
-import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage, addPageNumbers, addWatermark } from './page-ops'
+import { getPageCount, rotatePage, rotatePages, deletePages, reorderPages, insertBlankPage, createBlankPdf, extractPages, mergePdfs, splitPdf, duplicatePages, replacePage, addPageNumbers, addWatermark } from './page-ops'
 import { PDFDocument } from 'pdf-lib'
 
 describe('getPageCount', () => {
   it('returns the number of pages', async () => {
     const bytes = await makeSamplePdf(4)
     expect(await getPageCount(bytes)).toBe(4)
+  })
+})
+
+describe('createBlankPdf', () => {
+  it('produces a valid single-page A4 (595×842) PDF by default', async () => {
+    const bytes = await createBlankPdf()
+    const doc = await PDFDocument.load(bytes)
+    expect(doc.getPageCount()).toBe(1)
+    const page = doc.getPage(0)
+    expect(Math.round(page.getWidth())).toBe(595)
+    expect(Math.round(page.getHeight())).toBe(842)
+  })
+
+  it('honors a custom page size', async () => {
+    const doc = await PDFDocument.load(await createBlankPdf([612, 792]))
+    expect(Math.round(doc.getPage(0).getWidth())).toBe(612)
+    expect(Math.round(doc.getPage(0).getHeight())).toBe(792)
   })
 })
 

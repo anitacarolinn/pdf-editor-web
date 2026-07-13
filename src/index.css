@@ -1584,6 +1584,15 @@ body {
 }
 
 /* ── Dropzone card ────────────────────────────────────────────── */
+/* Row holding the dropzone card and the "blank page" link beside it */
+.lp-open-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 12px;
+}
+
 .lp-dropzone {
   width: 420px;
   padding: 48px 40px;
@@ -1596,7 +1605,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  margin-top: 12px;
+  flex-shrink: 0;
   transition:
     border-color 200ms ease,
     box-shadow 200ms ease,
@@ -1691,6 +1700,46 @@ body {
   text-transform: uppercase;
 }
 
+/* "OR start with a blank page" — all on one line, beside the dropzone card */
+.lp-blank-aside {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.lp-blank-or {
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: #b0b0b0;
+}
+
+/* Simple secondary text link — kept on a single line */
+.lp-blank-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+  font-family: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #8a8a8a;
+  text-decoration: underline;
+  text-decoration-color: #d6d6d6;
+  text-underline-offset: 3px;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+.lp-blank-link:hover {
+  color: #b45309;
+  text-decoration-color: #d97706;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 /* Hide filmstrip when there isn't room */
 @media (max-width: 1120px) {
@@ -1719,9 +1768,17 @@ body {
     top: 20px;
     right: 20px;
   }
+  .lp-open-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
   .lp-dropzone {
     width: 100%;
     padding: 36px 24px;
+  }
+  .lp-blank-aside {
+    align-items: center;
   }
   .lp-headline {
     font-size: clamp(36px, 9vw, 54px);

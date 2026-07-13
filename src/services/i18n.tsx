@@ -13,6 +13,8 @@ const en = {
   dropHeadline: 'Drag & drop a PDF or image here',
   chooseFile: 'Choose file',
   openHint: 'PDF · PNG · JPG',
+  orSeparator: 'OR',
+  createBlankCta: 'Start with a blank page',
   langEn: 'EN',
   langZh: '中文',
 
@@ -255,6 +257,8 @@ const zh = {
   dropHeadline: '將 PDF 或圖片拖曳至此',
   chooseFile: '選擇檔案',
   openHint: 'PDF · PNG · JPG',
+  orSeparator: '或',
+  createBlankCta: '從空白頁開始',
   langEn: 'EN',
   langZh: '中文',
 
@@ -498,6 +502,8 @@ interface Dict {
   dropHeadline: string
   chooseFile: string
   openHint: string
+  orSeparator: string
+  createBlankCta: string
   langEn: string
   langZh: string
   features: FeatureItem[]

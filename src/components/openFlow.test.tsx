@@ -27,4 +27,14 @@ describe('open flow', () => {
       expect(screen.queryByText('Open a PDF to get started')).not.toBeInTheDocument(),
     )
   })
+
+  it('"Start with a blank page" loads a fresh document and opens the page editor', async () => {
+    render(<App />)
+    await userEvent.click(screen.getByRole('button', { name: /blank page/i }))
+    // A working document now exists...
+    await waitFor(() => expect(useDocumentStore.getState().bytes).not.toBeNull())
+    // ...and the editor modal is open on the blank page.
+    await waitFor(() => expect(screen.getByTestId('modal-backdrop')).toBeInTheDocument())
+    expect(useDocumentStore.getState().fileName).toBe('untitled.pdf')
+  })
 })

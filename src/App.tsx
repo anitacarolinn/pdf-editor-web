@@ -20,6 +20,7 @@ import {
   duplicatePages,
   deletePages,
   insertBlankPage,
+  createBlankPdf,
   mergePdfs,
   extractPages,
   replacePage,
@@ -286,6 +287,20 @@ export default function App() {
     setSelected(1)
     setSelectedPages(new Set([0]))
     setAnchor(0)
+  }
+
+  // Start a fresh document with a single blank A4 page (no upload), then open
+  // it straight in the page editor so the user can add text/images right away.
+  async function onCreateBlank() {
+    const bytes = await createBlankPdf()
+    load(bytes, 'untitled.pdf')
+    useOverlayStore.getState().clear()
+    setShrinkInfo(null)
+    setSelected(1)
+    setSelectedPages(new Set([0]))
+    setAnchor(0)
+    setModalZoom(1)
+    setPreviewPage(0)
   }
 
   function handleThumbClick(i: number, e: React.MouseEvent) {
@@ -789,7 +804,7 @@ export default function App() {
       )}
       {/* Main grid area — show Landing when no document is loaded */}
       {!bytes ? (
-        <Landing onFiles={onOpen} />
+        <Landing onFiles={onOpen} onCreateBlank={onCreateBlank} />
       ) : (
         <main className="grid-area">
           <PageGrid

@@ -61,6 +61,17 @@ export async function reorderPages(
   return out.save()
 }
 
+/** Create a new single-page PDF with one blank page (defaults to A4 portrait,
+ *  595×842pt — the same size `insertBlankPage` uses). For starting from scratch
+ *  without uploading a file. */
+export async function createBlankPdf(
+  size: [number, number] = [595, 842],
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.create()
+  doc.addPage(size)
+  return doc.save()
+}
+
 export async function insertBlankPage(
   bytes: Uint8Array,
   atIndex: number,

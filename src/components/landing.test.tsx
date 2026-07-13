@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event'
 import Landing from './Landing'
 import { I18nProvider } from '../services/i18n'
 
-function Wrapped({ onFiles }: { onFiles: (f: File[]) => void }) {
+function Wrapped({ onFiles, onCreateBlank = vi.fn() }: { onFiles: (f: File[]) => void; onCreateBlank?: () => void }) {
   return (
     <I18nProvider>
-      <Landing onFiles={onFiles} />
+      <Landing onFiles={onFiles} onCreateBlank={onCreateBlank} />
     </I18nProvider>
   )
 }
@@ -21,6 +21,14 @@ describe('Landing', () => {
   it('renders the file-type hint text "PDF · PNG · JPG"', () => {
     render(<Wrapped onFiles={vi.fn()} />)
     expect(screen.getByText('PDF · PNG · JPG')).toBeInTheDocument()
+  })
+
+  it('renders a "start with a blank page" link and calls onCreateBlank when clicked', async () => {
+    const onCreateBlank = vi.fn()
+    render(<Wrapped onFiles={vi.fn()} onCreateBlank={onCreateBlank} />)
+    const btn = screen.getByRole('button', { name: /blank page/i })
+    await userEvent.click(btn)
+    expect(onCreateBlank).toHaveBeenCalledOnce()
   })
 
   it('calls onFiles with the file when a PDF is dropped', () => {

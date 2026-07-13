@@ -20,6 +20,8 @@ import {
 
 export interface LandingProps {
   onFiles: (files: File[]) => void
+  /** Start a fresh document with one blank page (no upload). */
+  onCreateBlank: () => void
 }
 
 // One icon per feature — reuse existing icon set where semantically appropriate
@@ -40,7 +42,7 @@ const FEATURE_ICONS = [
   <IconOpen />,
 ]
 
-export default function Landing({ onFiles }: LandingProps) {
+export default function Landing({ onFiles, onCreateBlank }: LandingProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
   const prefersReduced = useReducedMotion()
@@ -172,7 +174,8 @@ export default function Landing({ onFiles }: LandingProps) {
         {/* Subline */}
         <p className="lp-subline">{t.tagline}</p>
 
-        {/* Dropzone card */}
+        {/* Open row: dropzone card + a simple "blank page" link beside it */}
+        <div className="lp-open-row">
         <motion.div
           className={`lp-dropzone${dragOver ? ' lp-dropzone--active' : ''}`}
           initial={prefersReduced ? false : { opacity: 0, y: 16 }}
@@ -219,6 +222,15 @@ export default function Landing({ onFiles }: LandingProps) {
             onChange={handleChange}
           />
         </motion.div>
+
+        {/* Simple secondary action — start from a blank page, no upload */}
+        <div className="lp-blank-aside">
+          <span className="lp-blank-or">{t.orSeparator}</span>
+          <button type="button" className="lp-blank-link" onClick={onCreateBlank}>
+            {t.createBlankCta}
+          </button>
+        </div>
+        </div>
       </div>
     </div>
   )

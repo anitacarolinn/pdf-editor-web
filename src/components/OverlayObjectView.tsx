@@ -12,6 +12,31 @@ interface Props {
   onDelete: () => void
 }
 
+// A visible square "grip" centered on a corner handle. The parent handle div
+// (from react-rnd) supplies the hit area and the diagonal resize cursor; this
+// dot is purely the affordance and ignores pointer events so it never steals
+// the drag from the handle underneath it.
+function ResizeGrip() {
+  return (
+    <div
+      data-testid="resize-grip"
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 11,
+        height: 11,
+        background: '#fff',
+        border: '2px solid var(--color-accent, #d97706)',
+        borderRadius: 2,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.35)',
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
+
 export default function OverlayObjectView({
   obj,
   pageWidthPx,
@@ -62,6 +87,20 @@ export default function OverlayObjectView({
       position={{ x, y }}
       size={{ width, height }}
       onMouseDown={onSelect}
+      // Resize from the four corners only, and only once selected — that's when
+      // the corner grips are shown, so the affordance matches what's draggable.
+      enableResizing={
+        selected
+          ? { topLeft: true, topRight: true, bottomLeft: true, bottomRight: true,
+              top: false, right: false, bottom: false, left: false }
+          : false
+      }
+      resizeHandleComponent={
+        selected
+          ? { topLeft: <ResizeGrip />, topRight: <ResizeGrip />,
+              bottomLeft: <ResizeGrip />, bottomRight: <ResizeGrip /> }
+          : undefined
+      }
       onDragStop={(_e, d) => {
         onChange({ xPct: d.x / pageWidthPx, yPct: d.y / pageHeightPx })
       }}

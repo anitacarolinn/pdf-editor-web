@@ -9,6 +9,7 @@ import { useDocumentStore } from './services/document-store'
 import { useOverlayStore } from './services/overlay-store'
 import { useMarkupStore } from './services/markup-store'
 import { flattenObjects } from './services/flatten'
+import { normalizeImageOrientation } from './services/image-normalize'
 import { readFileAsBytes } from './services/file-io'
 import { loadRenderDoc, isPdfEncrypted } from './services/render-service'
 import { unlockPdf } from './services/lock-service'
@@ -331,8 +332,14 @@ export default function App() {
     })(),
   )
   const onInsert = () => run(apply((b) => {
-    // selected is 1-based; passing it as 0-based atIndex inserts AFTER the current page
-    return insertBlankPage(b, selected)
+    // Insert a blank page AFTER the current page. Inside the modal the current
+    // page is `previewPage` (0-based), so the new page goes at previewPage + 1;
+    // from the grid, `selected` is 1-based and already equals currentIndex + 1.
+    // Using `selected` here regardless was the bug: inserting from the modal
+    // ignored the page being viewed and landed at the grid selection (often the
+    // last page).
+    const atIndex = previewPage !== null ? previewPage + 1 : selected
+    return insertBlankPage(b, atIndex)
   }))
   const onMerge = (files: File[]) => run(
     (async () => {
@@ -484,7 +491,7 @@ export default function App() {
       const imgBytes = new Uint8Array(arrayBuffer)
       const mimeType = file.type === 'image/jpeg' ? 'jpeg' : 'png'
       const img = new Image()
-      img.onload = () => {
+      img.onload = async () => {
         URL.revokeObjectURL(img.src)
         // Use the ref-captured target page (set before the picker opened) so
         // that both the modal button and the grid-card button land on the right page.
@@ -495,7 +502,17 @@ export default function App() {
         const pageH = 800
         const wPct = 0.3
         const hPct = wPct * (img.naturalHeight / img.naturalWidth) * (pageW / pageH)
-        useOverlayStore.getState().addImage(targetPage, imgBytes, mimeType, wPct, hPct)
+        // Bake EXIF orientation into the pixels so the exported PDF matches the
+        // editor preview (pdf-lib ignores EXIF; browsers honor it). Fall back to
+        // the raw bytes if the canvas re-encode is unavailable.
+        const normalized = await normalizeImageOrientation(img, mimeType)
+        useOverlayStore.getState().addImage(
+          targetPage,
+          normalized?.bytes ?? imgBytes,
+          normalized?.type ?? mimeType,
+          wPct,
+          hPct,
+        )
         addImageTargetPageRef.current = null
       }
       img.onerror = () => {

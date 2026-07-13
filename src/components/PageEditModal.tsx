@@ -322,8 +322,14 @@ export default function PageEditModal({
   }, [scannedInfo])
 
   // Show the info banner when the user tries to select on a text-less page.
-  const handlePageMouseDown = useCallback(() => {
-    if (pageHasText === false) setScannedInfo(true)
+  // Skip it when the press lands on an overlay object (moving/resizing an added
+  // image or text box) or a markup — that click isn't an attempt to select the
+  // page's text, so the "no selectable text" hint would be misleading noise.
+  const handlePageMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (pageHasText !== false) return
+    const target = e.target as HTMLElement
+    if (target.closest('[data-testid="overlay-layer"], [data-testid="markup-layer"]')) return
+    setScannedInfo(true)
   }, [pageHasText])
 
   // ── Selection popup ────────────────────────────────────────────────────────

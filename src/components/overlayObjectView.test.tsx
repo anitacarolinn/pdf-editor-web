@@ -22,4 +22,15 @@ describe('OverlayObjectView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Delete object' }))
     expect(onDelete).toHaveBeenCalledOnce()
   })
+
+  it('shows four corner resize grips only when selected', () => {
+    const { rerender } = render(
+      <OverlayObjectView obj={textObj} pageWidthPx={600} pageHeightPx={800} selected={false} onSelect={() => {}} onChange={() => {}} onDelete={() => {}} />,
+    )
+    expect(screen.queryAllByTestId('resize-grip')).toHaveLength(0)
+    rerender(
+      <OverlayObjectView obj={textObj} pageWidthPx={600} pageHeightPx={800} selected onSelect={() => {}} onChange={() => {}} onDelete={() => {}} />,
+    )
+    expect(screen.getAllByTestId('resize-grip')).toHaveLength(4)
+  })
 })

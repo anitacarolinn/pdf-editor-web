@@ -4,6 +4,7 @@ import PageEditModal from './PageEditModal'
 import type { PageEditModalProps } from './PageEditModal'
 import { I18nProvider } from '../services/i18n'
 import { useMarkupStore } from '../services/markup-store'
+import { useOverlayStore } from '../services/overlay-store'
 import { searchDocument } from '../services/text-service'
 
 // Number of transparent spans the mocked renderTextLayer appends to its
@@ -60,6 +61,7 @@ function renderModal(overrides: Partial<PageEditModalProps> = {}) {
 describe('PageEditModal — text layer integration', () => {
   beforeEach(() => {
     useMarkupStore.setState({ objects: [] })
+    useOverlayStore.getState().clear()
     extractSpy.mockClear()
     downloadTextSpy.mockClear()
     writeTextSpy.mockClear()
@@ -138,6 +140,19 @@ describe('PageEditModal — text layer integration', () => {
     expect(screen.queryByText(/no selectable text/i)).toBeNull()
     fireEvent.mouseDown(surface)
     await waitFor(() => expect(screen.getByText(/no selectable text/i)).toBeTruthy())
+  })
+
+  it('does NOT show the scanned info when interacting with an overlay object', async () => {
+    // On a text-less page, grabbing an added image/text to move it must not
+    // fire the "no selectable text" banner — that click is aimed at the
+    // overlay object, not at the page trying to select text.
+    textLayerSpanCount = 0
+    useOverlayStore.getState().addText(0)
+    renderModal()
+    await flushTextLayer()
+    fireEvent.mouseDown(screen.getByTestId('overlay-text'))
+    await flushTextLayer()
+    expect(screen.queryByText(/no selectable text/i)).toBeNull()
   })
 
   it('does NOT show the scanned info when the page has real text', async () => {

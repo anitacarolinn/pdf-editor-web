@@ -22,6 +22,12 @@ export default function OverlayLayer({ page, pageWidthPx, pageHeightPx }: Props)
         inset: 0,
         pointerEvents: 'none',
         overflow: 'hidden',
+        // Sit above the pdf.js text layer (z-index:1) and markup (z-index:2) so
+        // the transparent text layer can't swallow drag/resize/click events
+        // aimed at overlay images and text. The container stays
+        // pointer-events:none, so empty areas still fall through to text
+        // selection; only the object boxes below opt back in.
+        zIndex: 3,
       }}
       onClick={(e) => {
         // Deselect when clicking on the overlay background

@@ -3,9 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { useDocumentStore } from '../services/document-store'
-import { makeSamplePdf } from '../test/fixtures'
+import { makeSamplePdf, getPageWidths } from '../test/fixtures'
 import { PDFDocument } from 'pdf-lib'
 import { getPageCount } from '../services/page-ops'
+import { loadRenderDoc } from '../services/render-service'
 
 vi.mock('../services/render-service', () => ({
   loadRenderDoc: vi.fn(async () => ({ numPages: 2 })),
@@ -55,6 +56,28 @@ it('Numbers opens the modal, then adds numbers without changing page count', asy
     const after = useDocumentStore.getState().bytes!
     expect(after).not.toBe(before)
     expect(await getPageCount(after)).toBe(beforeCount)
+  })
+})
+
+it('New page (from the modal) inserts right AFTER the previewed page', async () => {
+  // Regression: onInsert used the grid selection (`selected`) instead of the
+  // page open in the modal (`previewPage`), so inserting from the modal landed
+  // at the wrong spot (often the last page) regardless of what you were viewing.
+  vi.mocked(loadRenderDoc).mockResolvedValue({ numPages: 3 } as never)
+  const bytes = await makeSamplePdf(3) // page widths [100, 200, 300]
+  useDocumentStore.setState({ bytes, fileName: 'a.pdf', past: [], future: [] })
+  render(<App />)
+
+  // Open the MIDDLE page (index 1, width 200) in the modal.
+  const previewBtns = await screen.findAllByRole('button', { name: 'Preview page' })
+  await userEvent.click(previewBtns[1])
+
+  await userEvent.click(await screen.findByRole('button', { name: 'New page' }))
+
+  await waitFor(async () => {
+    // Blank page (595pt wide) sits immediately after the previewed page (200),
+    // NOT at the front (grid selection default) or the end.
+    expect(await getPageWidths(useDocumentStore.getState().bytes!)).toEqual([100, 200, 595, 300])
   })
 })
 
